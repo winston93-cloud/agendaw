@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 type Step = 1 | 2 | 3 | 4
 
@@ -130,6 +131,12 @@ export default function AgendarPage() {
     alert('¡Cita agendada exitosamente! Recibirás un correo de confirmación.')
   }
 
+  const availableTimes = [
+    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+    '12:00', '12:30', '14:00', '14:30', '15:00', '15:30',
+    '16:00', '16:30', '17:00'
+  ]
+
   return (
     <div className="agendar-page">
       <div className="agendar-header">
@@ -176,7 +183,15 @@ export default function AgendarPage() {
                 className={`campus-card ${formData.campus === 'winston' ? 'selected' : ''}`}
                 onClick={() => updateFormData('campus', 'winston')}
               >
-                <div className="campus-icon">👶</div>
+                <div className="campus-logo">
+                  <Image 
+                    src="/logo-winston-educativo.png" 
+                    alt="Instituto Educativo Winston"
+                    width={120}
+                    height={120}
+                    priority
+                  />
+                </div>
                 <h3>Instituto Educativo Winston</h3>
                 <p className="campus-website">{campusInfo.winston.website}</p>
                 <div className="campus-levels">
@@ -189,7 +204,15 @@ export default function AgendarPage() {
                 className={`campus-card ${formData.campus === 'churchill' ? 'selected' : ''}`}
                 onClick={() => updateFormData('campus', 'churchill')}
               >
-                <div className="campus-icon">🎓</div>
+                <div className="campus-logo">
+                  <Image 
+                    src="/logo-winston-churchill.png" 
+                    alt="Instituto Winston Churchill"
+                    width={120}
+                    height={120}
+                    priority
+                  />
+                </div>
                 <h3>Instituto Winston Churchill</h3>
                 <p className="campus-website">{campusInfo.churchill.website}</p>
                 <div className="campus-levels">
@@ -213,7 +236,7 @@ export default function AgendarPage() {
                       required
                     >
                       <option value="">Selecciona un grado</option>
-                      {gradeLevels.map((grade) => (
+                      {getGradeLevels().map((grade) => (
                         <option key={grade.value} value={grade.value}>
                           {grade.label}
                         </option>
@@ -425,7 +448,7 @@ export default function AgendarPage() {
                 <h3>📚 Aspirante</h3>
                 <p><strong>Nombre:</strong> {formData.studentName}</p>
                 <p><strong>Edad:</strong> {formData.studentAge} años</p>
-                <p><strong>Grado:</strong> {gradeLevels.find(g => g.value === formData.gradeLevel)?.label}</p>
+                <p><strong>Grado:</strong> {getGradeLevels().find(g => g.value === formData.gradeLevel)?.label}</p>
               </div>
 
               <div className="summary-section">

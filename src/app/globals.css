@@ -371,21 +371,22 @@ body {
   margin: 0 auto;
 }
 
-.school-logo {
+.hero-logos {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  align-items: center;
   margin-bottom: 2rem;
 }
 
-.logo-circle {
-  width: 100px;
-  height: 100px;
-  background: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 3rem;
-  margin: 0 auto;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+.hero-logo {
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+  transition: transform 0.3s;
+}
+
+.hero-logo:hover {
+  transform: scale(1.05);
 }
 
 .hero-title {
@@ -628,10 +629,12 @@ body {
   background: rgba(255, 255, 255, 0.2);
 }
 
-.campus-mini .mini-icon {
-  font-size: 2.5rem;
+.campus-mini .mini-logo {
   display: block;
-  margin-bottom: 0.5rem;
+  margin: 0 auto 0.5rem;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  opacity: 0.95;
 }
 
 .campus-mini p {
@@ -729,9 +732,23 @@ body {
   box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
 }
 
-.campus-icon {
-  font-size: 3.5rem;
-  margin-bottom: 1rem;
+.campus-logo {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s;
+}
+
+.campus-card:hover .campus-logo {
+  transform: scale(1.1);
+}
+
+.campus-logo img {
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .campus-card h3 {
@@ -1155,6 +1172,15 @@ body {
     gap: 1rem;
   }
   
+  .hero-logos {
+    gap: 1.5rem;
+  }
+  
+  .hero-logo {
+    width: 80px;
+    height: 80px;
+  }
+  
   /* Campus selection responsive */
   .campus-selection {
     grid-template-columns: 1fr;
@@ -1165,8 +1191,9 @@ body {
     padding: 1.5rem;
   }
   
-  .campus-icon {
-    font-size: 3rem;
+  .campus-logo {
+    width: 100px;
+    height: 100px;
   }
   
   .campus-card h3 {

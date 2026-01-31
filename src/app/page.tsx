@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function Home() {
   return (
@@ -6,8 +7,21 @@ export default function Home() {
       {/* Hero Section */}
       <div className="admission-hero">
         <div className="hero-content">
-          <div className="school-logo">
-            <div className="logo-circle">🎓</div>
+          <div className="hero-logos">
+            <Image 
+              src="/logo-winston-educativo.png" 
+              alt="Instituto Educativo Winston"
+              width={100}
+              height={100}
+              className="hero-logo"
+            />
+            <Image 
+              src="/logo-winston-churchill.png" 
+              alt="Instituto Winston Churchill"
+              width={100}
+              height={100}
+              className="hero-logo"
+            />
           </div>
           <h1 className="hero-title">
             INICIA HOY TU<br />
@@ -99,12 +113,24 @@ export default function Home() {
             <p>Selecciona el campus y agenda tu cita en menos de 3 minutos</p>
             <div className="campus-mini-cards">
               <div className="campus-mini">
-                <span className="mini-icon">👶</span>
+                <Image 
+                  src="/logo-winston-educativo.png" 
+                  alt="Instituto Educativo Winston"
+                  width={60}
+                  height={60}
+                  className="mini-logo"
+                />
                 <p>Instituto Educativo Winston</p>
                 <small>Maternal y Kinder</small>
               </div>
               <div className="campus-mini">
-                <span className="mini-icon">🎓</span>
+                <Image 
+                  src="/logo-winston-churchill.png" 
+                  alt="Instituto Winston Churchill"
+                  width={60}
+                  height={60}
+                  className="mini-logo"
+                />
                 <p>Instituto Winston Churchill</p>
                 <small>Primaria y Secundaria</small>
               </div>
