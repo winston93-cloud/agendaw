@@ -1,9 +1,24 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'AgendaW - Sistema de Gestión de Citas',
-  description: 'Sistema moderno para gestión de citas y clientes',
+  title: 'AgendaW - Agenda tu Cita de Admisión',
+  description: 'Sistema de agendamiento de citas para proceso de admisión escolar. Rápido, fácil y seguro.',
+  keywords: 'agenda, citas, admisión, escolar, registro',
+  authors: [{ name: 'Winston93 Cloud' }],
+  openGraph: {
+    title: 'AgendaW - Agenda tu Cita de Admisión',
+    description: 'Sistema de agendamiento de citas para proceso de admisión escolar',
+    type: 'website',
+  },
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: '#3b82f6',
 }
 
 export default function RootLayout({
@@ -13,6 +28,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="AgendaW" />
+      </head>
       <body>{children}</body>
     </html>
   )

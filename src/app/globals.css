@@ -109,6 +109,7 @@ body {
   gap: 1rem;
   justify-content: center;
   margin-top: 3rem;
+  flex-wrap: wrap;
 }
 
 .btn {
@@ -121,6 +122,17 @@ body {
   cursor: pointer;
   border: none;
   font-size: 1rem;
+  min-height: 48px; /* Tamaño mínimo para touch en móvil */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.btn:active {
+  transform: scale(0.98);
 }
 
 .btn-primary {
@@ -156,17 +168,21 @@ body {
   margin-bottom: 0.5rem;
   font-weight: 600;
   color: var(--text-primary);
+  font-size: 1rem;
 }
 
 .form-input,
 .form-select,
 .form-textarea {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid var(--light-border);
+  padding: 0.875rem;
+  border: 2px solid var(--light-border);
   border-radius: var(--radius);
-  font-size: 1rem;
+  font-size: 16px; /* Previene zoom en iOS */
   transition: border-color 0.2s;
+  background: white;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .form-input:focus,
@@ -180,6 +196,15 @@ body {
 .form-textarea {
   resize: vertical;
   min-height: 100px;
+}
+
+/* Mejor estilo para selects en móvil */
+.form-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.875rem center;
+  background-size: 12px;
+  padding-right: 2.5rem;
 }
 
 /* Card */
@@ -799,6 +824,17 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  min-height: 48px; /* Tamaño mínimo para touch */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.time-slot:active {
+  transform: scale(0.95);
 }
 
 .time-slot:hover {
@@ -895,6 +931,11 @@ body {
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.checkbox-label:active {
+  background: #e0f2fe;
 }
 
 .checkbox-label:hover {
@@ -904,6 +945,7 @@ body {
 .checkbox-label input[type="checkbox"] {
   width: 24px;
   height: 24px;
+  min-width: 24px;
   margin-top: 2px;
   cursor: pointer;
   accent-color: var(--primary-color);
@@ -913,6 +955,7 @@ body {
   flex: 1;
   color: var(--text-secondary);
   line-height: 1.6;
+  font-size: 0.95rem;
 }
 
 /* Form Actions */
@@ -939,9 +982,21 @@ body {
   .agendar-page {
     padding: 1rem 0;
   }
+  
+  .container {
+    padding: 1rem;
+  }
+
+  .agendar-header {
+    padding: 0 1rem;
+  }
 
   .agendar-header h1 {
     font-size: 1.75rem;
+  }
+
+  .progress-container {
+    padding: 0 1rem;
   }
 
   .progress-bar {
@@ -958,8 +1013,12 @@ body {
     font-size: 0.75rem;
   }
 
+  .form-container {
+    padding: 0 1rem;
+  }
+
   .form-step {
-    padding: 2rem 1.5rem;
+    padding: 1.5rem;
   }
 
   .step-heading {
@@ -976,44 +1035,52 @@ body {
   }
 
   .time-slots {
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 0.75rem;
   }
 
   .time-slot {
-    padding: 0.75rem 0.5rem;
-    font-size: 0.875rem;
+    padding: 0.875rem 0.5rem;
+    font-size: 0.9rem;
+    min-height: 48px;
   }
 
   .form-actions {
-    flex-direction: column;
+    flex-direction: column-reverse;
+    gap: 0.75rem;
   }
 
   .form-actions .btn {
     width: 100%;
+    min-height: 52px;
+    font-size: 1.05rem;
   }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
+  
+  /* Mejoras para la página de inicio en móvil */
   .hero-title {
     font-size: 2rem;
+    line-height: 1.2;
   }
 
   .hero-subtitle {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
   }
 
   .section-title {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
 
   .steps-grid {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .step-card {
+    padding: 1.5rem;
   }
 
   .cta-card h2 {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
 
   .cta-card p {
@@ -1021,14 +1088,44 @@ body {
   }
 
   .btn-large {
-    padding: 1rem 2rem;
-    font-size: 1rem;
+    padding: 1.125rem 2rem;
+    font-size: 1.05rem;
     width: 100%;
+    min-height: 56px;
   }
 
   .logo-circle {
     width: 80px;
     height: 80px;
     font-size: 2.5rem;
+  }
+  
+  /* Mejorar legibilidad en móvil */
+  .email-item {
+    font-size: 0.85rem;
+  }
+  
+  .summary-section p {
+    font-size: 0.95rem;
+  }
+  
+  /* Asegurar que los textos no se salgan */
+  .info-box {
+    font-size: 0.9rem;
+  }
+}
+
+/* Extra pequeño (muy móviles muy pequeños) */
+@media (max-width: 375px) {
+  .time-slots {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .form-step {
+    padding: 1.25rem;
+  }
+  
+  .hero-title {
+    font-size: 1.75rem;
   }
 }
