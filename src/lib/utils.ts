@@ -1,7 +1,6 @@
-import { clsx, type ClassValue } from 'clsx'
-
-export function cn(...inputs: ClassValue[]) {
-  return clsx(inputs)
+// Utilidad simple para combinar clases CSS
+export function cn(...classes: string[]) {
+  return classes.filter(Boolean).join(' ')
 }
 
 export function formatDate(date: string | Date): string {
