@@ -50,15 +50,15 @@ export default function Home() {
               <div className="email-list">
                 <div className="email-item">
                   <strong>Maternal/Kinder:</strong>
-                  <span>psicologia.kinder@escuela.mx</span>
+                  <span>psicologia.kinder@winston93.edu.mx</span>
                 </div>
                 <div className="email-item">
                   <strong>Primaria:</strong>
-                  <span>psicologia.primaria@escuela.mx</span>
+                  <span>psicologia.primaria@winston93.edu.mx</span>
                 </div>
                 <div className="email-item">
                   <strong>Secundaria:</strong>
-                  <span>psicologia.secundaria@escuela.mx</span>
+                  <span>psicologia.secundaria@winston93.edu.mx</span>
                 </div>
               </div>
             </div>
@@ -96,7 +96,19 @@ export default function Home() {
         <div className="cta-section">
           <div className="cta-card">
             <h2>¿Listo para comenzar?</h2>
-            <p>Agenda tu cita de entrevista en menos de 3 minutos</p>
+            <p>Selecciona el campus y agenda tu cita en menos de 3 minutos</p>
+            <div className="campus-mini-cards">
+              <div className="campus-mini">
+                <span className="mini-icon">👶</span>
+                <p>Instituto Educativo Winston</p>
+                <small>Maternal y Kinder</small>
+              </div>
+              <div className="campus-mini">
+                <span className="mini-icon">🎓</span>
+                <p>Instituto Winston Churchill</p>
+                <small>Primaria y Secundaria</small>
+              </div>
+            </div>
             <Link href="/agendar" className="btn btn-primary btn-large">
               Agendar mi cita →
             </Link>

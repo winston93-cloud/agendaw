@@ -6,10 +6,11 @@ import Link from 'next/link'
 type Step = 1 | 2 | 3 | 4
 
 interface FormData {
-  // Paso 1: Información del aspirante
+  // Paso 1: Selección de plantel y nivel
+  campus: string // 'churchill' o 'winston'
+  gradeLevel: string
   studentName: string
   studentAge: string
-  gradeLevel: string
   
   // Paso 2: Información del padre/tutor
   parentName: string
@@ -29,6 +30,7 @@ interface FormData {
 export default function AgendarPage() {
   const [currentStep, setCurrentStep] = useState<Step>(1)
   const [formData, setFormData] = useState<FormData>({
+    campus: '',
     studentName: '',
     studentAge: '',
     gradeLevel: '',
@@ -42,8 +44,75 @@ export default function AgendarPage() {
     documentsSent: false,
   })
 
+  const campusInfo = {
+    churchill: {
+      name: 'Instituto Winston Churchill',
+      website: 'www.winston93.edu.mx',
+      levels: ['Primaria', 'Secundaria'],
+      email: {
+        primaria: 'psicologia.primaria@winston93.edu.mx',
+        secundaria: 'psicologia.secundaria@winston93.edu.mx'
+      }
+    },
+    winston: {
+      name: 'Instituto Educativo Winston',
+      website: 'www.winstonkinder.edu.mx',
+      levels: ['Maternal', 'Kinder'],
+      email: {
+        maternal: 'psicologia.kinder@winston93.edu.mx',
+        kinder: 'psicologia.kinder@winston93.edu.mx'
+      }
+    }
+  }
+
+  const getGradeLevels = () => {
+    if (!formData.campus) return []
+    
+    if (formData.campus === 'winston') {
+      return [
+        { value: 'maternal', label: 'Maternal', campus: 'winston' },
+        { value: 'kinder1', label: 'Kinder 1', campus: 'winston' },
+        { value: 'kinder2', label: 'Kinder 2', campus: 'winston' },
+        { value: 'kinder3', label: 'Kinder 3', campus: 'winston' },
+      ]
+    } else {
+      return [
+        { value: 'primaria1', label: '1° Primaria', campus: 'churchill' },
+        { value: 'primaria2', label: '2° Primaria', campus: 'churchill' },
+        { value: 'primaria3', label: '3° Primaria', campus: 'churchill' },
+        { value: 'primaria4', label: '4° Primaria', campus: 'churchill' },
+        { value: 'primaria5', label: '5° Primaria', campus: 'churchill' },
+        { value: 'primaria6', label: '6° Primaria', campus: 'churchill' },
+        { value: 'secundaria1', label: '1° Secundaria', campus: 'churchill' },
+        { value: 'secundaria2', label: '2° Secundaria', campus: 'churchill' },
+        { value: 'secundaria3', label: '3° Secundaria', campus: 'churchill' },
+      ]
+    }
+  }
+
+  const getContactEmail = () => {
+    if (!formData.gradeLevel) return ''
+    
+    if (formData.gradeLevel.includes('maternal') || formData.gradeLevel.includes('kinder')) {
+      return campusInfo.winston.email.kinder
+    } else if (formData.gradeLevel.includes('primaria')) {
+      return campusInfo.churchill.email.primaria
+    } else {
+      return campusInfo.churchill.email.secundaria
+    }
+  }
+
   const updateFormData = (field: keyof FormData, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value }
+      
+      // Si cambia el campus, resetear gradeLevel
+      if (field === 'campus') {
+        newData.gradeLevel = ''
+      }
+      
+      return newData
+    })
   }
 
   const nextStep = () => {
@@ -56,31 +125,10 @@ export default function AgendarPage() {
 
   const handleSubmit = async () => {
     console.log('Enviando formulario:', formData)
+    console.log('Email de contacto:', getContactEmail())
     // Aquí irá la lógica para guardar en Supabase
     alert('¡Cita agendada exitosamente! Recibirás un correo de confirmación.')
   }
-
-  const gradeLevels = [
-    { value: 'maternal', label: 'Maternal' },
-    { value: 'kinder1', label: 'Kinder 1' },
-    { value: 'kinder2', label: 'Kinder 2' },
-    { value: 'kinder3', label: 'Kinder 3' },
-    { value: 'primaria1', label: '1° Primaria' },
-    { value: 'primaria2', label: '2° Primaria' },
-    { value: 'primaria3', label: '3° Primaria' },
-    { value: 'primaria4', label: '4° Primaria' },
-    { value: 'primaria5', label: '5° Primaria' },
-    { value: 'primaria6', label: '6° Primaria' },
-    { value: 'secundaria1', label: '1° Secundaria' },
-    { value: 'secundaria2', label: '2° Secundaria' },
-    { value: 'secundaria3', label: '3° Secundaria' },
-  ]
-
-  const availableTimes = [
-    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-    '12:00', '12:30', '14:00', '14:30', '15:00', '15:30',
-    '16:00', '16:30', '17:00'
-  ]
 
   return (
     <div className="agendar-page">
@@ -118,61 +166,95 @@ export default function AgendarPage() {
         {/* Step 1: Información del Aspirante */}
         {currentStep === 1 && (
           <div className="form-step">
-            <h2 className="step-heading">📚 Información del Aspirante</h2>
+            <h2 className="step-heading">🏫 Selecciona el Plantel</h2>
             <p className="step-description">
-              Ingresa los datos del estudiante que desea ingresar
+              Elige el campus según el nivel educativo de interés
             </p>
 
-            <div className="form-grid">
-              <div className="form-group">
-                <label className="form-label">Nombre completo del aspirante *</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Ej: Juan Pérez García"
-                  value={formData.studentName}
-                  onChange={(e) => updateFormData('studentName', e.target.value)}
-                  required
-                />
+            <div className="campus-selection">
+              <div 
+                className={`campus-card ${formData.campus === 'winston' ? 'selected' : ''}`}
+                onClick={() => updateFormData('campus', 'winston')}
+              >
+                <div className="campus-icon">👶</div>
+                <h3>Instituto Educativo Winston</h3>
+                <p className="campus-website">{campusInfo.winston.website}</p>
+                <div className="campus-levels">
+                  <span className="level-badge">Maternal</span>
+                  <span className="level-badge">Kinder</span>
+                </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Edad *</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  placeholder="Ej: 6"
-                  min="3"
-                  max="18"
-                  value={formData.studentAge}
-                  onChange={(e) => updateFormData('studentAge', e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-group full-width">
-                <label className="form-label">Grado al que desea ingresar *</label>
-                <select
-                  className="form-select"
-                  value={formData.gradeLevel}
-                  onChange={(e) => updateFormData('gradeLevel', e.target.value)}
-                  required
-                >
-                  <option value="">Selecciona un grado</option>
-                  {gradeLevels.map((grade) => (
-                    <option key={grade.value} value={grade.value}>
-                      {grade.label}
-                    </option>
-                  ))}
-                </select>
+              <div 
+                className={`campus-card ${formData.campus === 'churchill' ? 'selected' : ''}`}
+                onClick={() => updateFormData('campus', 'churchill')}
+              >
+                <div className="campus-icon">🎓</div>
+                <h3>Instituto Winston Churchill</h3>
+                <p className="campus-website">{campusInfo.churchill.website}</p>
+                <div className="campus-levels">
+                  <span className="level-badge">Primaria</span>
+                  <span className="level-badge">Secundaria</span>
+                </div>
               </div>
             </div>
+
+            {formData.campus && (
+              <div className="student-info-section">
+                <h3 className="section-subtitle">📚 Información del Aspirante</h3>
+                
+                <div className="form-grid">
+                  <div className="form-group full-width">
+                    <label className="form-label">Grado al que desea ingresar *</label>
+                    <select
+                      className="form-select"
+                      value={formData.gradeLevel}
+                      onChange={(e) => updateFormData('gradeLevel', e.target.value)}
+                      required
+                    >
+                      <option value="">Selecciona un grado</option>
+                      {gradeLevels.map((grade) => (
+                        <option key={grade.value} value={grade.value}>
+                          {grade.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Nombre completo del aspirante *</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="Ej: Juan Pérez García"
+                      value={formData.studentName}
+                      onChange={(e) => updateFormData('studentName', e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Edad *</label>
+                    <input
+                      type="number"
+                      className="form-input"
+                      placeholder="Ej: 6"
+                      min="2"
+                      max="18"
+                      value={formData.studentAge}
+                      onChange={(e) => updateFormData('studentAge', e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="form-actions">
               <button
                 className="btn btn-primary"
                 onClick={nextStep}
-                disabled={!formData.studentName || !formData.studentAge || !formData.gradeLevel}
+                disabled={!formData.campus || !formData.studentName || !formData.studentAge || !formData.gradeLevel}
               >
                 Siguiente →
               </button>
@@ -334,6 +416,12 @@ export default function AgendarPage() {
 
             <div className="summary-card">
               <div className="summary-section">
+                <h3>🏫 Plantel</h3>
+                <p><strong>Campus:</strong> {formData.campus === 'winston' ? campusInfo.winston.name : campusInfo.churchill.name}</p>
+                <p><strong>Sitio web:</strong> {formData.campus === 'winston' ? campusInfo.winston.website : campusInfo.churchill.website}</p>
+              </div>
+
+              <div className="summary-section">
                 <h3>📚 Aspirante</h3>
                 <p><strong>Nombre:</strong> {formData.studentName}</p>
                 <p><strong>Edad:</strong> {formData.studentAge} años</p>
@@ -352,6 +440,7 @@ export default function AgendarPage() {
                 <h3>📅 Cita</h3>
                 <p><strong>Fecha:</strong> {new Date(formData.appointmentDate).toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
                 <p><strong>Hora:</strong> {formData.appointmentTime}</p>
+                <p><strong>Contacto:</strong> {getContactEmail()}</p>
               </div>
             </div>
 
