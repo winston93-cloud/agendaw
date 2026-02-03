@@ -1745,8 +1745,14 @@ body {
   }
 
   .steps-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: 1rem;
+  }
+  
+  /* Pasos 3 y 4 más compactos en móvil */
+  .step-card:nth-child(3),
+  .step-card:nth-child(4) {
+    padding: 1.25rem;
   }
   
   .step-card {
