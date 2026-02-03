@@ -6,7 +6,7 @@ import Image from 'next/image'
 import ExamDateCalendar from '@/components/ExamDateCalendar'
 import { createAdmissionAppointment } from './actions'
 
-type Step = 1 | 2 | 3 | 4
+type Step = 1 | 2
 
 const SCHOOL_CYCLES = [
   { value: '2025-2026', label: '2025-2026' },
@@ -224,11 +224,11 @@ export default function AgendarPage() {
   }, [formData.appointmentTime, formData.gradeLevel, formData.appointmentDate, scheduleTimes.length, currentStep])
 
   const nextStep = () => {
-    if (currentStep < 4) setCurrentStep((currentStep + 1) as Step)
+    if (currentStep < 2) setCurrentStep(2)
   }
 
   const prevStep = () => {
-    if (currentStep > 1) setCurrentStep((currentStep - 1) as Step)
+    if (currentStep > 1) setCurrentStep(1)
   }
 
   const handleSubmit = async () => {
@@ -260,29 +260,21 @@ export default function AgendarPage() {
   return (
     <div className="agendar-page">
       <div className="agendar-header">
-        <Link href="/" className="back-link">← Volver</Link>
-        <h1>Agendar Cita de Admisión</h1>
+        <Link href="/" className="back-link">← Volver al inicio</Link>
+        <h1>Solicitud de cita de admisión</h1>
+        <p className="agendar-header-desc">Complete los datos para agendar el examen de admisión.</p>
       </div>
 
       {/* Progress Bar */}
-      <div className="progress-container">
+      <div className="progress-container progress-two">
         <div className="progress-bar">
-          {[1, 2, 3, 4].map((step) => (
+          {[1, 2].map((step) => (
             <div
               key={step}
-              className={`progress-step ${currentStep >= step ? 'active' : ''} ${
-                currentStep > step ? 'completed' : ''
-              }`}
+              className={`progress-step ${currentStep >= step ? 'active' : ''} ${currentStep > step ? 'completed' : ''}`}
             >
-              <div className="progress-circle">
-                {currentStep > step ? '✓' : step}
-              </div>
-              <span className="progress-label">
-                {step === 1 && 'Aspirante'}
-                {step === 2 && 'Tutor'}
-                {step === 3 && 'Fecha'}
-                {step === 4 && 'Confirmar'}
-              </span>
+              <div className="progress-circle">{currentStep > step ? '✓' : step}</div>
+              <span className="progress-label">{step === 1 ? 'Solicitud' : 'Confirmar'}</span>
             </div>
           ))}
         </div>
@@ -293,9 +285,9 @@ export default function AgendarPage() {
         {/* Step 1: Información del Aspirante */}
         {currentStep === 1 && (
           <div className="form-step">
-            <h2 className="step-heading">🏫 Selecciona el Plantel</h2>
+            <h2 className="step-heading">Plantel y nivel</h2>
             <p className="step-description">
-              Elige el campus según el nivel educativo de interés
+              Seleccione el campus y el nivel educativo de interés.
             </p>
 
             <div className="campus-selection">
@@ -522,6 +514,34 @@ export default function AgendarPage() {
                             ))}
                           </select>
                         </div>
+
+                        <div className="form-section-divider" />
+                        <h3 className="section-subtitle">Responsable del aspirante</h3>
+                        <div className="form-group">
+                          <label className="form-label">Nombre completo del padre o tutor *</label>
+                          <input
+                            type="text"
+                            className="form-input"
+                            placeholder="Ej: María García López"
+                            value={formData.parentName}
+                            onChange={(e) => updateFormData('parentName', e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Parentesco *</label>
+                          <select
+                            className="form-select"
+                            value={formData.relationship}
+                            onChange={(e) => updateFormData('relationship', e.target.value)}
+                            required
+                          >
+                            <option value="Padre">Padre</option>
+                            <option value="Madre">Madre</option>
+                            <option value="Tutor">Tutor</option>
+                            <option value="Otro">Otro</option>
+                          </select>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -531,7 +551,7 @@ export default function AgendarPage() {
 
             <div className="form-actions">
               <button
-                className="btn btn-primary"
+                className="btn btn-primary btn-submit-step"
                 onClick={nextStep}
                 disabled={Boolean(
                   !formData.campus || !formData.level || !formData.gradeLevel || !formData.appointmentDate ||
@@ -540,159 +560,22 @@ export default function AgendarPage() {
                     !formData.studentName?.trim() || !formData.studentLastNameP?.trim() || !formData.studentLastNameM?.trim() ||
                     !formData.studentBirthDate || !formData.schoolCycle || !formData.howDidYouHear ||
                     !formData.parentPhone?.trim() || formData.parentPhone.replace(/\D/g, '').length !== 10 ||
-                    !formData.parentEmail?.trim()
+                    !formData.parentEmail?.trim() || !formData.parentName?.trim() || !formData.relationship
                   ))
                 )}
               >
-                Siguiente →
+                Revisar y confirmar →
               </button>
             </div>
           </div>
         )}
 
-        {/* Step 2: Información del Padre/Tutor */}
+        {/* Paso 2: Confirmación */}
         {currentStep === 2 && (
-          <div className="form-step">
-            <h2 className="step-heading">👤 Información del Padre/Tutor</h2>
+          <div className="form-step form-step-confirm">
+            <h2 className="step-heading">Confirmación de tu solicitud</h2>
             <p className="step-description">
-              Datos de contacto del responsable
-            </p>
-
-            <div className="form-grid">
-              <div className="form-group">
-                <label className="form-label">Nombre completo *</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Ej: María García López"
-                  value={formData.parentName}
-                  onChange={(e) => updateFormData('parentName', e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Parentesco *</label>
-                <select
-                  className="form-select"
-                  value={formData.relationship}
-                  onChange={(e) => updateFormData('relationship', e.target.value)}
-                  required
-                >
-                  <option value="Padre">Padre</option>
-                  <option value="Madre">Madre</option>
-                  <option value="Tutor">Tutor</option>
-                  <option value="Otro">Otro</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Correo electrónico *</label>
-                <input
-                  type="email"
-                  className="form-input"
-                  placeholder="ejemplo@correo.com"
-                  value={formData.parentEmail}
-                  onChange={(e) => updateFormData('parentEmail', e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Teléfono celular *</label>
-                <input
-                  type="tel"
-                  className="form-input"
-                  placeholder="10 dígitos"
-                  value={formData.parentPhone}
-                  onChange={(e) => updateFormData('parentPhone', e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  inputMode="numeric"
-                  pattern="[0-9]{10}"
-                  maxLength={10}
-                  required
-                  title="10 dígitos sin espacios"
-                />
-              </div>
-            </div>
-
-            <div className="form-actions">
-              <button className="btn btn-secondary" onClick={prevStep}>
-                ← Anterior
-              </button>
-              <button
-                className="btn btn-primary"
-                onClick={nextStep}
-                disabled={Boolean(
-                  !formData.parentName?.trim() || !formData.parentEmail?.trim() ||
-                  !formData.parentPhone?.trim() || formData.parentPhone.replace(/\D/g, '').length !== 10 ||
-                  !formData.relationship
-                )}
-              >
-                Siguiente →
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Selección de Hora (fecha ya elegida en paso 1) */}
-        {currentStep === 3 && (
-          <div className="form-step">
-            <h2 className="step-heading">🕐 Selecciona la Hora</h2>
-            <p className="step-description">
-              Fecha del examen: <strong>{formData.appointmentDate ? new Date(formData.appointmentDate + 'T12:00:00').toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ''}</strong>
-            </p>
-
-            <div className="form-grid">
-              <div className="form-group full-width">
-                <label className="form-label">Hora de la cita *</label>
-                {scheduleTimes.length === 0 ? (
-                  <p className="form-hint text-soft">No hay horarios configurados para este nivel. La escuela te contactará.</p>
-                ) : (
-                  <div className="time-slots">
-                    {scheduleTimes.map((time) => (
-                      <button
-                        key={time}
-                        type="button"
-                        className={`time-slot ${formData.appointmentTime === time ? 'selected' : ''}`}
-                        onClick={() => updateFormData('appointmentTime', time)}
-                      >
-                        {time}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="info-box">
-              <strong>📌 Importante:</strong>
-              <p>
-                La entrevista tiene una duración aproximada de 30 minutos. Por favor llega
-                10 minutos antes de tu hora agendada.
-              </p>
-            </div>
-
-            <div className="form-actions">
-              <button className="btn btn-secondary" onClick={prevStep}>
-                ← Anterior
-              </button>
-              <button
-                className="btn btn-primary"
-                onClick={nextStep}
-                disabled={!formData.appointmentDate || (scheduleTimes.length > 0 && !formData.appointmentTime)}
-              >
-                Siguiente →
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 4: Confirmación */}
-        {currentStep === 4 && (
-          <div className="form-step">
-            <h2 className="step-heading">✅ Confirma tu Información</h2>
-            <p className="step-description">
-              Revisa que todos los datos sean correctos
+              Revisa que todos los datos sean correctos antes de enviar.
             </p>
 
             <div className="summary-card">
@@ -751,16 +634,17 @@ export default function AgendarPage() {
               </label>
             </div>
 
-            <div className="form-actions">
-              <button className="btn btn-secondary" onClick={prevStep}>
-                ← Anterior
+            <div className="form-actions form-actions-confirm">
+              <button type="button" className="btn btn-secondary" onClick={prevStep}>
+                ← Corregir datos
               </button>
               <button
+                type="button"
                 className="btn btn-primary btn-large"
                 onClick={handleSubmit}
                 disabled={!formData.acceptTerms || !formData.documentsSent}
               >
-                Confirmar Cita ✓
+                Enviar solicitud
               </button>
             </div>
           </div>
