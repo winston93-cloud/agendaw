@@ -31,7 +31,7 @@ export default function Home() {
               
               <h1 className="hero-title">
                 <span className="title-line-1">Da el primer paso</span><br />
-                <span className="highlight">Trabajando por un futuro brillante</span>
+                <span className="highlight">Trabajando por un futuro más brillante</span>
               </h1>
               
               <p className="hero-subtitle">
