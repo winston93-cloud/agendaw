@@ -9,31 +9,42 @@ export default function Home() {
       <div className="admission-hero">
         <div className="hero-content">
           <div className="hero-logos">
-            <Image 
-              src="/logo-winston-educativo.png" 
-              alt="Instituto Educativo Winston"
-              width={100}
-              height={100}
-              className="hero-logo"
-            />
-            <Image 
-              src="/logo-winston-churchill.png" 
-              alt="Instituto Winston Churchill"
-              width={100}
-              height={100}
-              className="hero-logo"
-            />
+            {/* Logo izquierdo */}
+            <div className="hero-logo-wrapper">
+              <Image 
+                src="/logo-winston-educativo.png" 
+                alt="Instituto Educativo Winston"
+                width={120}
+                height={120}
+                className="hero-logo"
+              />
+            </div>
+
+            {/* Contenido central */}
+            <div className="hero-center-content">
+              <h1 className="hero-title">
+                INICIA HOY TU<br />
+                <span className="highlight">PROCESO DE ADMISIÓN</span>
+              </h1>
+              <p className="hero-subtitle">
+                Agenda tu cita de manera fácil y rápida
+              </p>
+              
+              {/* Carousel */}
+              <Carousel />
+            </div>
+
+            {/* Logo derecho */}
+            <div className="hero-logo-wrapper">
+              <Image 
+                src="/logo-winston-churchill.png" 
+                alt="Instituto Winston Churchill"
+                width={120}
+                height={120}
+                className="hero-logo"
+              />
+            </div>
           </div>
-          <h1 className="hero-title">
-            INICIA HOY TU<br />
-            <span className="highlight">PROCESO DE ADMISIÓN</span>
-          </h1>
-          <p className="hero-subtitle">
-            Agenda tu cita de manera fácil y rápida
-          </p>
-          
-          {/* Carousel */}
-          <Carousel />
         </div>
       </div>
 
