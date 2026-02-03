@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import ExamDateCalendar from '@/components/ExamDateCalendar'
+import { createAdmissionAppointment } from './actions'
 
 type Step = 1 | 2 | 3 | 4
 
@@ -32,6 +33,7 @@ interface FormData {
 
 export default function AgendarPage() {
   const [currentStep, setCurrentStep] = useState<Step>(1)
+  const [blockedDates, setBlockedDates] = useState<string[]>([])
   const [formData, setFormData] = useState<FormData>({
     campus: '',
     level: '',
@@ -148,8 +150,27 @@ export default function AgendarPage() {
   }
 
   const setCampusAndLevel = (campus: string, level: string) => {
-    setFormData(prev => ({ ...prev, campus, level, gradeLevel: '' }))
+    setFormData(prev => ({ ...prev, campus, level, gradeLevel: '', appointmentDate: '' }))
   }
+
+  const admissionLevelForApi = (): string | null => {
+    if (formData.level === 'maternal' || formData.level === 'kinder') return 'maternal_kinder'
+    if (formData.level === 'primaria') return 'primaria'
+    if (formData.level === 'secundaria') return 'secundaria'
+    return null
+  }
+
+  useEffect(() => {
+    const level = admissionLevelForApi()
+    if (!level) {
+      setBlockedDates([])
+      return
+    }
+    fetch(`/api/blocked-dates?level=${level}`)
+      .then((res) => res.json())
+      .then((data) => setBlockedDates(data.dates || []))
+      .catch(() => setBlockedDates([]))
+  }, [formData.level])
 
   const nextStep = () => {
     if (currentStep < 4) setCurrentStep((currentStep + 1) as Step)
@@ -160,10 +181,24 @@ export default function AgendarPage() {
   }
 
   const handleSubmit = async () => {
-    console.log('Enviando formulario:', formData)
-    console.log('Email de contacto:', getContactEmail())
-    // Aquí irá la lógica para guardar en Supabase
-    alert('¡Cita agendada exitosamente! Recibirás un correo de confirmación.')
+    try {
+      await createAdmissionAppointment({
+        campus: formData.campus,
+        level: formData.level,
+        grade_level: formData.gradeLevel,
+        student_name: formData.studentName,
+        student_age: formData.studentAge,
+        parent_name: formData.parentName,
+        parent_email: formData.parentEmail,
+        parent_phone: formData.parentPhone,
+        relationship: formData.relationship,
+        appointment_date: formData.appointmentDate,
+        appointment_time: formData.appointmentTime,
+      })
+      alert('¡Cita agendada exitosamente! Recibirás un correo de confirmación.')
+    } catch (e) {
+      alert('No se pudo guardar la cita. Intenta de nuevo o contacta al plantel.')
+    }
   }
 
   const availableTimes = [
@@ -309,6 +344,7 @@ export default function AgendarPage() {
                       <ExamDateCalendar
                         value={formData.appointmentDate}
                         onChange={(date) => updateFormData('appointmentDate', date)}
+                        blockedDates={blockedDates}
                       />
                     </div>
                   )}

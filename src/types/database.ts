@@ -64,3 +64,32 @@ export interface Availability {
   created_at: string
   updated_at: string
 }
+
+export type AdmissionLevel = 'maternal_kinder' | 'primaria' | 'secundaria'
+
+export interface AdmissionAppointment {
+  id: string
+  campus: string
+  level: string
+  grade_level: string
+  student_name: string
+  student_age: string
+  parent_name: string
+  parent_email: string
+  parent_phone: string
+  relationship: string
+  appointment_date: string
+  appointment_time: string
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed'
+  notes?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface BlockedDate {
+  id: string
+  block_date: string
+  level: AdmissionLevel
+  reason?: string
+  created_at: string
+}

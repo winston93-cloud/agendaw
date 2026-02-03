@@ -21,6 +21,7 @@ import { es } from 'date-fns/locale'
 interface ExamDateCalendarProps {
   value: string // YYYY-MM-DD
   onChange: (date: string) => void
+  blockedDates?: string[] // YYYY-MM-DD, días bloqueados para este nivel
 }
 
 const WEEKDAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
@@ -33,7 +34,7 @@ function getMinBookableDate(): Date {
   return d
 }
 
-export default function ExamDateCalendar({ value, onChange }: ExamDateCalendarProps) {
+export default function ExamDateCalendar({ value, onChange, blockedDates = [] }: ExamDateCalendarProps) {
   const selectedDate = value ? new Date(value + 'T12:00:00') : null
   const minBookable = useMemo(() => getMinBookableDate(), [])
   const [isOpen, setIsOpen] = useState(!value)
@@ -58,6 +59,8 @@ export default function ExamDateCalendar({ value, onChange }: ExamDateCalendarPr
 
   const isDayDisabled = (date: Date): boolean => {
     if (isWeekend(date)) return true
+    const dayStr = format(date, 'yyyy-MM-dd')
+    if (blockedDates.includes(dayStr)) return true
     const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
     const minStart = new Date(minBookable.getFullYear(), minBookable.getMonth(), minBookable.getDate())
     return isBefore(dayStart, minStart)
