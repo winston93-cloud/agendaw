@@ -33,8 +33,8 @@ export default function Home() {
               </div>
               
               <h1 className="hero-title">
-                <span className="title-line-1">Agenda tu cita de admisión</span><br />
-                <span className="highlight">Working for a brighter future</span>
+                <span className="title-line-1">Working for a brighter future</span><br />
+                <span className="highlight">Agenda tu cita de admisión</span>
               </h1>
               
               <p className="hero-subtitle">
