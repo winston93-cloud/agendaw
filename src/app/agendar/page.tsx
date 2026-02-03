@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import ExamDateCalendar from '@/components/ExamDateCalendar'
@@ -35,6 +35,7 @@ export default function AgendarPage() {
   const [currentStep, setCurrentStep] = useState<Step>(1)
   const [blockedDates, setBlockedDates] = useState<string[]>([])
   const [scheduleTimes, setScheduleTimes] = useState<string[]>([])
+  const studentInfoRef = useRef<HTMLDivElement>(null)
   const [formData, setFormData] = useState<FormData>({
     campus: '',
     level: '',
@@ -179,6 +180,13 @@ export default function AgendarPage() {
     })
   }, [formData.level])
 
+  // Scroll a "Información del Aspirante" al elegir plantel y nivel
+  useEffect(() => {
+    if (formData.campus && formData.level && currentStep === 1) {
+      studentInfoRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [formData.campus, formData.level, currentStep])
+
   const nextStep = () => {
     if (currentStep < 4) setCurrentStep((currentStep + 1) as Step)
   }
@@ -318,7 +326,7 @@ export default function AgendarPage() {
             </div>
 
             {formData.campus && formData.level && (
-              <div className="student-info-section">
+              <div className="student-info-section" ref={studentInfoRef}>
                 <h3 className="section-subtitle">📚 Información del Aspirante</h3>
                 
                 <div className="form-grid">
