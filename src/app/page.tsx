@@ -33,13 +33,13 @@ export default function Home() {
               </div>
               
               <h1 className="hero-title">
-                <span className="title-line-1">Da el primer paso</span><br />
+                <span className="title-line-1">Agenda tu cita de admisión</span><br />
                 <span className="highlight">Working for a brighter future</span>
               </h1>
               
               <p className="hero-subtitle">
-                Conoce el proceso de admisión paso a paso.<br />
-                Tu familia merece la mejor educación.
+                Sistema en línea para agendar tu entrevista de admisión.<br />
+                Rápido, fácil y en minutos.
               </p>
               
               {/* CTA Principal - Scroll to process */}
