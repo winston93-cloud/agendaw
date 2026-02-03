@@ -132,7 +132,7 @@ export default function Home() {
             </div>
 
             {/* Step 4 */}
-            <div className="step-card">
+            <div className="step-card step-important">
               <div className="step-number">4</div>
               <div className="step-icon">💳</div>
               <h3 className="step-title">Realiza el pago</h3>

@@ -801,6 +801,28 @@ body {
   background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
 }
 
+.step-important {
+  border: 3px solid #f59e0b;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.15);
+  position: relative;
+}
+
+.step-important::after {
+  content: '¡IMPORTANTE!';
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+}
+
 .step-number {
   position: absolute;
   top: -15px;
