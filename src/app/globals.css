@@ -904,7 +904,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  grid-column: span 2;
+  /* sin span: los 3 pasos en la misma fila (mismo nivel) en desktop */
 }
 
 .step-highlight .step-description {
