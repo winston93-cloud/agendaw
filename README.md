@@ -2,6 +2,8 @@
 
 Sistema moderno de gestión de citas construido con Next.js, TypeScript y Supabase.
 
+**Última actualización:** 3 de Febrero 2026
+
 ## Stack Tecnológico
 
 - **Frontend**: Next.js 15 + TypeScript + CSS Global
