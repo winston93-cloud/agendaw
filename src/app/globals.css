@@ -1341,23 +1341,45 @@ body {
     gap: 1rem;
   }
   
+  /* Hero responsive para móvil */
+  .admission-hero {
+    padding: 2rem 1rem;
+  }
+  
   .hero-logos {
     flex-direction: column;
     align-items: center;
-    gap: 2rem;
+    gap: 1rem;
+    padding: 0 1rem;
   }
   
   .hero-logo-wrapper {
-    order: -1;
+    display: none; /* Ocultar logos laterales en móvil */
   }
   
   .hero-center-content {
-    order: 1;
+    width: 100%;
+    padding: 0;
   }
   
   .hero-logo {
-    width: 80px;
-    height: 80px;
+    width: 70px;
+    height: 70px;
+  }
+  
+  /* Mostrar logos arriba en móvil */
+  .hero-center-content::before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100px;
+    background-image: 
+      url('/logo-winston-educativo.png'),
+      url('/logo-winston-churchill.png');
+    background-size: 70px 70px, 70px 70px;
+    background-position: 25% center, 75% center;
+    background-repeat: no-repeat;
+    margin-bottom: 1.5rem;
   }
   
   /* Campus selection responsive */
@@ -1382,6 +1404,18 @@ body {
   .time-slots {
     grid-template-columns: repeat(3, 1fr);
     gap: 0.75rem;
+  }
+  
+  /* Carousel responsive mejorado */
+  .carousel-container {
+    max-width: 100%;
+    margin: 1.5rem 0 0;
+    padding: 0 0.5rem;
+  }
+  
+  .carousel {
+    height: 240px;
+    border-radius: 12px;
   }
 
   .time-slot {
@@ -1410,40 +1444,28 @@ body {
   .hero-subtitle {
     font-size: 1.125rem;
   }
-  
-  /* Carousel responsive */
-  .carousel-container {
-    max-width: 100%;
-    margin: 1.5rem 0 0;
-  }
-  
-  .carousel {
-    height: 280px;
-    border-radius: 12px;
-  }
-  
   .carousel-arrow {
     width: 40px;
     height: 40px;
   }
   
   .carousel-arrow-left {
-    left: 8px;
+    left: 4px;
   }
   
   .carousel-arrow-right {
-    right: 8px;
+    right: 4px;
   }
   
   .carousel-play-button {
     width: 36px;
     height: 36px;
-    bottom: 16px;
-    right: 16px;
+    bottom: 12px;
+    right: 12px;
   }
   
   .carousel-indicators {
-    bottom: 16px;
+    bottom: 12px;
     gap: 8px;
   }
   
