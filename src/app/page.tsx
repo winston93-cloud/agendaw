@@ -146,64 +146,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-
-        {/* CTA Section */}
-        <div className="cta-section">
-          <div className="cta-card">
-            <h2>¿Listo para comenzar?</h2>
-            <p>Selecciona el campus y agenda tu cita en menos de 3 minutos</p>
-            <div className="campus-mini-cards">
-              <div className="campus-mini">
-                <Image 
-                  src="/logo-winston-educativo.png" 
-                  alt="Instituto Educativo Winston"
-                  width={60}
-                  height={60}
-                  className="mini-logo"
-                />
-                <p>Instituto Educativo Winston</p>
-                <small>Maternal y Kinder</small>
-              </div>
-              <div className="campus-mini">
-                <Image 
-                  src="/logo-winston-churchill.png" 
-                  alt="Instituto Winston Churchill"
-                  width={60}
-                  height={60}
-                  className="mini-logo"
-                />
-                <p>Instituto Winston Churchill</p>
-                <small>Primaria y Secundaria</small>
-              </div>
-            </div>
-            <Link href="/agendar" className="btn btn-primary btn-large">
-              Agendar mi cita →
-            </Link>
-          </div>
-        </div>
-
-        {/* FAQ Section */}
-        <div className="faq-section">
-          <h2 className="section-title">Preguntas Frecuentes</h2>
-          <div className="faq-grid">
-            <div className="faq-item">
-              <h4>¿Cuánto dura la entrevista?</h4>
-              <p>La entrevista tiene una duración aproximada de 30 minutos.</p>
-            </div>
-            <div className="faq-item">
-              <h4>¿Puedo reagendar mi cita?</h4>
-              <p>Sí, puedes modificar tu cita con al menos 24 horas de anticipación.</p>
-            </div>
-            <div className="faq-item">
-              <h4>¿Qué debo llevar el día de la cita?</h4>
-              <p>Lleva tu identificación oficial y el comprobante de cita que recibirás por email.</p>
-            </div>
-            <div className="faq-item">
-              <h4>¿Puedo llevar a mi hijo/a?</h4>
-              <p>Sí, es recomendable que el aspirante asista a la entrevista.</p>
-            </div>
-          </div>
-        </div>
       </div>
     </main>
   )
