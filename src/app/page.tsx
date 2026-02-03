@@ -23,6 +23,9 @@ export default function Home() {
 
             {/* Contenido central */}
             <div className="hero-center-content">
+              {/* Carousel - Primero para impacto visual */}
+              <Carousel />
+              
               {/* Badge de Confianza */}
               <div className="trust-badge">
                 <span className="badge-icon">🏆</span>
@@ -45,9 +48,6 @@ export default function Home() {
                 <span className="cta-arrow">↓</span>
               </ScrollButton>
               <p className="hero-note">Solo 4 pasos sencillos para iniciar</p>
-              
-              {/* Carousel */}
-              <Carousel />
               
               {/* Scroll Indicator */}
               <div className="scroll-indicator">

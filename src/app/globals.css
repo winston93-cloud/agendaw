@@ -599,7 +599,7 @@ body {
 .carousel-container {
   width: 100%;
   max-width: 800px;
-  margin: 2rem auto 0;
+  margin: 0 auto 2rem;
 }
 
 .carousel {
