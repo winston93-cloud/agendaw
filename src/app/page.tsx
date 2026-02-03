@@ -22,20 +22,34 @@ export default function Home() {
 
             {/* Contenido central */}
             <div className="hero-center-content">
-          <h1 className="hero-title">
-            INICIA HOY TU<br />
-            <span className="highlight">PROCESO DE ADMISIÓN</span>
-          </h1>
-          <p className="hero-subtitle">
-            Agenda tu cita de manera fácil y rápida ✨
-          </p>
+              {/* Badge de Confianza */}
+              <div className="trust-badge">
+                <span className="badge-icon">🏆</span>
+                <span className="badge-text">Más de 30 años formando líderes</span>
+              </div>
+              
+              <h1 className="hero-title">
+                <span className="title-line-1">Da el primer paso hacia</span><br />
+                <span className="highlight">Un futuro brillante</span>
+              </h1>
+              
+              <p className="hero-subtitle">
+                Agenda tu cita de admisión en minutos.<br />
+                Tu familia merece la mejor educación.
+              </p>
+              
+              {/* CTA Principal */}
+              <Link href="/agendar" className="hero-cta-button">
+                <span className="cta-text">Agendar mi cita ahora</span>
+                <span className="cta-arrow">→</span>
+              </Link>
               
               {/* Carousel */}
               <Carousel />
               
               {/* Scroll Indicator */}
               <div className="scroll-indicator">
-                <span className="scroll-text">Desliza para ver más</span>
+                <span className="scroll-text">Descubre más</span>
                 <div className="scroll-arrow">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                     <path d="M12 5v14M19 12l-7 7-7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

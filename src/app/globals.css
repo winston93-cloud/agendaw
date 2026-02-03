@@ -332,12 +332,13 @@ body {
 }
 
 .admission-hero {
-  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #8b5cf6 100%);
   color: white;
   padding: 4rem 2rem;
   text-align: center;
   position: relative;
   overflow: hidden;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.1);
 }
 
 .admission-hero::before {
@@ -398,27 +399,106 @@ body {
   margin: 0 auto;
 }
 
+/* Trust Badge */
+.trust-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 0.5rem 1.25rem;
+  border-radius: 50px;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: fadeInDown 0.8s ease-out;
+}
+
+.badge-icon {
+  font-size: 1.25rem;
+}
+
+.badge-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* Hero Title */
 .hero-title {
   font-size: 3rem;
   font-weight: 800;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   line-height: 1.2;
+  animation: fadeInUp 1s ease-out 0.2s both;
+}
+
+.title-line-1 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  letter-spacing: 1px;
+  display: block;
+  margin-bottom: 0.5rem;
+  opacity: 0.95;
 }
 
 .hero-title .highlight {
-  background: white;
-  color: #1e40af;
-  padding: 0.2rem 1rem;
-  border-radius: 8px;
+  background: linear-gradient(to right, #ffffff, #f0f9ff);
+  color: #1e3a8a;
+  padding: 0.3rem 1.5rem;
+  border-radius: 12px;
   display: inline-block;
   margin-top: 0.5rem;
+  font-size: 3.5rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  letter-spacing: -1px;
 }
 
 .hero-subtitle {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   opacity: 0.95;
   font-weight: 300;
   margin-bottom: 2rem;
+  line-height: 1.6;
+  animation: fadeInUp 1s ease-out 0.4s both;
+}
+
+/* Hero CTA Button */
+.hero-cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #1e3a8a;
+  padding: 1rem 2.5rem;
+  border-radius: 50px;
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 30px rgba(251, 191, 36, 0.4);
+  margin-bottom: 2rem;
+  animation: fadeInUp 1s ease-out 0.6s both;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.hero-cta-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(251, 191, 36, 0.6);
+  background: linear-gradient(135deg, #fcd34d 0%, #fbbf24 100%);
+}
+
+.cta-text {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.cta-arrow {
+  font-size: 1.5rem;
+  transition: transform 0.3s ease;
+}
+
+.hero-cta-button:hover .cta-arrow {
+  transform: translateX(5px);
 }
 
 /* Scroll Indicator */
@@ -480,6 +560,17 @@ body {
   from {
     opacity: 0;
     transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
   }
   to {
     opacity: 1;
@@ -1503,15 +1594,50 @@ body {
   }
   
   /* Mejoras para la página de inicio en móvil */
+  .trust-badge {
+    padding: 0.4rem 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .badge-icon {
+    font-size: 1rem;
+  }
+  
+  .badge-text {
+    font-size: 0.75rem;
+  }
+  
   .hero-title {
-    font-size: 1.75rem;
-    line-height: 1.15;
-    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+  
+  .title-line-1 {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .hero-title .highlight {
+    font-size: 2rem;
+    padding: 0.2rem 1rem;
   }
 
   .hero-subtitle {
+    font-size: 0.95rem;
+    margin-bottom: 1.25rem;
+    line-height: 1.5;
+  }
+  
+  .hero-cta-button {
+    padding: 0.875rem 2rem;
     font-size: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .cta-arrow {
+    font-size: 1.25rem;
   }
   
   .scroll-indicator {
