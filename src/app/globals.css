@@ -1203,6 +1203,14 @@ body {
   margin-bottom: 1rem;
 }
 
+/* Datos del alumno: inputs a ancho completo para no dejar marco en blanco */
+.student-data-section .form-grid {
+  grid-template-columns: 1fr;
+}
+.student-data-section .form-group {
+  max-width: 100%;
+}
+
 .section-subtitle {
   font-size: 1.5rem;
   font-weight: 600;
