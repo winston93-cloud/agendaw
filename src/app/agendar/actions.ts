@@ -8,6 +8,11 @@ export async function createAdmissionAppointment(data: {
   grade_level: string
   student_name: string
   student_age: string
+  student_last_name_p?: string
+  student_last_name_m?: string
+  student_birth_date?: string
+  school_cycle?: string
+  how_did_you_hear?: string
   parent_name: string
   parent_email: string
   parent_phone: string
@@ -22,6 +27,11 @@ export async function createAdmissionAppointment(data: {
     grade_level: data.grade_level,
     student_name: data.student_name,
     student_age: data.student_age,
+    student_last_name_p: data.student_last_name_p || null,
+    student_last_name_m: data.student_last_name_m || null,
+    student_birth_date: data.student_birth_date || null,
+    school_cycle: data.school_cycle || null,
+    how_did_you_hear: data.how_did_you_hear || null,
     parent_name: data.parent_name,
     parent_email: data.parent_email,
     parent_phone: data.parent_phone,

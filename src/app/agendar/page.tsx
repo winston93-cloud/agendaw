@@ -8,24 +8,41 @@ import { createAdmissionAppointment } from './actions'
 
 type Step = 1 | 2 | 3 | 4
 
+const SCHOOL_CYCLES = [
+  { value: '2025-2026', label: '2025-2026' },
+  { value: '2026-2027', label: '2026-2027' },
+] as const
+
+const HOW_DID_YOU_HEAR_OPTIONS = [
+  { value: '', label: 'Seleccione una opción' },
+  { value: 'medios_impresos', label: 'Medios Impresos' },
+  { value: 'facebook', label: 'Facebook' },
+  { value: 'instagram', label: 'Instagram' },
+  { value: 'tiktok', label: 'TikTok' },
+  { value: 'familiar_conocido', label: 'Familiar o Conocido' },
+  { value: 'programa_familia_winston', label: 'Programa Familia Winston' },
+  { value: 'otra', label: 'Otra' },
+] as const
+
 interface FormData {
   // Paso 1: Selección de plantel y nivel
-  campus: string // 'churchill' o 'winston'
-  level: string // 'maternal' | 'kinder' | 'primaria' | 'secundaria'
+  campus: string
+  level: string
   gradeLevel: string
   studentName: string
+  studentLastNameP: string
+  studentLastNameM: string
+  studentBirthDate: string
   studentAge: string
-  
-  // Paso 2: Información del padre/tutor
+  schoolCycle: string
+  howDidYouHear: string
+  appointmentDate: string
+  appointmentTime: string
+  // Paso 2: Padre/tutor
   parentName: string
   parentEmail: string
   parentPhone: string
   relationship: string
-  
-  // Paso 3: Fecha y hora
-  appointmentDate: string
-  appointmentTime: string
-  
   // Paso 4: Confirmación
   acceptTerms: boolean
   documentsSent: boolean
@@ -36,18 +53,24 @@ export default function AgendarPage() {
   const [blockedDates, setBlockedDates] = useState<string[]>([])
   const [scheduleTimes, setScheduleTimes] = useState<string[]>([])
   const studentInfoRef = useRef<HTMLDivElement>(null)
+  const afterHorarioRef = useRef<HTMLDivElement>(null)
   const [formData, setFormData] = useState<FormData>({
     campus: '',
     level: '',
     studentName: '',
+    studentLastNameP: '',
+    studentLastNameM: '',
+    studentBirthDate: '',
     studentAge: '',
     gradeLevel: '',
+    schoolCycle: '',
+    howDidYouHear: '',
+    appointmentDate: '',
+    appointmentTime: '',
     parentName: '',
     parentEmail: '',
     parentPhone: '',
     relationship: 'Padre',
-    appointmentDate: '',
-    appointmentTime: '',
     acceptTerms: false,
     documentsSent: false,
   })
@@ -137,11 +160,16 @@ export default function AgendarPage() {
         newData.level = ''
         newData.gradeLevel = ''
       }
-      // Si cambia el nivel, resetear gradeLevel, fecha y horario
+      // Si cambia el nivel, resetear gradeLevel, fecha, horario y datos extra
       if (field === 'level') {
         newData.gradeLevel = ''
         newData.appointmentDate = ''
         newData.appointmentTime = ''
+        newData.studentLastNameP = ''
+        newData.studentLastNameM = ''
+        newData.studentBirthDate = ''
+        newData.schoolCycle = ''
+        newData.howDidYouHear = ''
       }
       // Si cambia el grado, resetear fecha y horario
       if (field === 'gradeLevel') {
@@ -187,6 +215,14 @@ export default function AgendarPage() {
     }
   }, [formData.campus, formData.level, currentStep])
 
+  // Scroll a datos del alumno al elegir horario (o al tener fecha si no hay horarios configurados)
+  useEffect(() => {
+    const showDataBlock = (formData.appointmentTime || scheduleTimes.length === 0) && formData.gradeLevel && formData.appointmentDate
+    if (showDataBlock && currentStep === 1) {
+      afterHorarioRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [formData.appointmentTime, formData.gradeLevel, formData.appointmentDate, scheduleTimes.length, currentStep])
+
   const nextStep = () => {
     if (currentStep < 4) setCurrentStep((currentStep + 1) as Step)
   }
@@ -203,6 +239,11 @@ export default function AgendarPage() {
         grade_level: formData.gradeLevel,
         student_name: formData.studentName,
         student_age: formData.studentAge,
+        student_last_name_p: formData.studentLastNameP || undefined,
+        student_last_name_m: formData.studentLastNameM || undefined,
+        student_birth_date: formData.studentBirthDate || undefined,
+        school_cycle: formData.schoolCycle || undefined,
+        how_did_you_hear: formData.howDidYouHear || undefined,
         parent_name: formData.parentName,
         parent_email: formData.parentEmail,
         parent_phone: formData.parentPhone,
@@ -380,31 +421,92 @@ export default function AgendarPage() {
                     </div>
                   )}
 
-                  <div className="form-group">
-                    <label className="form-label">Nombre completo del aspirante *</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="Ej: Juan Pérez García"
-                      value={formData.studentName}
-                      onChange={(e) => updateFormData('studentName', e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Edad *</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      placeholder="Ej: 6"
-                      min="2"
-                      max="18"
-                      value={formData.studentAge}
-                      onChange={(e) => updateFormData('studentAge', e.target.value)}
-                      required
-                    />
-                  </div>
+                  {(formData.appointmentTime || scheduleTimes.length === 0) && formData.gradeLevel && formData.appointmentDate && (
+                    <div className="student-data-section" ref={afterHorarioRef}>
+                      <h3 className="section-subtitle">Datos del alumno</h3>
+                      <div className="form-grid">
+                        <div className="form-group">
+                          <label className="form-label">Nombre del alumno *</label>
+                          <input
+                            type="text"
+                            className="form-input"
+                            placeholder="Nombre del alumno"
+                            value={formData.studentName}
+                            onChange={(e) => updateFormData('studentName', e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Apellido paterno</label>
+                          <input
+                            type="text"
+                            className="form-input"
+                            placeholder="Apellido paterno"
+                            value={formData.studentLastNameP}
+                            onChange={(e) => updateFormData('studentLastNameP', e.target.value)}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Apellido materno</label>
+                          <input
+                            type="text"
+                            className="form-input"
+                            placeholder="Apellido materno"
+                            value={formData.studentLastNameM}
+                            onChange={(e) => updateFormData('studentLastNameM', e.target.value)}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Fecha de nacimiento</label>
+                          <input
+                            type="date"
+                            className="form-input"
+                            value={formData.studentBirthDate}
+                            onChange={(e) => updateFormData('studentBirthDate', e.target.value)}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Edad *</label>
+                          <input
+                            type="number"
+                            className="form-input"
+                            placeholder="Ej: 6"
+                            min="2"
+                            max="18"
+                            value={formData.studentAge}
+                            onChange={(e) => updateFormData('studentAge', e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Ciclo escolar al que desea ingresar *</label>
+                          <select
+                            className="form-select"
+                            value={formData.schoolCycle}
+                            onChange={(e) => updateFormData('schoolCycle', e.target.value)}
+                            required
+                          >
+                            <option value="">Seleccione una opción</option>
+                            {SCHOOL_CYCLES.map((c) => (
+                              <option key={c.value} value={c.value}>{c.label}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="form-group full-width">
+                          <label className="form-label">¿Cómo se enteró de nuestra institución?</label>
+                          <select
+                            className="form-select"
+                            value={formData.howDidYouHear}
+                            onChange={(e) => updateFormData('howDidYouHear', e.target.value)}
+                          >
+                            {HOW_DID_YOU_HEAR_OPTIONS.map((o) => (
+                              <option key={o.value || 'empty'} value={o.value}>{o.label}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -413,10 +515,11 @@ export default function AgendarPage() {
               <button
                 className="btn btn-primary"
                 onClick={nextStep}
-                disabled={
-                  !formData.campus || !formData.level || !formData.studentName || !formData.studentAge || !formData.gradeLevel || !formData.appointmentDate ||
-                  (scheduleTimes.length > 0 && !formData.appointmentTime)
-                }
+                disabled={Boolean(
+                  !formData.campus || !formData.level || !formData.gradeLevel || !formData.appointmentDate ||
+                  (scheduleTimes.length > 0 && !formData.appointmentTime) ||
+                  ((formData.appointmentTime || scheduleTimes.length === 0) && (!formData.studentName || !formData.studentAge || !formData.schoolCycle))
+                )}
               >
                 Siguiente →
               </button>
@@ -575,9 +678,12 @@ export default function AgendarPage() {
 
               <div className="summary-section">
                 <h3>📚 Aspirante</h3>
-                <p><strong>Nombre:</strong> {formData.studentName}</p>
+                <p><strong>Nombre:</strong> {formData.studentName}{formData.studentLastNameP || formData.studentLastNameM ? ` ${formData.studentLastNameP || ''} ${formData.studentLastNameM || ''}`.trim() : ''}</p>
+                {formData.studentBirthDate && <p><strong>Fecha de nacimiento:</strong> {new Date(formData.studentBirthDate + 'T12:00:00').toLocaleDateString('es-MX')}</p>}
                 <p><strong>Edad:</strong> {formData.studentAge} años</p>
                 <p><strong>Grado:</strong> {getGradeLevels().find(g => g.value === formData.gradeLevel)?.label}</p>
+                {formData.schoolCycle && <p><strong>Ciclo escolar:</strong> {formData.schoolCycle}</p>}
+                {formData.howDidYouHear && <p><strong>Cómo se enteró:</strong> {HOW_DID_YOU_HEAR_OPTIONS.find(o => o.value === formData.howDidYouHear)?.label || formData.howDidYouHear}</p>}
               </div>
 
               <div className="summary-section">

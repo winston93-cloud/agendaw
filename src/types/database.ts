@@ -74,6 +74,11 @@ export interface AdmissionAppointment {
   grade_level: string
   student_name: string
   student_age: string
+  student_last_name_p?: string
+  student_last_name_m?: string
+  student_birth_date?: string
+  school_cycle?: string
+  how_did_you_hear?: string
   parent_name: string
   parent_email: string
   parent_phone: string

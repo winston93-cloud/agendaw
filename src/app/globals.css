@@ -1192,6 +1192,17 @@ body {
   animation: slideIn 0.3s ease-out;
 }
 
+.student-data-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--light-border);
+  animation: slideIn 0.3s ease-out;
+}
+
+.student-data-section .section-subtitle {
+  margin-bottom: 1rem;
+}
+
 .section-subtitle {
   font-size: 1.5rem;
   font-weight: 600;
