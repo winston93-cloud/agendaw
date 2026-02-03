@@ -30,8 +30,8 @@ export default function Home() {
               </div>
               
               <h1 className="hero-title">
-                <span className="title-line-1">Da el primer paso hacia</span><br />
-                <span className="highlight">Un futuro brillante</span>
+                <span className="title-line-1">Da el primer paso</span><br />
+                <span className="highlight">Trabajando por un futuro brillante</span>
               </h1>
               
               <p className="hero-subtitle">
