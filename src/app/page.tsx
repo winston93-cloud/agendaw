@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import Carousel from '@/components/Carousel'
+import ScrollButton from '@/components/ScrollButton'
 
 export default function Home() {
   return (
@@ -39,13 +40,10 @@ export default function Home() {
               </p>
               
               {/* CTA Principal - Scroll to process */}
-              <button 
-                onClick={() => document.querySelector('.process-section')?.scrollIntoView({ behavior: 'smooth' })}
-                className="hero-cta-button"
-              >
+              <ScrollButton targetSelector=".process-section" className="hero-cta-button">
                 <span className="cta-text">Ver el proceso completo</span>
                 <span className="cta-arrow">↓</span>
-              </button>
+              </ScrollButton>
               <p className="hero-note">Solo 4 pasos sencillos para iniciar</p>
               
               {/* Carousel */}
