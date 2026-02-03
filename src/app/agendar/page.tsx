@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import ExamDateCalendar from '@/components/ExamDateCalendar'
 
 type Step = 1 | 2 | 3 | 4
 
@@ -429,14 +430,10 @@ export default function AgendarPage() {
 
             <div className="form-grid">
               <div className="form-group full-width">
-                <label className="form-label">Fecha de la cita *</label>
-                <input
-                  type="date"
-                  className="form-input"
+                <label className="form-label">Fecha del examen de admisión *</label>
+                <ExamDateCalendar
                   value={formData.appointmentDate}
-                  onChange={(e) => updateFormData('appointmentDate', e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
-                  required
+                  onChange={(date) => updateFormData('appointmentDate', date)}
                 />
               </div>
 
