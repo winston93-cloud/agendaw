@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import Carousel from '@/components/Carousel'
 
 export default function Home() {
   return (
@@ -30,6 +31,9 @@ export default function Home() {
           <p className="hero-subtitle">
             Agenda tu cita de manera fácil y rápida
           </p>
+          
+          {/* Carousel */}
+          <Carousel />
         </div>
       </div>
 
