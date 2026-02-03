@@ -807,11 +807,14 @@ body {
   margin-top: 3rem;
 }
 
-/* Tablet: 2x2 */
+/* Tablet: 2x2, paso 3 ocupa toda la fila */
 @media (max-width: 1024px) {
   .steps-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
+  }
+  .step-highlight {
+    grid-column: span 2;
   }
 }
 
@@ -833,11 +836,12 @@ body {
 .step-highlight {
   border: 2px solid var(--primary-color);
   background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
-  padding: 2.25rem 2rem;
-  min-height: 220px;
+  padding: 2.5rem 2.5rem;
+  min-height: 240px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  grid-column: span 2;
 }
 
 .step-highlight .step-description {
@@ -2190,6 +2194,10 @@ body {
   .steps-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
+  }
+
+  .step-highlight {
+    grid-column: span 1;
   }
   
   /* Pasos 3 y 4 más compactos en móvil */
