@@ -833,6 +833,32 @@ body {
 .step-highlight {
   border: 2px solid var(--primary-color);
   background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+  padding: 2.25rem 2rem;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.step-highlight .step-description {
+  flex: 1;
+  margin-bottom: 1.5rem;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  padding-right: 0.5rem;
+}
+
+.step-highlight .step-cta {
+  margin-top: auto;
+  padding: 1rem 1.75rem;
+  font-size: 1.05rem;
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .step-important {
