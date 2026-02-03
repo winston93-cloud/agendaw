@@ -1409,13 +1409,14 @@ body {
   
   /* Hero responsive para móvil */
   .admission-hero {
-    padding: 2rem 1rem;
+    padding: 1rem 1rem 1.5rem;
+    min-height: auto;
   }
   
   .hero-logos {
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
+    gap: 0.5rem;
     padding: 0 1rem;
   }
   
@@ -1429,8 +1430,8 @@ body {
   }
   
   .hero-logo {
-    width: 70px;
-    height: 70px;
+    width: 50px;
+    height: 50px;
   }
   
   /* Mostrar logos arriba en móvil */
@@ -1438,14 +1439,14 @@ body {
     content: '';
     display: block;
     width: 100%;
-    height: 100px;
+    height: 60px;
     background-image: 
       url('/logo-winston-educativo.png'),
       url('/logo-winston-churchill.png');
-    background-size: 70px 70px, 70px 70px;
+    background-size: 50px 50px, 50px 50px;
     background-position: 25% center, 75% center;
     background-repeat: no-repeat;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
   }
   
   /* Campus selection responsive */
@@ -1475,12 +1476,12 @@ body {
   /* Carousel responsive mejorado */
   .carousel-container {
     max-width: 100%;
-    margin: 1.5rem 0 0;
+    margin: 1rem 0 0;
     padding: 0 0.5rem;
   }
   
   .carousel {
-    height: 240px;
+    height: 200px;
     border-radius: 12px;
   }
 
@@ -1503,25 +1504,27 @@ body {
   
   /* Mejoras para la página de inicio en móvil */
   .hero-title {
-    font-size: 2rem;
-    line-height: 1.2;
+    font-size: 1.75rem;
+    line-height: 1.15;
+    margin-bottom: 0.5rem;
   }
 
   .hero-subtitle {
-    font-size: 1.125rem;
+    font-size: 1rem;
+    margin-bottom: 1rem;
   }
   
   .scroll-indicator {
-    margin-top: 1.5rem;
+    margin-top: 1rem;
   }
   
   .scroll-text {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
   }
   
   .scroll-arrow {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
   }
   
   .carousel-arrow {
