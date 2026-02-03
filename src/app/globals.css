@@ -1197,18 +1197,26 @@ body {
   padding-top: 1.5rem;
   border-top: 1px solid var(--light-border);
   animation: slideIn 0.3s ease-out;
+  /* Ocupa todo el ancho del grid padre (evita que quede en 50%) */
+  grid-column: 1 / -1;
 }
 
 .student-data-section .section-subtitle {
   margin-bottom: 1rem;
 }
 
-/* Datos del alumno: inputs a ancho completo para no dejar marco en blanco */
+/* Datos del alumno: una sola columna, inputs a ancho completo */
 .student-data-section .form-grid {
   grid-template-columns: 1fr;
 }
 .student-data-section .form-group {
   max-width: 100%;
+}
+.student-data-section .form-input,
+.student-data-section .form-select {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .section-subtitle {
