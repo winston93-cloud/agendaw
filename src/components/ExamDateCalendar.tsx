@@ -36,10 +36,10 @@ function getMinBookableDate(): Date {
 export default function ExamDateCalendar({ value, onChange }: ExamDateCalendarProps) {
   const selectedDate = value ? new Date(value + 'T12:00:00') : null
   const minBookable = useMemo(() => getMinBookableDate(), [])
+  const [isOpen, setIsOpen] = useState(!value)
   const [viewDate, setViewDate] = useState(() => {
     if (selectedDate) return selectedDate
-    const first = minBookable
-    return first
+    return minBookable
   })
 
   const year = viewDate.getFullYear()
@@ -66,12 +66,35 @@ export default function ExamDateCalendar({ value, onChange }: ExamDateCalendarPr
   const handleSelect = (date: Date) => {
     if (isDayDisabled(date)) return
     onChange(format(date, 'yyyy-MM-dd'))
+    setIsOpen(false)
   }
+
+  const formattedSelectedDate = value && selectedDate
+    ? format(selectedDate, "EEEE d 'de' MMMM, yyyy", { locale: es })
+    : ''
 
   const canPrevMonth = (): boolean => {
     const prev = subMonths(viewDate, 1)
     return prev.getFullYear() > minBookable.getFullYear() ||
       (prev.getFullYear() === minBookable.getFullYear() && prev.getMonth() >= minBookable.getMonth())
+  }
+
+  if (value && !isOpen) {
+    return (
+      <div className="exam-calendar-closed">
+        <div className="exam-date-selected">
+          <span className="exam-date-label">Fecha del examen:</span>
+          <span className="exam-date-value">{formattedSelectedDate}</span>
+        </div>
+        <button
+          type="button"
+          className="exam-date-change"
+          onClick={() => setIsOpen(true)}
+        >
+          Cambiar fecha
+        </button>
+      </div>
+    )
   }
 
   return (

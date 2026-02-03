@@ -1499,6 +1499,57 @@ body {
   text-align: center;
 }
 
+/* Estado cerrado: input con fecha seleccionada */
+.exam-calendar-closed {
+  max-width: 360px;
+  margin: 0 auto 1.5rem;
+}
+
+.exam-date-selected {
+  display: block;
+  width: 100%;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 2px solid var(--primary-color);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
+}
+
+.exam-date-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.35rem;
+}
+
+.exam-date-value {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  text-transform: capitalize;
+}
+
+.exam-date-change {
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  color: var(--primary-color);
+  background: transparent;
+  border: 1px solid var(--primary-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.exam-date-change:hover {
+  background: var(--primary-color);
+  color: white;
+}
+
 @media (max-width: 480px) {
   .exam-calendar {
     padding: 1rem;
