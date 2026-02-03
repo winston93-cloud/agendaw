@@ -1147,12 +1147,25 @@ body {
 }
 
 .level-badge {
-  background: var(--primary-color);
-  color: white;
+  background: rgba(59, 130, 246, 0.2);
+  color: var(--primary-color);
   padding: 0.375rem 0.875rem;
   border-radius: 999px;
   font-size: 0.875rem;
   font-weight: 600;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.level-badge:hover {
+  background: rgba(59, 130, 246, 0.35);
+}
+
+.level-badge.selected {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
 }
 
 .student-info-section {

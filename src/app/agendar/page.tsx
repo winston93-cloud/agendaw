@@ -9,6 +9,7 @@ type Step = 1 | 2 | 3 | 4
 interface FormData {
   // Paso 1: Selección de plantel y nivel
   campus: string // 'churchill' o 'winston'
+  level: string // 'maternal' | 'kinder' | 'primaria' | 'secundaria'
   gradeLevel: string
   studentName: string
   studentAge: string
@@ -32,6 +33,7 @@ export default function AgendarPage() {
   const [currentStep, setCurrentStep] = useState<Step>(1)
   const [formData, setFormData] = useState<FormData>({
     campus: '',
+    level: '',
     studentName: '',
     studentAge: '',
     gradeLevel: '',
@@ -67,53 +69,80 @@ export default function AgendarPage() {
   }
 
   const getGradeLevels = () => {
-    if (!formData.campus) return []
+    if (!formData.campus || !formData.level) return []
     
     if (formData.campus === 'winston') {
+      if (formData.level === 'maternal') {
+        return [
+          { value: 'maternal_a', label: 'Maternal A', campus: 'winston' },
+          { value: 'maternal_b', label: 'Maternal B', campus: 'winston' },
+        ]
+      }
+      if (formData.level === 'kinder') {
+        return [
+          { value: 'kinder_1', label: 'Kinder-1', campus: 'winston' },
+          { value: 'kinder_2', label: 'Kinder-2', campus: 'winston' },
+          { value: 'kinder_3', label: 'Kinder-3', campus: 'winston' },
+        ]
+      }
+      return []
+    }
+    // Churchill
+    if (formData.level === 'primaria') {
       return [
-        { value: 'maternal', label: 'Maternal', campus: 'winston' },
-        { value: 'kinder1', label: 'Kinder 1', campus: 'winston' },
-        { value: 'kinder2', label: 'Kinder 2', campus: 'winston' },
-        { value: 'kinder3', label: 'Kinder 3', campus: 'winston' },
-      ]
-    } else {
-      return [
-        { value: 'primaria1', label: '1° Primaria', campus: 'churchill' },
-        { value: 'primaria2', label: '2° Primaria', campus: 'churchill' },
-        { value: 'primaria3', label: '3° Primaria', campus: 'churchill' },
-        { value: 'primaria4', label: '4° Primaria', campus: 'churchill' },
-        { value: 'primaria5', label: '5° Primaria', campus: 'churchill' },
-        { value: 'primaria6', label: '6° Primaria', campus: 'churchill' },
-        { value: 'secundaria1', label: '1° Secundaria', campus: 'churchill' },
-        { value: 'secundaria2', label: '2° Secundaria', campus: 'churchill' },
-        { value: 'secundaria3', label: '3° Secundaria', campus: 'churchill' },
+        { value: 'primaria_1', label: '1° de Primaria', campus: 'churchill' },
+        { value: 'primaria_2', label: '2° de Primaria', campus: 'churchill' },
+        { value: 'primaria_3', label: '3° de Primaria', campus: 'churchill' },
+        { value: 'primaria_4', label: '4° de Primaria', campus: 'churchill' },
+        { value: 'primaria_5', label: '5° de Primaria', campus: 'churchill' },
+        { value: 'primaria_6', label: '6° de Primaria', campus: 'churchill' },
       ]
     }
+    if (formData.level === 'secundaria') {
+      return [
+        { value: 'secundaria_7', label: '7mo', campus: 'churchill' },
+        { value: 'secundaria_8', label: '8vo', campus: 'churchill' },
+        { value: 'secundaria_9', label: '9no', campus: 'churchill' },
+      ]
+    }
+    return []
   }
 
   const getContactEmail = () => {
     if (!formData.gradeLevel) return ''
     
-    if (formData.gradeLevel.includes('maternal') || formData.gradeLevel.includes('kinder')) {
+    if (formData.gradeLevel.startsWith('maternal_') || formData.gradeLevel.startsWith('kinder_')) {
       return campusInfo.winston.email.kinder
-    } else if (formData.gradeLevel.includes('primaria')) {
+    }
+    if (formData.gradeLevel.startsWith('primaria_')) {
       return campusInfo.churchill.email.primaria
-    } else {
+    }
+    if (formData.gradeLevel.startsWith('secundaria_')) {
       return campusInfo.churchill.email.secundaria
     }
+    return ''
   }
 
   const updateFormData = (field: keyof FormData, value: string | boolean) => {
     setFormData(prev => {
       const newData = { ...prev, [field]: value }
       
-      // Si cambia el campus, resetear gradeLevel
+      // Si cambia el campus, resetear level y gradeLevel
       if (field === 'campus') {
+        newData.level = ''
+        newData.gradeLevel = ''
+      }
+      // Si cambia el nivel, resetear gradeLevel
+      if (field === 'level') {
         newData.gradeLevel = ''
       }
       
       return newData
     })
+  }
+
+  const setCampusAndLevel = (campus: string, level: string) => {
+    setFormData(prev => ({ ...prev, campus, level, gradeLevel: '' }))
   }
 
   const nextStep = () => {
@@ -195,8 +224,20 @@ export default function AgendarPage() {
                 <h3>Instituto Educativo Winston</h3>
                 <p className="campus-website">{campusInfo.winston.website}</p>
                 <div className="campus-levels">
-                  <span className="level-badge">Maternal</span>
-                  <span className="level-badge">Kinder</span>
+                  <button
+                    type="button"
+                    className={`level-badge ${formData.campus === 'winston' && formData.level === 'maternal' ? 'selected' : ''}`}
+                    onClick={(e) => { e.stopPropagation(); setCampusAndLevel('winston', 'maternal'); }}
+                  >
+                    Maternal
+                  </button>
+                  <button
+                    type="button"
+                    className={`level-badge ${formData.campus === 'winston' && formData.level === 'kinder' ? 'selected' : ''}`}
+                    onClick={(e) => { e.stopPropagation(); setCampusAndLevel('winston', 'kinder'); }}
+                  >
+                    Kinder
+                  </button>
                 </div>
               </div>
 
@@ -216,13 +257,25 @@ export default function AgendarPage() {
                 <h3>Instituto Winston Churchill</h3>
                 <p className="campus-website">{campusInfo.churchill.website}</p>
                 <div className="campus-levels">
-                  <span className="level-badge">Primaria</span>
-                  <span className="level-badge">Secundaria</span>
+                  <button
+                    type="button"
+                    className={`level-badge ${formData.campus === 'churchill' && formData.level === 'primaria' ? 'selected' : ''}`}
+                    onClick={(e) => { e.stopPropagation(); setCampusAndLevel('churchill', 'primaria'); }}
+                  >
+                    Primaria
+                  </button>
+                  <button
+                    type="button"
+                    className={`level-badge ${formData.campus === 'churchill' && formData.level === 'secundaria' ? 'selected' : ''}`}
+                    onClick={(e) => { e.stopPropagation(); setCampusAndLevel('churchill', 'secundaria'); }}
+                  >
+                    Secundaria
+                  </button>
                 </div>
               </div>
             </div>
 
-            {formData.campus && (
+            {formData.campus && formData.level && (
               <div className="student-info-section">
                 <h3 className="section-subtitle">📚 Información del Aspirante</h3>
                 
@@ -277,7 +330,7 @@ export default function AgendarPage() {
               <button
                 className="btn btn-primary"
                 onClick={nextStep}
-                disabled={!formData.campus || !formData.studentName || !formData.studentAge || !formData.gradeLevel}
+                disabled={!formData.campus || !formData.level || !formData.studentName || !formData.studentAge || !formData.gradeLevel}
               >
                 Siguiente →
               </button>
