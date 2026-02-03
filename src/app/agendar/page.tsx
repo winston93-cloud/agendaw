@@ -437,45 +437,62 @@ export default function AgendarPage() {
                           />
                         </div>
                         <div className="form-group">
-                          <label className="form-label">Apellido paterno</label>
+                          <label className="form-label">Apellido paterno *</label>
                           <input
                             type="text"
                             className="form-input"
                             placeholder="Apellido paterno"
                             value={formData.studentLastNameP}
                             onChange={(e) => updateFormData('studentLastNameP', e.target.value)}
+                            required
                           />
                         </div>
                         <div className="form-group">
-                          <label className="form-label">Apellido materno</label>
+                          <label className="form-label">Apellido materno *</label>
                           <input
                             type="text"
                             className="form-input"
                             placeholder="Apellido materno"
                             value={formData.studentLastNameM}
                             onChange={(e) => updateFormData('studentLastNameM', e.target.value)}
+                            required
                           />
                         </div>
                         <div className="form-group">
-                          <label className="form-label">Fecha de nacimiento</label>
+                          <label className="form-label">Fecha de nacimiento *</label>
                           <input
                             type="date"
                             className="form-input"
                             value={formData.studentBirthDate}
                             onChange={(e) => updateFormData('studentBirthDate', e.target.value)}
+                            required
                           />
                         </div>
                         <div className="form-group">
-                          <label className="form-label">Edad *</label>
+                          <label className="form-label">Teléfono *</label>
                           <input
-                            type="number"
+                            type="tel"
                             className="form-input"
-                            placeholder="Ej: 6"
-                            min="2"
-                            max="18"
-                            value={formData.studentAge}
-                            onChange={(e) => updateFormData('studentAge', e.target.value)}
+                            placeholder="10 dígitos"
+                            value={formData.parentPhone}
+                            onChange={(e) => updateFormData('parentPhone', e.target.value.replace(/\D/g, '').slice(0, 10))}
+                            inputMode="numeric"
+                            pattern="[0-9]{10}"
+                            maxLength={10}
                             required
+                            title="10 dígitos sin espacios"
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Email *</label>
+                          <input
+                            type="email"
+                            className="form-input"
+                            placeholder="correo@ejemplo.com"
+                            value={formData.parentEmail}
+                            onChange={(e) => updateFormData('parentEmail', e.target.value)}
+                            required
+                            title="Correo electrónico válido"
                           />
                         </div>
                         <div className="form-group">
@@ -493,11 +510,12 @@ export default function AgendarPage() {
                           </select>
                         </div>
                         <div className="form-group full-width">
-                          <label className="form-label">¿Cómo se enteró de nuestra institución?</label>
+                          <label className="form-label">¿Cómo se enteró de nuestra institución? *</label>
                           <select
                             className="form-select"
                             value={formData.howDidYouHear}
                             onChange={(e) => updateFormData('howDidYouHear', e.target.value)}
+                            required
                           >
                             {HOW_DID_YOU_HEAR_OPTIONS.map((o) => (
                               <option key={o.value || 'empty'} value={o.value}>{o.label}</option>
@@ -518,7 +536,12 @@ export default function AgendarPage() {
                 disabled={Boolean(
                   !formData.campus || !formData.level || !formData.gradeLevel || !formData.appointmentDate ||
                   (scheduleTimes.length > 0 && !formData.appointmentTime) ||
-                  ((formData.appointmentTime || scheduleTimes.length === 0) && (!formData.studentName || !formData.studentAge || !formData.schoolCycle))
+                  ((formData.appointmentTime || scheduleTimes.length === 0) && (
+                    !formData.studentName?.trim() || !formData.studentLastNameP?.trim() || !formData.studentLastNameM?.trim() ||
+                    !formData.studentBirthDate || !formData.schoolCycle || !formData.howDidYouHear ||
+                    !formData.parentPhone?.trim() || formData.parentPhone.replace(/\D/g, '').length !== 10 ||
+                    !formData.parentEmail?.trim()
+                  ))
                 )}
               >
                 Siguiente →
@@ -582,8 +605,12 @@ export default function AgendarPage() {
                   className="form-input"
                   placeholder="10 dígitos"
                   value={formData.parentPhone}
-                  onChange={(e) => updateFormData('parentPhone', e.target.value)}
+                  onChange={(e) => updateFormData('parentPhone', e.target.value.replace(/\D/g, '').slice(0, 10))}
+                  inputMode="numeric"
+                  pattern="[0-9]{10}"
+                  maxLength={10}
                   required
+                  title="10 dígitos sin espacios"
                 />
               </div>
             </div>
@@ -595,12 +622,11 @@ export default function AgendarPage() {
               <button
                 className="btn btn-primary"
                 onClick={nextStep}
-                disabled={
-                  !formData.parentName ||
-                  !formData.parentEmail ||
-                  !formData.parentPhone ||
+                disabled={Boolean(
+                  !formData.parentName?.trim() || !formData.parentEmail?.trim() ||
+                  !formData.parentPhone?.trim() || formData.parentPhone.replace(/\D/g, '').length !== 10 ||
                   !formData.relationship
-                }
+                )}
               >
                 Siguiente →
               </button>
@@ -679,8 +705,7 @@ export default function AgendarPage() {
               <div className="summary-section">
                 <h3>📚 Aspirante</h3>
                 <p><strong>Nombre:</strong> {formData.studentName}{formData.studentLastNameP || formData.studentLastNameM ? ` ${formData.studentLastNameP || ''} ${formData.studentLastNameM || ''}`.trim() : ''}</p>
-                {formData.studentBirthDate && <p><strong>Fecha de nacimiento:</strong> {new Date(formData.studentBirthDate + 'T12:00:00').toLocaleDateString('es-MX')}</p>}
-                <p><strong>Edad:</strong> {formData.studentAge} años</p>
+                <p><strong>Fecha de nacimiento:</strong> {formData.studentBirthDate ? new Date(formData.studentBirthDate + 'T12:00:00').toLocaleDateString('es-MX') : '—'}</p>
                 <p><strong>Grado:</strong> {getGradeLevels().find(g => g.value === formData.gradeLevel)?.label}</p>
                 {formData.schoolCycle && <p><strong>Ciclo escolar:</strong> {formData.schoolCycle}</p>}
                 {formData.howDidYouHear && <p><strong>Cómo se enteró:</strong> {HOW_DID_YOU_HEAR_OPTIONS.find(o => o.value === formData.howDidYouHear)?.label || formData.howDidYouHear}</p>}

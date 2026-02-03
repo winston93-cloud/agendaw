@@ -26,7 +26,7 @@ export async function createAdmissionAppointment(data: {
     level: data.level,
     grade_level: data.grade_level,
     student_name: data.student_name,
-    student_age: data.student_age,
+    student_age: data.student_age?.trim() || '',
     student_last_name_p: data.student_last_name_p || null,
     student_last_name_m: data.student_last_name_m || null,
     student_birth_date: data.student_birth_date || null,
