@@ -47,7 +47,7 @@ export default function Home() {
                 <span className="cta-text">Ver el proceso completo</span>
                 <span className="cta-arrow">↓</span>
               </ScrollButton>
-              <p className="hero-note">Solo 4 pasos sencillos para iniciar</p>
+              <p className="hero-note">Solo 3 pasos sencillos para iniciar</p>
               
               {/* Scroll Indicator */}
               <div className="scroll-indicator">
@@ -78,7 +78,21 @@ export default function Home() {
       <div className="container">
         <div className="process-section">
           <h2 className="section-title">¿Cómo funciona?</h2>
-          <p className="section-subtitle">Solo 4 sencillos pasos</p>
+          <p className="section-subtitle">Solo 3 sencillos pasos</p>
+
+          {/* Banner aviso: pago el día de la cita — arriba de los pasos */}
+          <div className="process-banner">
+            <span className="process-banner-icon">💳</span>
+            <div className="process-banner-content">
+              <p className="process-banner-text">
+                El día de tu cita realiza el pago del examen en recepción.
+              </p>
+              <p className="process-banner-price">
+                <span className="process-banner-label">Costo del examen:</span>
+                <strong className="process-banner-amount">$200 MXN</strong>
+              </p>
+            </div>
+          </div>
 
           <div className="steps-grid">
             {/* Step 1 */}
@@ -129,20 +143,6 @@ export default function Home() {
               <Link href="/agendar" className="step-cta">
                 Agendar ahora →
               </Link>
-            </div>
-
-            {/* Step 4 */}
-            <div className="step-card step-important">
-              <div className="step-number">4</div>
-              <div className="step-icon">💳</div>
-              <h3 className="step-title">Realiza el pago</h3>
-              <p className="step-description">
-                El día de tu cita, realiza el pago del examen en recepción
-              </p>
-              <div className="price-tag">
-                <span className="price-label">Costo del examen:</span>
-                <span className="price-amount">$200 MXN</span>
-              </div>
             </div>
           </div>
         </div>

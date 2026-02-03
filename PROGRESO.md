@@ -4,17 +4,15 @@
 
 ### 1. Página de Inicio (`/`)
 - **Hero section** con diseño atractivo y gradiente azul
-- **4 pasos del proceso** explicados visualmente con tarjetas
+- **3 pasos del proceso** explicados visualmente con tarjetas
 - **Sección de preguntas frecuentes** para resolver dudas comunes
 - **Call-to-action** destacado para agendar cita
 - **Diseño completamente responsive** para móviles
 
 ### 2. Página de Agendamiento (`/agendar`)
-- **Formulario multi-paso (wizard)** con 4 pasos:
-  - **Paso 1**: Información del aspirante (nombre, edad, grado)
-  - **Paso 2**: Información del padre/tutor (contacto)
-  - **Paso 3**: Selección de fecha y hora (calendario + horarios disponibles)
-  - **Paso 4**: Confirmación y revisión de datos
+- **Formulario en 2 pasos**: solicitud (todo en uno) y confirmación
+  - **Paso 1**: Información del aspirante, padre/tutor, fecha, horario y datos extra
+  - **Paso 2**: Confirmación y revisión de datos
   
 - **Barra de progreso visual** que muestra en qué paso estás
 - **Validación en tiempo real** - botones deshabilitados hasta completar campos
@@ -82,28 +80,17 @@
 
 2. **Click en "Agendar mi cita"**
    - Redirige a `/agendar`
-   - Ve barra de progreso con 4 pasos
+   - Ve barra de progreso con 2 pasos (Solicitud → Confirmar)
 
-3. **Paso 1: Datos del aspirante**
-   - Nombre completo
-   - Edad
-   - Grado al que desea ingresar
+3. **Paso 1: Solicitud (todo en uno)**
+   - Datos del aspirante, padre/tutor, fecha, horario y datos extra
 
-4. **Paso 2: Datos del tutor**
-   - Nombre del padre/tutor
-   - Parentesco
-   - Email y teléfono
-
-5. **Paso 3: Fecha y hora**
-   - Selecciona fecha en calendario
-   - Elige horario disponible de la lista visual
-
-6. **Paso 4: Confirmación**
+4. **Paso 2: Confirmación**
    - Revisa todos los datos
    - Acepta términos (documentación enviada y pago)
    - Confirma la cita
 
-7. **Confirmación exitosa**
+5. **Confirmación exitosa**
    - Recibe mensaje de éxito
    - (Próximamente: email de confirmación)
 

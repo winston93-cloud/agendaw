@@ -800,14 +800,67 @@ body {
   margin-bottom: 3rem;
 }
 
+/* Banner aviso: pago (arriba de los pasos) */
+.process-banner {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  max-width: 640px;
+  margin: 0 auto 2.5rem;
+  padding: 1.25rem 1.75rem;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.12);
+}
+
+.process-banner-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.process-banner-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.process-banner-text {
+  margin: 0 0 0.35rem;
+  font-size: 0.9375rem;
+  color: #78350f;
+  line-height: 1.5;
+}
+
+.process-banner-price {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.process-banner-label {
+  font-size: 0.875rem;
+  color: #92400e;
+  font-weight: 500;
+}
+
+.process-banner-amount {
+  font-size: 1.5rem;
+  color: #b45309;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
 .steps-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
   margin-top: 3rem;
 }
 
-/* Tablet: 2x2, paso 3 ocupa toda la fila */
+/* Tablet: 2 cols, paso 3 toda la fila */
 @media (max-width: 1024px) {
   .steps-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -815,6 +868,13 @@ body {
   }
   .step-highlight {
     grid-column: span 2;
+  }
+  .process-banner {
+    margin-bottom: 2rem;
+    padding: 1rem 1.25rem;
+  }
+  .process-banner-icon {
+    font-size: 1.75rem;
   }
 }
 
@@ -2199,10 +2259,25 @@ body {
   .step-highlight {
     grid-column: span 1;
   }
+
+  .process-banner {
+    flex-direction: row;
+    margin-bottom: 1.75rem;
+    padding: 1rem 1.25rem;
+    gap: 1rem;
+  }
+  .process-banner-icon {
+    font-size: 1.5rem;
+  }
+  .process-banner-text {
+    font-size: 0.875rem;
+  }
+  .process-banner-amount {
+    font-size: 1.25rem;
+  }
   
-  /* Pasos 3 y 4 más compactos en móvil */
-  .step-card:nth-child(3),
-  .step-card:nth-child(4) {
+  /* Último paso más compacto en móvil */
+  .step-card:nth-child(3) {
     padding: 1.25rem;
   }
   
