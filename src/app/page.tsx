@@ -22,13 +22,13 @@ export default function Home() {
 
             {/* Contenido central */}
             <div className="hero-center-content">
-              <h1 className="hero-title">
-                INICIA HOY TU<br />
-                <span className="highlight">PROCESO DE ADMISIÓN</span>
-              </h1>
-              <p className="hero-subtitle">
-                Agenda tu cita de manera fácil y rápida
-              </p>
+          <h1 className="hero-title">
+            INICIA HOY TU<br />
+            <span className="highlight">PROCESO DE ADMISIÓN</span>
+          </h1>
+          <p className="hero-subtitle">
+            Agenda tu cita de manera fácil y rápida ✨
+          </p>
               
               {/* Carousel */}
               <Carousel />
