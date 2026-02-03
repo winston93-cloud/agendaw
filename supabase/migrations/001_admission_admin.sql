@@ -28,16 +28,17 @@ CREATE TABLE IF NOT EXISTS public.blocked_dates (
   UNIQUE(block_date, level)
 );
 
-CREATE INDEX idx_admission_appointments_date ON public.admission_appointments(appointment_date);
-CREATE INDEX idx_admission_appointments_status ON public.admission_appointments(status);
-CREATE INDEX idx_admission_appointments_level ON public.admission_appointments(level);
-CREATE INDEX idx_blocked_dates_date_level ON public.blocked_dates(block_date, level);
+CREATE INDEX IF NOT EXISTS idx_admission_appointments_date ON public.admission_appointments(appointment_date);
+CREATE INDEX IF NOT EXISTS idx_admission_appointments_status ON public.admission_appointments(status);
+CREATE INDEX IF NOT EXISTS idx_admission_appointments_level ON public.admission_appointments(level);
+CREATE INDEX IF NOT EXISTS idx_blocked_dates_date_level ON public.blocked_dates(block_date, level);
 
 ALTER TABLE public.admission_appointments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.blocked_dates ENABLE ROW LEVEL SECURITY;
 
 -- admission_appointments: solo backend con service role (bypasea RLS). Sin políticas para anon.
 -- blocked_dates: lectura pública para que el formulario pueda ocultar días bloqueados por nivel
+DROP POLICY IF EXISTS "Public read blocked_dates" ON public.blocked_dates;
 CREATE POLICY "Public read blocked_dates"
   ON public.blocked_dates FOR SELECT
   USING (true);

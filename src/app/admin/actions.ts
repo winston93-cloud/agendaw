@@ -5,7 +5,12 @@ import { revalidatePath } from 'next/cache'
 import type { AdmissionLevel } from '@/types/database'
 
 export async function getAdmissionAppointments(filters?: { date?: string; level?: string; status?: string }) {
-  const supabase = createAdminClient()
+  let supabase
+  try {
+    supabase = createAdminClient()
+  } catch {
+    return []
+  }
   let query = supabase
     .from('admission_appointments')
     .select('*')
@@ -35,7 +40,12 @@ export async function updateAppointment(
 }
 
 export async function getBlockedDates(level?: AdmissionLevel) {
-  const supabase = createAdminClient()
+  let supabase
+  try {
+    supabase = createAdminClient()
+  } catch {
+    return []
+  }
   let query = supabase.from('blocked_dates').select('*').order('block_date', { ascending: true })
   if (level) query = query.eq('level', level)
   const { data, error } = await query

@@ -5,16 +5,24 @@ import AdminBloquear from './AdminBloquear'
 
 export const dynamic = 'force-dynamic'
 
+function hasSupabaseEnv() {
+  const u = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const k = process.env.SUPABASE_SERVICE_ROLE_KEY
+  return Boolean(u && typeof u === 'string' && u.trim() && k && typeof k === 'string' && k.trim())
+}
+
 export default async function AdminPage() {
   let appointments: Awaited<ReturnType<typeof getAdmissionAppointments>> = []
   let blockedDates: Awaited<ReturnType<typeof getBlockedDates>> = []
-  try {
-    ;[appointments, blockedDates] = await Promise.all([
-      getAdmissionAppointments(),
-      getBlockedDates(),
-    ])
-  } catch (e) {
-    console.error('Admin load error:', e)
+  if (hasSupabaseEnv()) {
+    try {
+      ;[appointments, blockedDates] = await Promise.all([
+        getAdmissionAppointments(),
+        getBlockedDates(),
+      ])
+    } catch (e) {
+      console.error('Admin load error:', e)
+    }
   }
 
   return (
