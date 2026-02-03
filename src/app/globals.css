@@ -1584,12 +1584,12 @@ body {
   /* Carousel responsive mejorado */
   .carousel-container {
     max-width: 100%;
-    margin: 1rem 0 0;
+    margin: 0 auto 1rem;
     padding: 0 0.5rem;
   }
   
   .carousel {
-    height: 200px;
+    height: 220px;
     border-radius: 12px;
   }
 
