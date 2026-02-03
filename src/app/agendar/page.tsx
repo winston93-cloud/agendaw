@@ -133,9 +133,14 @@ export default function AgendarPage() {
         newData.level = ''
         newData.gradeLevel = ''
       }
-      // Si cambia el nivel, resetear gradeLevel
+      // Si cambia el nivel, resetear gradeLevel y fecha
       if (field === 'level') {
         newData.gradeLevel = ''
+        newData.appointmentDate = ''
+      }
+      // Si cambia el grado, resetear fecha
+      if (field === 'gradeLevel') {
+        newData.appointmentDate = ''
       }
       
       return newData
@@ -298,6 +303,16 @@ export default function AgendarPage() {
                     </select>
                   </div>
 
+                  {formData.gradeLevel && (
+                    <div className="form-group full-width">
+                      <label className="form-label">Fecha del examen de admisión *</label>
+                      <ExamDateCalendar
+                        value={formData.appointmentDate}
+                        onChange={(date) => updateFormData('appointmentDate', date)}
+                      />
+                    </div>
+                  )}
+
                   <div className="form-group">
                     <label className="form-label">Nombre completo del aspirante *</label>
                     <input
@@ -331,7 +346,7 @@ export default function AgendarPage() {
               <button
                 className="btn btn-primary"
                 onClick={nextStep}
-                disabled={!formData.campus || !formData.level || !formData.studentName || !formData.studentAge || !formData.gradeLevel}
+                disabled={!formData.campus || !formData.level || !formData.studentName || !formData.studentAge || !formData.gradeLevel || !formData.appointmentDate}
               >
                 Siguiente →
               </button>
@@ -420,23 +435,15 @@ export default function AgendarPage() {
           </div>
         )}
 
-        {/* Step 3: Selección de Fecha y Hora */}
+        {/* Step 3: Selección de Hora (fecha ya elegida en paso 1) */}
         {currentStep === 3 && (
           <div className="form-step">
-            <h2 className="step-heading">📅 Selecciona Fecha y Hora</h2>
+            <h2 className="step-heading">🕐 Selecciona la Hora</h2>
             <p className="step-description">
-              Elige el día y horario que mejor te convenga
+              Fecha del examen: <strong>{formData.appointmentDate ? new Date(formData.appointmentDate + 'T12:00:00').toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ''}</strong>
             </p>
 
             <div className="form-grid">
-              <div className="form-group full-width">
-                <label className="form-label">Fecha del examen de admisión *</label>
-                <ExamDateCalendar
-                  value={formData.appointmentDate}
-                  onChange={(date) => updateFormData('appointmentDate', date)}
-                />
-              </div>
-
               <div className="form-group full-width">
                 <label className="form-label">Hora de la cita *</label>
                 <div className="time-slots">
