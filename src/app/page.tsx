@@ -32,6 +32,16 @@ export default function Home() {
               
               {/* Carousel */}
               <Carousel />
+              
+              {/* Scroll Indicator */}
+              <div className="scroll-indicator">
+                <span className="scroll-text">Desliza para ver más</span>
+                <div className="scroll-arrow">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 5v14M19 12l-7 7-7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+              </div>
             </div>
 
             {/* Logo derecho */}
