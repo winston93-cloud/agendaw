@@ -501,6 +501,15 @@ body {
   transform: translateX(5px);
 }
 
+.hero-note {
+  font-size: 0.9rem;
+  opacity: 0.85;
+  margin-top: -1rem;
+  margin-bottom: 1.5rem;
+  font-weight: 400;
+  animation: fadeInUp 1s ease-out 0.8s both;
+}
+
 /* Scroll Indicator */
 .scroll-indicator {
   display: flex;
@@ -1638,6 +1647,12 @@ body {
   
   .cta-arrow {
     font-size: 1.25rem;
+  }
+  
+  .hero-note {
+    font-size: 0.8rem;
+    margin-top: -1rem;
+    margin-bottom: 1.25rem;
   }
   
   .scroll-indicator {

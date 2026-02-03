@@ -34,15 +34,19 @@ export default function Home() {
               </h1>
               
               <p className="hero-subtitle">
-                Agenda tu cita de admisión en minutos.<br />
+                Conoce el proceso de admisión paso a paso.<br />
                 Tu familia merece la mejor educación.
               </p>
               
-              {/* CTA Principal */}
-              <Link href="/agendar" className="hero-cta-button">
-                <span className="cta-text">Agendar mi cita ahora</span>
-                <span className="cta-arrow">→</span>
-              </Link>
+              {/* CTA Principal - Scroll to process */}
+              <button 
+                onClick={() => document.querySelector('.process-section')?.scrollIntoView({ behavior: 'smooth' })}
+                className="hero-cta-button"
+              >
+                <span className="cta-text">Ver el proceso completo</span>
+                <span className="cta-arrow">↓</span>
+              </button>
+              <p className="hero-note">Solo 4 pasos sencillos para iniciar</p>
               
               {/* Carousel */}
               <Carousel />
