@@ -27,7 +27,7 @@ export async function createAdmissionAppointment(data: {
     parent_phone: data.parent_phone,
     relationship: data.relationship,
     appointment_date: data.appointment_date,
-    appointment_time: data.appointment_time,
+    appointment_time: data.appointment_time || 'Por confirmar',
     status: 'pending',
   })
   if (error) throw new Error(error.message)

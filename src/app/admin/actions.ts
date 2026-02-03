@@ -53,16 +53,75 @@ export async function getBlockedDates(level?: AdmissionLevel) {
   return data
 }
 
-export async function blockDate(block_date: string, level: AdmissionLevel, reason?: string) {
-  const supabase = createAdminClient()
-  const { error } = await supabase.from('blocked_dates').insert({ block_date, level, reason })
-  if (error) throw new Error(error.message)
-  revalidatePath('/admin')
+export async function blockDate(block_date: string, level: AdmissionLevel, reason?: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const supabase = createAdminClient()
+    const { error } = await supabase.from('blocked_dates').insert({ block_date, level, reason })
+    if (error) return { ok: false, error: error.message }
+    revalidatePath('/admin')
+    return { ok: true }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Error al bloquear el día.'
+    return { ok: false, error: msg }
+  }
 }
 
-export async function unblockDate(id: string) {
-  const supabase = createAdminClient()
-  const { error } = await supabase.from('blocked_dates').delete().eq('id', id)
+export async function unblockDate(id: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const supabase = createAdminClient()
+    const { error } = await supabase.from('blocked_dates').delete().eq('id', id)
+    if (error) return { ok: false, error: error.message }
+    revalidatePath('/admin')
+    return { ok: true }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Error al desbloquear.'
+    return { ok: false, error: msg }
+  }
+}
+
+// Horarios por nivel (1, 2 o 3 por día; lunes a viernes)
+export async function getSchedules(level?: AdmissionLevel) {
+  let supabase
+  try {
+    supabase = createAdminClient()
+  } catch {
+    return []
+  }
+  let query = supabase.from('admission_schedules').select('*').order('sort_order', { ascending: true }).order('time_slot', { ascending: true })
+  if (level) query = query.eq('level', level)
+  const { data, error } = await query
   if (error) throw new Error(error.message)
-  revalidatePath('/admin')
+  return data
+}
+
+export async function addSchedule(level: AdmissionLevel, time_slot: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const supabase = createAdminClient()
+    const normalized = time_slot.trim().slice(0, 5)
+    if (!/^\d{1,2}:\d{2}$/.test(normalized)) return { ok: false, error: 'Formato de hora inválido (usa HH:MM)' }
+    const { data: existing } = await supabase.from('admission_schedules').select('id').eq('level', level).eq('time_slot', normalized).maybeSingle()
+    if (existing) return { ok: false, error: 'Ese horario ya existe para este nivel' }
+    const { data: max } = await supabase.from('admission_schedules').select('sort_order').eq('level', level).order('sort_order', { ascending: false }).limit(1).maybeSingle()
+    const sort_order = (max?.sort_order ?? -1) + 1
+    const { error } = await supabase.from('admission_schedules').insert({ level, time_slot: normalized, sort_order })
+    if (error) return { ok: false, error: error.message }
+    revalidatePath('/admin')
+    return { ok: true }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Error al agregar horario.'
+    return { ok: false, error: msg }
+  }
+}
+
+export async function removeSchedule(id: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const supabase = createAdminClient()
+    const { error } = await supabase.from('admission_schedules').delete().eq('id', id)
+    if (error) return { ok: false, error: error.message }
+    revalidatePath('/admin')
+    return { ok: true }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Error al eliminar horario.'
+    return { ok: false, error: msg }
+  }
 }

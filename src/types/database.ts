@@ -93,3 +93,11 @@ export interface BlockedDate {
   reason?: string
   created_at: string
 }
+
+export interface AdmissionSchedule {
+  id: string
+  level: AdmissionLevel
+  time_slot: string
+  sort_order: number
+  created_at: string
+}

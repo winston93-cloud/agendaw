@@ -34,6 +34,7 @@ interface FormData {
 export default function AgendarPage() {
   const [currentStep, setCurrentStep] = useState<Step>(1)
   const [blockedDates, setBlockedDates] = useState<string[]>([])
+  const [scheduleTimes, setScheduleTimes] = useState<string[]>([])
   const [formData, setFormData] = useState<FormData>({
     campus: '',
     level: '',
@@ -135,14 +136,16 @@ export default function AgendarPage() {
         newData.level = ''
         newData.gradeLevel = ''
       }
-      // Si cambia el nivel, resetear gradeLevel y fecha
+      // Si cambia el nivel, resetear gradeLevel, fecha y horario
       if (field === 'level') {
         newData.gradeLevel = ''
         newData.appointmentDate = ''
+        newData.appointmentTime = ''
       }
-      // Si cambia el grado, resetear fecha
+      // Si cambia el grado, resetear fecha y horario
       if (field === 'gradeLevel') {
         newData.appointmentDate = ''
+        newData.appointmentTime = ''
       }
       
       return newData
@@ -164,12 +167,16 @@ export default function AgendarPage() {
     const level = admissionLevelForApi()
     if (!level) {
       setBlockedDates([])
+      setScheduleTimes([])
       return
     }
-    fetch(`/api/blocked-dates?level=${level}`)
-      .then((res) => res.json())
-      .then((data) => setBlockedDates(data.dates || []))
-      .catch(() => setBlockedDates([]))
+    Promise.all([
+      fetch(`/api/blocked-dates?level=${level}`).then((res) => res.json()).then((data) => data.dates || []).catch(() => []),
+      fetch(`/api/schedules?level=${level}`).then((res) => res.json()).then((data) => data.times || []).catch(() => []),
+    ]).then(([dates, times]) => {
+      setBlockedDates(dates)
+      setScheduleTimes(times)
+    })
   }, [formData.level])
 
   const nextStep = () => {
@@ -200,12 +207,6 @@ export default function AgendarPage() {
       alert('No se pudo guardar la cita. Intenta de nuevo o contacta al plantel.')
     }
   }
-
-  const availableTimes = [
-    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-    '12:00', '12:30', '14:00', '14:30', '15:00', '15:30',
-    '16:00', '16:30', '17:00'
-  ]
 
   return (
     <div className="agendar-page">
@@ -349,6 +350,28 @@ export default function AgendarPage() {
                     </div>
                   )}
 
+                  {formData.gradeLevel && formData.appointmentDate && (
+                    <div className="form-group full-width">
+                      <label className="form-label">Horario al que asistiría *</label>
+                      {scheduleTimes.length === 0 ? (
+                        <p className="form-hint text-soft">No hay horarios configurados para este nivel. La escuela te contactará para confirmar.</p>
+                      ) : (
+                        <div className="time-slots">
+                          {scheduleTimes.map((time) => (
+                            <button
+                              key={time}
+                              type="button"
+                              className={`time-slot ${formData.appointmentTime === time ? 'selected' : ''}`}
+                              onClick={() => updateFormData('appointmentTime', time)}
+                            >
+                              {time}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <div className="form-group">
                     <label className="form-label">Nombre completo del aspirante *</label>
                     <input
@@ -382,7 +405,10 @@ export default function AgendarPage() {
               <button
                 className="btn btn-primary"
                 onClick={nextStep}
-                disabled={!formData.campus || !formData.level || !formData.studentName || !formData.studentAge || !formData.gradeLevel || !formData.appointmentDate}
+                disabled={
+                  !formData.campus || !formData.level || !formData.studentName || !formData.studentAge || !formData.gradeLevel || !formData.appointmentDate ||
+                  (scheduleTimes.length > 0 && !formData.appointmentTime)
+                }
               >
                 Siguiente →
               </button>
@@ -482,20 +508,22 @@ export default function AgendarPage() {
             <div className="form-grid">
               <div className="form-group full-width">
                 <label className="form-label">Hora de la cita *</label>
-                <div className="time-slots">
-                  {availableTimes.map((time) => (
-                    <button
-                      key={time}
-                      type="button"
-                      className={`time-slot ${
-                        formData.appointmentTime === time ? 'selected' : ''
-                      }`}
-                      onClick={() => updateFormData('appointmentTime', time)}
-                    >
-                      {time}
-                    </button>
-                  ))}
-                </div>
+                {scheduleTimes.length === 0 ? (
+                  <p className="form-hint text-soft">No hay horarios configurados para este nivel. La escuela te contactará.</p>
+                ) : (
+                  <div className="time-slots">
+                    {scheduleTimes.map((time) => (
+                      <button
+                        key={time}
+                        type="button"
+                        className={`time-slot ${formData.appointmentTime === time ? 'selected' : ''}`}
+                        onClick={() => updateFormData('appointmentTime', time)}
+                      >
+                        {time}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -514,7 +542,7 @@ export default function AgendarPage() {
               <button
                 className="btn btn-primary"
                 onClick={nextStep}
-                disabled={!formData.appointmentDate || !formData.appointmentTime}
+                disabled={!formData.appointmentDate || (scheduleTimes.length > 0 && !formData.appointmentTime)}
               >
                 Siguiente →
               </button>
@@ -555,7 +583,7 @@ export default function AgendarPage() {
               <div className="summary-section highlight">
                 <h3>📅 Cita</h3>
                 <p><strong>Fecha:</strong> {new Date(formData.appointmentDate).toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                <p><strong>Hora:</strong> {formData.appointmentTime}</p>
+                <p><strong>Hora:</strong> {formData.appointmentTime || 'Por confirmar (la escuela te contactará)'}</p>
                 <p><strong>Contacto:</strong> {getContactEmail()}</p>
               </div>
             </div>

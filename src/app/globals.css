@@ -2273,6 +2273,69 @@ body {
   color: var(--text-primary);
 }
 
+.admin-horarios .admin-hint {
+  margin-bottom: 1.25rem;
+}
+
+.admin-horarios-level {
+  margin-bottom: 1.5rem;
+}
+
+.admin-horarios-level h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.admin-horarios-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+  margin-bottom: 0.5rem;
+}
+
+.admin-horarios-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.admin-horarios-form input[type="time"] {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--light-border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.admin-horarios-list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 0.5rem;
+}
+
+.admin-horarios-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--light-border);
+  font-size: 0.95rem;
+}
+
+.admin-horarios-list li.admin-empty {
+  border: none;
+  padding: 0.5rem 0;
+}
+
+.form-hint.text-soft {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+
 .admin-blocked-level ul {
   list-style: none;
   padding: 0;

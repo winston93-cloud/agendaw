@@ -1,7 +1,8 @@
 import Link from 'next/link'
-import { getAdmissionAppointments, getBlockedDates } from './actions'
+import { getAdmissionAppointments, getBlockedDates, getSchedules } from './actions'
 import AdminCitas from './AdminCitas'
 import AdminBloquear from './AdminBloquear'
+import AdminHorarios from './AdminHorarios'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,11 +15,13 @@ function hasSupabaseEnv() {
 export default async function AdminPage() {
   let appointments: Awaited<ReturnType<typeof getAdmissionAppointments>> = []
   let blockedDates: Awaited<ReturnType<typeof getBlockedDates>> = []
+  let schedules: Awaited<ReturnType<typeof getSchedules>> = []
   if (hasSupabaseEnv()) {
     try {
-      ;[appointments, blockedDates] = await Promise.all([
+      ;[appointments, blockedDates, schedules] = await Promise.all([
         getAdmissionAppointments(),
         getBlockedDates(),
+        getSchedules(),
       ])
     } catch (e) {
       console.error('Admin load error:', e)
@@ -45,6 +48,11 @@ export default async function AdminPage() {
         <section className="admin-section">
           <h2>📅 Citas programadas</h2>
           <AdminCitas appointments={appointments} />
+        </section>
+
+        <section className="admin-section">
+          <h2>🕐 Horarios por nivel</h2>
+          <AdminHorarios schedules={schedules} />
         </section>
 
         <section className="admin-section">

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { blockDate, unblockDate } from './actions'
 import type { BlockedDate } from '@/types/database'
 import type { AdmissionLevel } from '@/types/database'
@@ -12,6 +13,7 @@ const LEVEL_LABELS: Record<AdmissionLevel, string> = {
 }
 
 export default function AdminBloquear({ blockedDates }: { blockedDates: BlockedDate[] }) {
+  const router = useRouter()
   const [level, setLevel] = useState<AdmissionLevel>('maternal_kinder')
   const [block_date, setBlockDate] = useState('')
   const [reason, setReason] = useState('')
@@ -21,24 +23,25 @@ export default function AdminBloquear({ blockedDates }: { blockedDates: BlockedD
     e.preventDefault()
     if (!block_date.trim()) return
     setLoading(true)
-    try {
-      await blockDate(block_date, level, reason.trim() || undefined)
-      setBlockDate('')
-      setReason('')
-    } catch (err) {
-      alert((err as Error).message)
-    } finally {
-      setLoading(false)
+    const result = await blockDate(block_date, level, reason.trim() || undefined)
+    setLoading(false)
+    if (!result.ok) {
+      alert(result.error ?? 'No se pudo bloquear el día.')
+      return
     }
+    setBlockDate('')
+    setReason('')
+    router.refresh()
   }
 
   const handleUnblock = async (id: string) => {
     if (!confirm('¿Desbloquear este día para este nivel?')) return
-    try {
-      await unblockDate(id)
-    } catch (err) {
-      alert((err as Error).message)
+    const result = await unblockDate(id)
+    if (!result.ok) {
+      alert(result.error ?? 'No se pudo desbloquear.')
+      return
     }
+    router.refresh()
   }
 
   const byLevel = (l: AdmissionLevel) => blockedDates.filter((b) => b.level === l)
