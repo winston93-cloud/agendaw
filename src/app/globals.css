@@ -829,12 +829,12 @@ body {
 
 /* Contenedor de proceso: menos espacio arriba para acercar al hero azul */
 .container-process {
-  padding-top: 0.75rem;
+  padding-top: 0.25rem;
 }
 
 /* Process Section: más pegada al hero azul */
 .process-section {
-  padding: 1.75rem 0 4rem;
+  padding: 1.25rem 0 4rem;
 }
 
 .section-title {
