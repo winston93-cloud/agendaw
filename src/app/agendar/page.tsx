@@ -36,6 +36,7 @@ interface FormData {
   studentAge: string
   schoolCycle: string
   howDidYouHear: string
+  howDidYouHearOther: string
   appointmentDate: string
   appointmentTime: string
   // Paso 2: Padre/tutor
@@ -43,6 +44,7 @@ interface FormData {
   parentEmail: string
   parentPhone: string
   relationship: string
+  relationshipOther: string
   // Paso 4: Confirmación
   acceptTerms: boolean
   documentsSent: boolean
@@ -68,12 +70,14 @@ export default function AgendarPage() {
     gradeLevel: '',
     schoolCycle: '',
     howDidYouHear: '',
+    howDidYouHearOther: '',
     appointmentDate: '',
     appointmentTime: '',
     parentName: '',
     parentEmail: '',
     parentPhone: '',
     relationship: 'Padre',
+    relationshipOther: '',
     acceptTerms: false,
     documentsSent: false,
   })
@@ -179,7 +183,13 @@ export default function AgendarPage() {
         newData.appointmentDate = ''
         newData.appointmentTime = ''
       }
-      
+      if (field === 'howDidYouHear' && value !== 'otra') {
+        newData.howDidYouHearOther = ''
+      }
+      if (field === 'relationship' && value !== 'Otro') {
+        newData.relationshipOther = ''
+      }
+
       return newData
     })
   }
@@ -270,11 +280,15 @@ export default function AgendarPage() {
         student_last_name_m: formData.studentLastNameM || undefined,
         student_birth_date: formData.studentBirthDate || undefined,
         school_cycle: formData.schoolCycle || undefined,
-        how_did_you_hear: formData.howDidYouHear || undefined,
+        how_did_you_hear: formData.howDidYouHear === 'otra'
+          ? (formData.howDidYouHearOther?.trim() ? `Otra: ${formData.howDidYouHearOther.trim()}` : undefined)
+          : (formData.howDidYouHear || undefined),
         parent_name: formData.parentName,
         parent_email: formData.parentEmail,
         parent_phone: formData.parentPhone,
-        relationship: formData.relationship,
+        relationship: formData.relationship === 'Otro'
+          ? (formData.relationshipOther?.trim() ? `Otro: ${formData.relationshipOther.trim()}` : 'Otro')
+          : formData.relationship,
         appointment_date: formData.appointmentDate,
         appointment_time: formData.appointmentTime,
       })
@@ -540,6 +554,16 @@ export default function AgendarPage() {
                               <option key={o.value || 'empty'} value={o.value}>{o.label}</option>
                             ))}
                           </select>
+                          {formData.howDidYouHear === 'otra' && (
+                            <input
+                              type="text"
+                              className="form-input mt-2"
+                              placeholder="Especifique cómo se enteró"
+                              value={formData.howDidYouHearOther}
+                              onChange={(e) => updateFormData('howDidYouHearOther', e.target.value)}
+                              required={formData.howDidYouHear === 'otra'}
+                            />
+                          )}
                         </div>
 
                         <div className="form-section-divider" />
@@ -568,6 +592,16 @@ export default function AgendarPage() {
                             <option value="Tutor">Tutor</option>
                             <option value="Otro">Otro</option>
                           </select>
+                          {formData.relationship === 'Otro' && (
+                            <input
+                              type="text"
+                              className="form-input mt-2"
+                              placeholder="Especifique el parentesco"
+                              value={formData.relationshipOther}
+                              onChange={(e) => updateFormData('relationshipOther', e.target.value)}
+                              required={formData.relationship === 'Otro'}
+                            />
+                          )}
                         </div>
                       </div>
                     </div>
@@ -586,8 +620,10 @@ export default function AgendarPage() {
                   ((formData.appointmentTime || scheduleTimes.length === 0) && (
                     !formData.studentName?.trim() || !formData.studentLastNameP?.trim() || !formData.studentLastNameM?.trim() ||
                     !formData.studentBirthDate || !formData.schoolCycle || !formData.howDidYouHear ||
+                    (formData.howDidYouHear === 'otra' && !formData.howDidYouHearOther?.trim()) ||
                     !formData.parentPhone?.trim() || formData.parentPhone.replace(/\D/g, '').length !== 10 ||
-                    !formData.parentEmail?.trim() || !formData.parentName?.trim() || !formData.relationship
+                    !formData.parentEmail?.trim() || !formData.parentName?.trim() || !formData.relationship ||
+                    (formData.relationship === 'Otro' && !formData.relationshipOther?.trim())
                   ))
                 )}
               >
@@ -618,13 +654,19 @@ export default function AgendarPage() {
                 <p><strong>Fecha de nacimiento:</strong> {formData.studentBirthDate ? new Date(formData.studentBirthDate + 'T12:00:00').toLocaleDateString('es-MX') : '—'}</p>
                 <p><strong>Grado:</strong> {getGradeLevels().find(g => g.value === formData.gradeLevel)?.label}</p>
                 {formData.schoolCycle && <p><strong>Ciclo escolar:</strong> {formData.schoolCycle}</p>}
-                {formData.howDidYouHear && <p><strong>Cómo se enteró:</strong> {HOW_DID_YOU_HEAR_OPTIONS.find(o => o.value === formData.howDidYouHear)?.label || formData.howDidYouHear}</p>}
+                {formData.howDidYouHear && (
+                <p><strong>Cómo se enteró:</strong> {formData.howDidYouHear === 'otra' && formData.howDidYouHearOther?.trim()
+                  ? `Otra: ${formData.howDidYouHearOther.trim()}`
+                  : (HOW_DID_YOU_HEAR_OPTIONS.find(o => o.value === formData.howDidYouHear)?.label || formData.howDidYouHear)}</p>
+              )}
               </div>
 
               <div className="summary-section">
                 <h3>👤 Padre/Tutor</h3>
                 <p><strong>Nombre:</strong> {formData.parentName}</p>
-                <p><strong>Parentesco:</strong> {formData.relationship}</p>
+                <p><strong>Parentesco:</strong> {formData.relationship === 'Otro' && formData.relationshipOther?.trim()
+                  ? `Otro: ${formData.relationshipOther.trim()}`
+                  : formData.relationship}</p>
                 <p><strong>Email:</strong> {formData.parentEmail}</p>
                 <p><strong>Teléfono:</strong> {formData.parentPhone}</p>
               </div>
