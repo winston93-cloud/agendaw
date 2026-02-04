@@ -33,6 +33,20 @@ export async function createAdmissionAppointment(data: {
   appointment_time: string
 }) {
   const supabase = createAdminClient()
+
+  // Evitar doble reserva: mismo día, hora y nivel
+  const { data: existing } = await supabase
+    .from('admission_appointments')
+    .select('id')
+    .eq('appointment_date', data.appointment_date)
+    .eq('appointment_time', data.appointment_time || 'Por confirmar')
+    .eq('level', data.level)
+    .neq('status', 'cancelled')
+    .limit(1)
+  if (existing && existing.length > 0) {
+    throw new Error('Ese horario ya no está disponible. Elige otra fecha u otro horario.')
+  }
+
   const { error } = await supabase.from('admission_appointments').insert({
     campus: data.campus,
     level: data.level,

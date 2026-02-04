@@ -54,6 +54,7 @@ export default function AgendarPage() {
   const [currentStep, setCurrentStep] = useState<Step>(1)
   const [blockedDates, setBlockedDates] = useState<string[]>([])
   const [scheduleTimes, setScheduleTimes] = useState<string[]>([])
+  const [bookedSlots, setBookedSlots] = useState<string[]>([])
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const studentInfoRef = useRef<HTMLDivElement>(null)
@@ -222,6 +223,28 @@ export default function AgendarPage() {
       setScheduleTimes(times)
     })
   }, [formData.level])
+
+  // Horarios ya reservados para esta fecha y nivel (evitar doble reserva)
+  useEffect(() => {
+    if (!formData.appointmentDate || !formData.level) {
+      setBookedSlots([])
+      return
+    }
+    fetch(`/api/booked-slots?level=${formData.level}&date=${formData.appointmentDate}`)
+      .then((res) => res.json())
+      .then((data) => setBookedSlots(data.times || []))
+      .catch(() => setBookedSlots([]))
+  }, [formData.appointmentDate, formData.level])
+
+  // Si el horario elegido está ocupado, limpiar selección
+  useEffect(() => {
+    setFormData((prev) => {
+      if (prev.appointmentTime && bookedSlots.includes(prev.appointmentTime)) {
+        return { ...prev, appointmentTime: '' }
+      }
+      return prev
+    })
+  }, [bookedSlots])
 
   // Scroll a "Información del Aspirante" al elegir plantel y nivel
   useEffect(() => {
@@ -465,16 +488,22 @@ export default function AgendarPage() {
                         <p className="form-hint text-soft">No hay horarios configurados para este nivel. La escuela te contactará para confirmar.</p>
                       ) : (
                         <div className="time-slots">
-                          {scheduleTimes.map((time) => (
-                            <button
-                              key={time}
-                              type="button"
-                              className={`time-slot ${formData.appointmentTime === time ? 'selected' : ''}`}
-                              onClick={() => updateFormData('appointmentTime', time)}
-                            >
-                              {time}
-                            </button>
-                          ))}
+                          {scheduleTimes.map((time) => {
+                            const isBooked = bookedSlots.includes(time)
+                            return (
+                              <button
+                                key={time}
+                                type="button"
+                                className={`time-slot ${formData.appointmentTime === time ? 'selected' : ''} ${isBooked ? 'time-slot-booked' : ''}`}
+                                onClick={() => !isBooked && updateFormData('appointmentTime', time)}
+                                disabled={isBooked}
+                                title={isBooked ? 'Horario ocupado' : undefined}
+                              >
+                                {time}
+                                {isBooked && <span className="time-slot-label"> (Ocupado)</span>}
+                              </button>
+                            )
+                          })}
                         </div>
                       )}
                     </div>
