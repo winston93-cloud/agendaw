@@ -55,6 +55,7 @@ export default function AgendarPage() {
   const studentInfoRef = useRef<HTMLDivElement>(null)
   const afterHorarioRef = useRef<HTMLDivElement>(null)
   const confirmStepRef = useRef<HTMLDivElement>(null)
+  const plantelNivelRef = useRef<HTMLDivElement>(null)
   const [formData, setFormData] = useState<FormData>({
     campus: '',
     level: '',
@@ -231,6 +232,16 @@ export default function AgendarPage() {
     }
   }, [currentStep])
 
+  // Al cargar /agendar (paso 1), mostrar Plantel y nivel y botones en vista
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (currentStep === 1 && plantelNivelRef.current) {
+        plantelNivelRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }, 100)
+    return () => clearTimeout(t)
+  }, []) // solo al montar
+
   const nextStep = () => {
     if (currentStep < 2) setCurrentStep(2)
   }
@@ -292,7 +303,7 @@ export default function AgendarPage() {
       <div className="form-container">
         {/* Step 1: Información del Aspirante */}
         {currentStep === 1 && (
-          <div className="form-step">
+          <div ref={plantelNivelRef} className="form-step">
             <h2 className="step-heading">Plantel y nivel</h2>
             <p className="step-description">
               Seleccione el campus y el nivel educativo de interés.
