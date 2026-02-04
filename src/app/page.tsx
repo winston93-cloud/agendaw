@@ -59,7 +59,7 @@ export default function Home() {
       </div>
 
       {/* Process Steps */}
-      <div className="container">
+      <div className="container container-process">
         <div className="process-section">
           <h2 className="section-title">¿Cómo funciona?</h2>
           <p className="section-subtitle">Solo 3 sencillos pasos</p>
