@@ -212,7 +212,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                     <select
                       value={a.status}
                       onChange={(e) => updateStatus(a.id, e.target.value)}
-                      className="admin-select-status"
+                      className={`admin-select-status status-pill status-${a.status}`}
                     >
                       <option value="pending">Pendiente</option>
                       <option value="confirmed">Confirmada</option>

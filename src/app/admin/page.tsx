@@ -45,18 +45,18 @@ export default async function AdminPage() {
       </header>
 
       <main className="admin-main">
-        <section className="admin-section">
-          <h2>📅 Citas programadas</h2>
+        <section className="admin-section admin-section-citas">
+          <h2><span className="admin-section-icon">📅</span> Citas programadas</h2>
           <AdminCitas appointments={appointments} />
         </section>
 
-        <section className="admin-section">
-          <h2>🕐 Horarios por nivel</h2>
+        <section className="admin-section admin-section-horarios">
+          <h2><span className="admin-section-icon">🕐</span> Horarios por nivel</h2>
           <AdminHorarios schedules={schedules} />
         </section>
 
-        <section className="admin-section">
-          <h2>🚫 Días bloqueados por nivel</h2>
+        <section className="admin-section admin-section-bloquear">
+          <h2><span className="admin-section-icon">🚫</span> Días bloqueados por nivel</h2>
           <p className="admin-hint">
             Si bloqueas un día para un nivel (ej. Secundaria), los otros niveles (Maternal/Kinder, Primaria) siguen pudiendo agendar ese día.
           </p>

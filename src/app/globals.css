@@ -2649,10 +2649,21 @@ body {
   }
 }
 
-/* ========== ADMIN (Psicólogas) ========== */
+/* ========== ADMIN (Psicólogas) – UI vibrante ========== */
+@keyframes adminFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .admin-layout {
   min-height: 100vh;
-  background: var(--light-bg);
+  background: linear-gradient(160deg, #f0f9ff 0%, #e0f2fe 40%, #fefce8 100%);
 }
 
 .admin-login-page {
@@ -2661,16 +2672,17 @@ body {
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #8b5cf6 100%);
 }
 
 .admin-login-card {
   background: white;
   padding: 2.5rem;
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
   max-width: 400px;
   width: 100%;
+  animation: adminFadeInUp 0.5s ease-out;
 }
 
 .admin-login-card h1 {
@@ -2697,14 +2709,29 @@ body {
   padding: 0.75rem 1rem;
   margin-top: 0.35rem;
   border: 2px solid var(--light-border);
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.admin-login-card input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  outline: none;
 }
 
 .admin-login-card .btn {
   width: 100%;
   margin-top: 0.5rem;
   padding: 0.75rem;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.admin-login-card .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
 
 .admin-login-error {
@@ -2720,38 +2747,48 @@ body {
 }
 
 .admin-header {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem 2rem;
-  margin-bottom: 2rem;
-  box-shadow: var(--shadow);
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #6366f1 100%);
+  border-radius: 20px;
+  padding: 2rem 2.5rem;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 12px 40px rgba(59, 130, 246, 0.35);
+  color: white;
+  animation: adminFadeInUp 0.4s ease-out;
 }
 
 .admin-header h1 {
-  font-size: 1.5rem;
-  margin-bottom: 0.25rem;
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin-bottom: 0.35rem;
+  letter-spacing: -0.02em;
 }
 
 .admin-header p {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  margin-bottom: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .admin-header-actions {
   display: flex;
-  gap: 1rem;
+  gap: 1.25rem;
   align-items: center;
 }
 
 .admin-link {
-  color: var(--primary-color);
+  color: rgba(255, 255, 255, 0.95);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  transition: background 0.2s, transform 0.2s;
 }
 
 .admin-link:hover {
-  text-decoration: underline;
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
 }
 
 .admin-main {
@@ -2762,38 +2799,98 @@ body {
 
 .admin-section {
   background: white;
-  border-radius: 12px;
-  padding: 1.5rem 2rem;
-  box-shadow: var(--shadow);
+  border-radius: 20px;
+  padding: 1.75rem 2rem 2rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  position: relative;
+  overflow: hidden;
+  animation: adminFadeInUp 0.5s ease-out backwards;
+}
+
+.admin-section:nth-child(1) { animation-delay: 0.05s; }
+.admin-section:nth-child(2) { animation-delay: 0.15s; }
+.admin-section:nth-child(3) { animation-delay: 0.25s; }
+
+.admin-section::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  border-radius: 5px 0 0 5px;
+}
+
+.admin-section-citas::before {
+  background: linear-gradient(180deg, #3b82f6, #6366f1);
+}
+
+.admin-section-horarios::before {
+  background: linear-gradient(180deg, #f59e0b, #eab308);
+}
+
+.admin-section-bloquear::before {
+  background: linear-gradient(180deg, #ef4444, #f97316);
 }
 
 .admin-section h2 {
-  font-size: 1.25rem;
-  margin-bottom: 1rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+  color: #1e293b;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-section-icon {
+  font-size: 1.5rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .admin-hint {
   color: var(--text-secondary);
   font-size: 0.9rem;
   margin-bottom: 1rem;
+  line-height: 1.5;
 }
 
 .admin-filters {
   display: flex;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
   flex-wrap: wrap;
 }
 
 .admin-filters select {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--light-border);
-  border-radius: 8px;
-  font-size: 0.9rem;
+  padding: 0.6rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  background: #f8fafc;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.admin-filters select:hover {
+  border-color: #cbd5e1;
+  background: #fff;
+}
+
+.admin-filters select:focus {
+  border-color: var(--primary-color);
+  background: #fff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
 .admin-table-wrap {
   overflow-x: auto;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 }
 
 .admin-table {
@@ -2804,27 +2901,111 @@ body {
 
 .admin-table th,
 .admin-table td {
-  padding: 0.75rem;
+  padding: 0.9rem 1rem;
   text-align: left;
-  border-bottom: 1px solid var(--light-border);
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.admin-table tbody tr {
+  transition: background 0.2s;
+}
+
+.admin-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .admin-table th {
-  font-weight: 600;
-  color: var(--text-secondary);
-  background: var(--light-bg);
+  font-weight: 700;
+  color: #475569;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-table th:first-child {
+  border-radius: 16px 0 0 0;
 }
 
 .admin-table td small {
   color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+/* Status pills en tabla admin */
+.admin-select-status.status-pill {
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  appearance: auto;
+  min-width: 110px;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.admin-select-status.status-pill:hover {
+  transform: scale(1.03);
+}
+
+.admin-select-status.status-pending {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #b45309;
+}
+
+.admin-select-status.status-confirmed {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #047857;
+}
+
+.admin-select-status.status-cancelled {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #64748b;
+}
+
+.admin-select-status.status-completed {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1d4ed8;
+}
+
+.admin-citas .btn-sm,
+.admin-bloquear .btn-sm,
+.admin-horarios .btn-sm {
+  border-radius: 10px;
+  font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.admin-citas .btn-primary:hover,
+.admin-bloquear .btn-primary:hover,
+.admin-horarios .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+}
+
+.admin-citas .btn-secondary:hover,
+.admin-horarios .btn-secondary:hover {
+  transform: translateY(-1px);
 }
 
 .admin-input-inline {
-  padding: 0.35rem 0.5rem;
-  border: 1px solid var(--light-border);
-  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
   font-size: 0.9rem;
   max-width: 140px;
+  transition: border-color 0.2s;
+}
+
+.admin-input-inline:focus {
+  border-color: var(--primary-color);
+  outline: none;
 }
 
 .admin-edit-date {
@@ -2851,25 +3032,33 @@ body {
   min-height: 36px;
 }
 
-.admin-select-status {
+.admin-select-status:not(.status-pill) {
   padding: 0.35rem 0.5rem;
-  border: 1px solid var(--light-border);
-  border-radius: 6px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
   font-size: 0.85rem;
 }
 
 .admin-empty {
   color: var(--text-secondary);
   font-style: italic;
-  padding: 1rem 0;
+  padding: 1.5rem;
+  text-align: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 16px;
+  border: 2px dashed #e2e8f0;
 }
 
 .admin-bloquear-form {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 1.25rem;
   align-items: flex-end;
   margin-bottom: 2rem;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #fff7ed 0%, #fffbeb 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(251, 191, 36, 0.3);
 }
 
 .admin-bloquear-form label {
@@ -2878,26 +3067,56 @@ body {
   gap: 0.35rem;
   font-weight: 600;
   font-size: 0.9rem;
+  color: #1e293b;
 }
 
 .admin-bloquear-form input,
 .admin-bloquear-form select {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--light-border);
-  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
   min-width: 160px;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+
+.admin-bloquear-form input:focus,
+.admin-bloquear-form select:focus {
+  border-color: #f59e0b;
+  outline: none;
+}
+
+.admin-bloquear-form .btn-primary {
+  border-radius: 12px;
+  font-weight: 600;
 }
 
 .admin-blocked-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
 }
 
+.admin-blocked-level {
+  background: linear-gradient(135deg, #fef2f2 0%, #fff7ed 100%);
+  border-radius: 16px;
+  padding: 1.25rem;
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.admin-blocked-level:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
 .admin-blocked-level h3 {
-  font-size: 1rem;
+  font-size: 1.05rem;
+  font-weight: 700;
   margin-bottom: 0.75rem;
-  color: var(--text-primary);
+  color: #1e293b;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid rgba(248, 113, 113, 0.3);
 }
 
 .admin-horarios .admin-hint {
@@ -2906,12 +3125,24 @@ body {
 
 .admin-horarios-level {
   margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #eff6ff 0%, #fefce8 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.admin-horarios-level:hover {
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.1);
 }
 
 .admin-horarios-level h3 {
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-  color: var(--text-primary);
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: #1e293b;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid rgba(59, 130, 246, 0.25);
 }
 
 .admin-horarios-form {
@@ -2919,7 +3150,7 @@ body {
   flex-wrap: wrap;
   gap: 0.75rem;
   align-items: flex-end;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .admin-horarios-form label {
@@ -2927,14 +3158,22 @@ body {
   flex-direction: column;
   gap: 0.25rem;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
+  color: #334155;
 }
 
 .admin-horarios-form input[type="time"] {
-  padding: 0.4rem 0.6rem;
-  border: 1px solid var(--light-border);
-  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
   font-size: 0.95rem;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+
+.admin-horarios-form input[type="time"]:focus {
+  border-color: #f59e0b;
+  outline: none;
 }
 
 .admin-horarios-list {
@@ -2947,14 +3186,26 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.4rem 0;
-  border-bottom: 1px solid var(--light-border);
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 0.35rem;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
   font-size: 0.95rem;
+  font-weight: 500;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.admin-horarios-list li:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
 }
 
 .admin-horarios-list li.admin-empty {
-  border: none;
-  padding: 0.5rem 0;
+  border: 2px dashed #e2e8f0;
+  background: transparent;
+  color: var(--text-secondary);
+  font-style: italic;
 }
 
 .form-hint.text-soft {
@@ -2973,12 +3224,34 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--light-border);
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 0.35rem;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #fecaca;
   font-size: 0.9rem;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.admin-blocked-level li:hover {
+  background: #fef2f2;
+  transform: translateX(4px);
 }
 
 .admin-blocked-level li span {
   flex: 1;
   margin-right: 0.75rem;
+  font-weight: 500;
+}
+
+.admin-blocked-level .btn-danger,
+.admin-horarios-list .btn-danger {
+  border-radius: 8px;
+  font-weight: 600;
+  transition: transform 0.2s;
+}
+
+.admin-blocked-level .btn-danger:hover,
+.admin-horarios-list .btn-danger:hover {
+  transform: scale(1.05);
 }
