@@ -31,7 +31,13 @@ export default function Home() {
                 Agenda tu entrevista de admisión en línea — seguro, sencillo y en pocos minutos.
               </p>
               <Carousel />
-              <ScrollButton targetSelector="#agendar-ahora" scrollBlock="center" className="hero-cta-button hero-title-cta">
+              <ScrollButton
+                targetSelector="#agendar-ahora"
+                scrollBlock="center"
+                mobileTargetSelector=".process-section"
+                mobileScrollBlock="start"
+                className="hero-cta-button hero-title-cta"
+              >
                 <span className="cta-text">Agenda tu cita de admisión</span>
                 <span className="cta-arrow">↓</span>
               </ScrollButton>
