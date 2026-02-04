@@ -56,6 +56,7 @@ export default function AgendarPage() {
   const afterHorarioRef = useRef<HTMLDivElement>(null)
   const confirmStepRef = useRef<HTMLDivElement>(null)
   const plantelNivelRef = useRef<HTMLDivElement>(null)
+  const calendarRef = useRef<HTMLDivElement>(null)
   const [formData, setFormData] = useState<FormData>({
     campus: '',
     level: '',
@@ -216,6 +217,13 @@ export default function AgendarPage() {
       studentInfoRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }, [formData.campus, formData.level, currentStep])
+
+  // Al seleccionar grado, bajar el scroll al calendario
+  useEffect(() => {
+    if (formData.gradeLevel && currentStep === 1) {
+      calendarRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [formData.gradeLevel, currentStep])
 
   // Scroll a datos del alumno al elegir horario (o al tener fecha si no hay horarios configurados)
   useEffect(() => {
@@ -400,7 +408,7 @@ export default function AgendarPage() {
                   </div>
 
                   {formData.gradeLevel && (
-                    <div className="form-group full-width">
+                    <div ref={calendarRef} className="form-group full-width">
                       <label className="form-label">Fecha del examen de admisión *</label>
                       <ExamDateCalendar
                         value={formData.appointmentDate}
