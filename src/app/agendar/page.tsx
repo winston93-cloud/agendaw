@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -290,16 +291,7 @@ export default function AgendarPage() {
     return () => clearTimeout(t)
   }, []) // solo al montar
 
-  // Evitar cerrar/recargar en paso confirmación sin haber enviado (salvo que confirme que no desea enviar)
-  useEffect(() => {
-    const onBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (currentStep !== 2 || showSuccessModal || allowLeaveWithoutSendRef.current) return
-      e.preventDefault()
-      ;(e as BeforeUnloadEvent & { returnValue: string }).returnValue = ''
-    }
-    window.addEventListener('beforeunload', onBeforeUnload)
-    return () => window.removeEventListener('beforeunload', onBeforeUnload)
-  }, [currentStep, showSuccessModal])
+  // Nota: al cerrar la pestaña el navegador solo puede mostrar su propio diálogo simple; nuestro modal solo aparece al hacer clic en "Volver al inicio" o "Corregir datos".
 
   const nextStep = () => {
     if (currentStep < 2) setCurrentStep(2)
@@ -385,8 +377,8 @@ export default function AgendarPage() {
         </div>
       )}
 
-      {/* Modal: ¿Desea enviar antes de salir? (paso confirmación sin enviar) */}
-      {showLeaveConfirmModal && (
+      {/* Modal: ¿Desea enviar antes de salir? (renderizado en body para que siempre sea visible) */}
+      {showLeaveConfirmModal && typeof document !== 'undefined' && createPortal(
         <div className="leave-confirm-modal-overlay" onClick={closeLeaveConfirmModal}>
           <div className="leave-confirm-modal" onClick={(e) => e.stopPropagation()}>
             <h3 className="leave-confirm-modal-title">¿Desea enviar su solicitud?</h3>
@@ -406,7 +398,8 @@ export default function AgendarPage() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {submitError && (
