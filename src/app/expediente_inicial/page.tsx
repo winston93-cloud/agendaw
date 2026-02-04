@@ -197,25 +197,30 @@ function ExpedienteInicialContent() {
         <Link href="/" className="expediente-back">← Volver al inicio</Link>
       </div>
 
-      <form onSubmit={handleSubmit} className="expediente-form" id="datosa">
-        <div className="expediente-header-section">
-          <div className="expediente-header-alert">
-            <p>ESTA INFORMACIÓN ES REQUERIDA POR EL DEPARTAMENTO DE PSICOLOGÍA</p>
-            <div>RECORDÁNDOLE QUE SERÁ MANEJADA DE MANERA CONFIDENCIAL</div>
-            <div className="expediente-header-box">
-              <strong>Favor de llenar todos los campos del Expediente Inicial</strong>
-            </div>
+      <form onSubmit={handleSubmit} className="expediente-form expediente-form-enter" id="datosa">
+        <header className="expediente-hero">
+          <div className="expediente-hero-confidencial">
+            <span className="expediente-hero-icon" aria-hidden>🔒</span>
+            <p>Esta información es requerida por el Departamento de Psicología</p>
+            <p className="expediente-hero-sub">y será manejada de manera confidencial.</p>
           </div>
-          <h2 className="expediente-title">EXPEDIENTE INICIAL DEL ASPIRANTE</h2>
-        </div>
+          <div className="expediente-hero-cta">
+            <span className="expediente-hero-cta-icon">📋</span>
+            Favor de llenar todos los campos del Expediente Inicial
+          </div>
+          <h1 className="expediente-hero-title">
+            <span className="expediente-hero-title-line">Expediente Inicial</span>
+            <span className="expediente-hero-title-line">del Aspirante</span>
+          </h1>
+        </header>
 
         {prefillLoading && (
           <p className="expediente-loading">Cargando datos de la cita…</p>
         )}
 
         {/* Datos del Alumno */}
-        <section className="expediente-section">
-          <h3>Datos del Alumno</h3>
+        <section className="expediente-section expediente-section-enter">
+          <h3 className="expediente-section-title">📚 Datos del Alumno</h3>
           <div className="expediente-grid">
             <div className="expediente-field">
               <label>Nivel</label>
@@ -269,8 +274,8 @@ function ExpedienteInicialContent() {
         </section>
 
         {/* Datos del Padre */}
-        <section className="expediente-section">
-          <h3>Datos del Padre</h3>
+        <section className="expediente-section expediente-section-enter">
+          <h3 className="expediente-section-title">👤 Datos del Padre</h3>
           <div className="expediente-grid">
             <div className="expediente-field">
               <label>Nombre</label>
@@ -312,8 +317,8 @@ function ExpedienteInicialContent() {
         </section>
 
         {/* Datos de la Madre */}
-        <section className="expediente-section">
-          <h3>Datos de la Madre</h3>
+        <section className="expediente-section expediente-section-enter">
+          <h3 className="expediente-section-title">👩 Datos de la Madre</h3>
           <div className="expediente-grid">
             <div className="expediente-field">
               <label>Nombre</label>
@@ -355,8 +360,8 @@ function ExpedienteInicialContent() {
         </section>
 
         {/* Datos Médicos */}
-        <section className="expediente-section">
-          <h3>Datos Médicos</h3>
+        <section className="expediente-section expediente-section-enter">
+          <h3 className="expediente-section-title">🏥 Datos Médicos</h3>
           <div className="expediente-grid">
             <div className="expediente-field full-width">
               <label>¿Su hijo ha recibido algún tratamiento médico en el último año? Especifique:</label>
@@ -402,8 +407,8 @@ function ExpedienteInicialContent() {
         </section>
 
         {/* Evaluación de Comportamiento */}
-        <section className="expediente-section">
-          <h3>Evaluación de Comportamiento</h3>
+        <section className="expediente-section expediente-section-enter">
+          <h3 className="expediente-section-title">✨ Evaluación de Comportamiento</h3>
           <p className="expediente-section-note">Señale los comportamientos que ha identificado en su pequeño(a):</p>
           <div className="expediente-conductas">
             {CONDUCTAS_OPTIONS.map(label => (
@@ -420,8 +425,8 @@ function ExpedienteInicialContent() {
         </section>
 
         {/* Info Psicológica y Médica */}
-        <section className="expediente-section">
-          <h3>Información Psicológica y Médica</h3>
+        <section className="expediente-section expediente-section-enter">
+          <h3 className="expediente-section-title">💡 Información Psicológica y Médica</h3>
           <div className="expediente-grid">
             <div className="expediente-field full-width">
               <label>¿Alguno de los padres trabaja fuera de la ciudad?</label>
@@ -442,8 +447,8 @@ function ExpedienteInicialContent() {
         </section>
 
         {/* Info Familiar */}
-        <section className="expediente-section">
-          <h3>Información Familiar</h3>
+        <section className="expediente-section expediente-section-enter">
+          <h3 className="expediente-section-title">👨‍👩‍👧‍👦 Información Familiar</h3>
           <div className="expediente-grid">
             <div className="expediente-field">
               <label>Número de familiares adicionales</label>
@@ -472,8 +477,8 @@ function ExpedienteInicialContent() {
         </section>
 
         {/* Contacto */}
-        <section className="expediente-section">
-          <h3>Información de Contacto</h3>
+        <section className="expediente-section expediente-section-enter">
+          <h3 className="expediente-section-title">📞 Información de Contacto</h3>
           <div className="expediente-field">
             <label>Teléfono principal de contacto</label>
             <input type="tel" placeholder="10 dígitos" value={form.telefono_principal || ''} onChange={e => setField('telefono_principal', e.target.value)} />
