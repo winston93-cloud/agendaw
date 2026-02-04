@@ -47,7 +47,7 @@ export default function Home() {
                 height={120}
                 className="hero-logo"
               />
-              <p className="hero-logo-caption hero-slogan">Working for a brighter future</p>
+              <p className="hero-logo-caption hero-slogan">Working for brighter futures</p>
             </div>
           </div>
         </div>
