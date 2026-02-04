@@ -28,8 +28,7 @@ export default function Home() {
             {/* Contenido central */}
             <div className="hero-center-content">
               <p className="hero-subtitle hero-intro">
-                Sistema en línea para agendar tu entrevista de admisión.<br />
-                Rápido, fácil y en minutos.
+                Agenda tu entrevista de admisión en línea — seguro, sencillo y en pocos minutos.
               </p>
               <Carousel />
               <ScrollButton targetSelector=".process-section" className="hero-cta-button hero-title-cta">
