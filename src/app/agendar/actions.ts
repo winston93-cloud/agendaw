@@ -1,6 +1,18 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/server'
+import { sendAdmissionConfirmation } from '@/lib/email'
+
+const CAMPUS_NAMES: Record<string, string> = {
+  winston: 'Instituto Educativo Winston',
+  churchill: 'Instituto Winston Churchill',
+}
+const LEVEL_LABELS: Record<string, string> = {
+  maternal: 'Maternal',
+  kinder: 'Kinder',
+  primaria: 'Primaria',
+  secundaria: 'Secundaria',
+}
 
 export async function createAdmissionAppointment(data: {
   campus: string
@@ -41,4 +53,21 @@ export async function createAdmissionAppointment(data: {
     status: 'pending',
   })
   if (error) throw new Error(error.message)
+
+  const studentName = [data.student_name, data.student_last_name_p, data.student_last_name_m].filter(Boolean).join(' ')
+  const campusName = CAMPUS_NAMES[data.campus] || data.campus
+  const levelLabel = LEVEL_LABELS[data.level] || data.level
+  try {
+    const result = await sendAdmissionConfirmation(data.parent_email, {
+      parentName: data.parent_name,
+      studentName: studentName || data.student_name,
+      appointmentDate: data.appointment_date,
+      appointmentTime: data.appointment_time || 'Por confirmar',
+      campusName,
+      levelLabel,
+    })
+    if (!result.ok) console.warn('[email]', result.error)
+  } catch (e) {
+    console.warn('[email]', e)
+  }
 }

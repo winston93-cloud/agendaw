@@ -54,6 +54,8 @@ export default function AgendarPage() {
   const [currentStep, setCurrentStep] = useState<Step>(1)
   const [blockedDates, setBlockedDates] = useState<string[]>([])
   const [scheduleTimes, setScheduleTimes] = useState<string[]>([])
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const studentInfoRef = useRef<HTMLDivElement>(null)
   const afterHorarioRef = useRef<HTMLDivElement>(null)
   const confirmStepRef = useRef<HTMLDivElement>(null)
@@ -269,6 +271,7 @@ export default function AgendarPage() {
   }
 
   const handleSubmit = async () => {
+    setSubmitError(null)
     try {
       await createAdmissionAppointment({
         campus: formData.campus,
@@ -292,14 +295,37 @@ export default function AgendarPage() {
         appointment_date: formData.appointmentDate,
         appointment_time: formData.appointmentTime,
       })
-      alert('¡Cita agendada exitosamente! Recibirás un correo de confirmación.')
+      setShowSuccessModal(true)
     } catch (e) {
-      alert('No se pudo guardar la cita. Intenta de nuevo o contacta al plantel.')
+      setSubmitError('No se pudo guardar la cita. Intenta de nuevo o contacta al plantel.')
     }
   }
 
   return (
     <div className="agendar-page">
+      {/* Modal de confirmación exitosa */}
+      {showSuccessModal && (
+        <div className="success-modal-overlay" onClick={() => setShowSuccessModal(false)}>
+          <div className="success-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="success-modal-icon">✓</div>
+            <h3 className="success-modal-title">Cita agendada exitosamente</h3>
+            <p className="success-modal-text">
+              Hemos registrado tu solicitud. Recibirás un correo de confirmación en <strong>{formData.parentEmail}</strong> con los detalles de tu cita.
+            </p>
+            <Link href="/" className="success-modal-btn" onClick={() => setShowSuccessModal(false)}>
+              Volver al inicio
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {submitError && (
+        <div className="agendar-error-banner">
+          <span>{submitError}</span>
+          <button type="button" className="agendar-error-close" onClick={() => setSubmitError(null)} aria-label="Cerrar">×</button>
+        </div>
+      )}
+
       <div className="agendar-header">
         <Link href="/" className="back-link">← Volver al inicio</Link>
         <h1>Solicitud de cita de admisión</h1>
