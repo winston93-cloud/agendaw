@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { getAppointmentForExpediente, submitExpedienteInicial, type ExpedienteFormData } from './actions'
@@ -114,7 +114,7 @@ const initialForm: ExpedienteFormData = {
   telefono_principal: '',
 }
 
-export default function ExpedienteInicialPage() {
+function ExpedienteInicialContent() {
   const searchParams = useSearchParams()
   const citaId = searchParams.get('cita') || undefined
   const [form, setForm] = useState<ExpedienteFormData>(initialForm)
@@ -494,5 +494,17 @@ export default function ExpedienteInicialPage() {
         </div>
       </form>
     </div>
+  )
+}
+
+export default function ExpedienteInicialPage() {
+  return (
+    <Suspense fallback={
+      <div className="expediente-page">
+        <p style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255,255,255,0.9)' }}>Cargando…</p>
+      </div>
+    }>
+      <ExpedienteInicialContent />
+    </Suspense>
   )
 }
