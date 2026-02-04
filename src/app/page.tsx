@@ -10,7 +10,7 @@ export default function Home() {
       <div className="admission-hero">
         <div className="hero-content">
           <div className="hero-logos">
-            {/* Logo izquierdo */}
+            {/* Logo izquierdo + texto */}
             <div className="hero-logo-wrapper">
               <Image 
                 src="/logo-winston-educativo.png" 
@@ -19,48 +19,26 @@ export default function Home() {
                 height={120}
                 className="hero-logo"
               />
+              <div className="hero-logo-caption trust-badge">
+                <span className="badge-icon">🏆</span>
+                <span className="badge-text">Más de 30 años formando líderes</span>
+              </div>
             </div>
 
             {/* Contenido central */}
             <div className="hero-center-content">
-              {/* Carousel - Primero para impacto visual */}
-              <Carousel />
-              
-              {/* Badge de Confianza */}
-              <div className="trust-badge">
-                <span className="badge-icon">🏆</span>
-                <span className="badge-text">Más de 30 años formando líderes</span>
-              </div>
-              
-              <h1 className="hero-title">
-                <span className="title-line-1">Working for a brighter future</span><br />
-                <span className="highlight">Agenda tu cita de admisión</span>
-              </h1>
-              
-              <p className="hero-subtitle">
+              <p className="hero-subtitle hero-intro">
                 Sistema en línea para agendar tu entrevista de admisión.<br />
                 Rápido, fácil y en minutos.
               </p>
-              
-              {/* CTA Principal - Scroll to process */}
-              <ScrollButton targetSelector=".process-section" className="hero-cta-button">
-                <span className="cta-text">Ver el proceso completo</span>
+              <Carousel />
+              <ScrollButton targetSelector=".process-section" className="hero-cta-button hero-title-cta">
+                <span className="cta-text">Agenda tu cita de admisión</span>
                 <span className="cta-arrow">↓</span>
               </ScrollButton>
-              <p className="hero-note">Solo 3 pasos sencillos para iniciar</p>
-              
-              {/* Scroll Indicator */}
-              <div className="scroll-indicator">
-                <span className="scroll-text">Descubre más</span>
-                <div className="scroll-arrow">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 5v14M19 12l-7 7-7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-              </div>
             </div>
 
-            {/* Logo derecho */}
+            {/* Logo derecho + texto */}
             <div className="hero-logo-wrapper">
               <Image 
                 src="/logo-winston-churchill.png" 
@@ -69,6 +47,7 @@ export default function Home() {
                 height={120}
                 className="hero-logo"
               />
+              <p className="hero-logo-caption hero-slogan">Working for a brighter future</p>
             </div>
           </div>
         </div>
