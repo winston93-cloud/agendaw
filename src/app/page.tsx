@@ -19,10 +19,7 @@ export default function Home() {
                 height={120}
                 className="hero-logo"
               />
-              <div className="hero-logo-caption trust-badge">
-                <span className="badge-icon">🏆</span>
-                <span className="badge-text">Más de 30 años formando líderes</span>
-              </div>
+              <p className="hero-logo-caption hero-slogan">Raising Brighter Kids</p>
             </div>
 
             {/* Contenido central */}
@@ -30,6 +27,7 @@ export default function Home() {
               <p className="hero-subtitle hero-intro">
                 Agenda tu entrevista de admisión en línea — seguro, sencillo y en pocos minutos.
               </p>
+              <p className="hero-blink-text">Más de 30 años formando líderes</p>
               <Carousel />
               <ScrollButton
                 targetSelector="#agendar-ahora"
