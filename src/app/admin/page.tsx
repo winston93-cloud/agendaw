@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { getAdmissionAppointments, getBlockedDates, getSchedules } from './actions'
 import AdminDashboard from './AdminDashboard'
 
@@ -33,7 +32,7 @@ export default async function AdminPage() {
           <h1>Panel de Psicólogas</h1>
           <p>Citas de examen de admisión</p>
           <div className="admin-header-actions">
-            <Link href="/" className="admin-link">← Volver al sitio</Link>
+            <a href="/admin" className="admin-link">← Dashboard</a>
             <a href="/api/admin/logout" className="admin-link">Cerrar sesión</a>
           </div>
         </div>
