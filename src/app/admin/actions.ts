@@ -31,6 +31,25 @@ export async function updateAppointment(
   updates: { appointment_date?: string; appointment_time?: string; status?: string; notes?: string }
 ) {
   const supabase = createAdminClient()
+
+  if (updates.appointment_date != null && updates.appointment_time != null) {
+    const { data: current } = await supabase.from('admission_appointments').select('level').eq('id', id).single()
+    if (current?.level) {
+      const { data: existing } = await supabase
+        .from('admission_appointments')
+        .select('id')
+        .eq('appointment_date', updates.appointment_date)
+        .eq('appointment_time', updates.appointment_time)
+        .eq('level', current.level)
+        .neq('id', id)
+        .neq('status', 'cancelled')
+        .limit(1)
+      if (existing?.length) {
+        throw new Error('Ese horario ya está ocupado por otra cita del mismo nivel. Elige otra fecha u horario.')
+      }
+    }
+  }
+
   const { error } = await supabase
     .from('admission_appointments')
     .update({ ...updates, updated_at: new Date().toISOString() })

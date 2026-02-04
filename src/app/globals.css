@@ -2827,6 +2827,30 @@ body {
   max-width: 140px;
 }
 
+.admin-edit-date {
+  min-width: 280px;
+}
+
+.admin-edit-date .exam-calendar {
+  max-width: 100%;
+}
+
+.admin-edit-time {
+  min-width: 200px;
+}
+
+.time-slots-admin {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.time-slots-admin .time-slot {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  min-height: 36px;
+}
+
 .admin-select-status {
   padding: 0.35rem 0.5rem;
   border: 1px solid var(--light-border);

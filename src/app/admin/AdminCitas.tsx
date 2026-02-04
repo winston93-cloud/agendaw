@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { updateAppointment } from './actions'
+import ExamDateCalendar from '@/components/ExamDateCalendar'
 import type { AdmissionAppointment } from '@/types/database'
 
 const LEVEL_LABELS: Record<string, string> = {
@@ -11,10 +12,21 @@ const LEVEL_LABELS: Record<string, string> = {
   secundaria: 'Secundaria',
 }
 
+function apiLevel(level: string): string {
+  if (level === 'maternal' || level === 'kinder') return 'maternal_kinder'
+  if (level === 'primaria') return 'primaria'
+  if (level === 'secundaria') return 'secundaria'
+  return level
+}
+
 export default function AdminCitas({ appointments }: { appointments: AdmissionAppointment[] }) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editDate, setEditDate] = useState('')
   const [editTime, setEditTime] = useState('')
+  const [editingLevel, setEditingLevel] = useState<string>('')
+  const [editBlockedDates, setEditBlockedDates] = useState<string[]>([])
+  const [editScheduleTimes, setEditScheduleTimes] = useState<string[]>([])
+  const [editBookedSlots, setEditBookedSlots] = useState<string[]>([])
   const [filterLevel, setFilterLevel] = useState<string>('')
   const [filterStatus, setFilterStatus] = useState<string>('')
 
@@ -28,12 +40,55 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
     setEditingId(a.id)
     setEditDate(a.appointment_date)
     setEditTime(a.appointment_time)
+    setEditingLevel(a.level)
   }
+
+  useEffect(() => {
+    if (!editingId || !editingLevel) {
+      setEditBlockedDates([])
+      setEditScheduleTimes([])
+      return
+    }
+    const level = apiLevel(editingLevel)
+    Promise.all([
+      fetch(`/api/blocked-dates?level=${level}`).then((r) => r.json()).then((d) => d.dates || []).catch(() => []),
+      fetch(`/api/schedules?level=${level}`).then((r) => r.json()).then((d) => d.times || []).catch(() => []),
+    ]).then(([dates, times]) => {
+      setEditBlockedDates(dates)
+      setEditScheduleTimes(times)
+    })
+  }, [editingId, editingLevel])
+
+  useEffect(() => {
+    if (!editingId || !editDate || !editingLevel) {
+      setEditBookedSlots([])
+      return
+    }
+    fetch(`/api/booked-slots?level=${editingLevel}&date=${editDate}&exclude_id=${editingId}`)
+      .then((r) => r.json())
+      .then((d) => setEditBookedSlots(d.times || []))
+      .catch(() => setEditBookedSlots([]))
+  }, [editingId, editDate, editingLevel])
+
+  // Si al cambiar fecha/horarios el tiempo elegido ya no está disponible, limpiar
+  useEffect(() => {
+    if (!editingId || !editTime) return
+    if (editBookedSlots.includes(editTime) || (editScheduleTimes.length > 0 && !editScheduleTimes.includes(editTime))) {
+      setEditTime('')
+    }
+  }, [editingId, editTime, editBookedSlots, editScheduleTimes])
 
   const saveEdit = async () => {
     if (!editingId) return
+    if (editScheduleTimes.length > 0 && !editTime?.trim()) {
+      alert('Elige un horario de la lista.')
+      return
+    }
     try {
-      await updateAppointment(editingId, { appointment_date: editDate, appointment_time: editTime })
+      await updateAppointment(editingId, {
+        appointment_date: editDate,
+        appointment_time: (editTime?.trim() || 'Por confirmar'),
+      })
       setEditingId(null)
     } catch (e) {
       alert((e as Error).message)
@@ -90,12 +145,13 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                 <tr key={a.id}>
                   <td>
                     {editingId === a.id ? (
-                      <input
-                        type="date"
-                        value={editDate}
-                        onChange={(e) => setEditDate(e.target.value)}
-                        className="admin-input-inline"
-                      />
+                      <div className="admin-edit-date">
+                        <ExamDateCalendar
+                          value={editDate}
+                          onChange={setEditDate}
+                          blockedDates={editBlockedDates}
+                        />
+                      </div>
                     ) : (
                       new Date(a.appointment_date + 'T12:00:00').toLocaleDateString('es-MX', {
                         weekday: 'short',
@@ -107,12 +163,36 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                   </td>
                   <td>
                     {editingId === a.id ? (
-                      <input
-                        type="time"
-                        value={editTime}
-                        onChange={(e) => setEditTime(e.target.value)}
-                        className="admin-input-inline"
-                      />
+                      <div className="admin-edit-time">
+                        {editScheduleTimes.length === 0 ? (
+                          <input
+                            type="text"
+                            value={editTime}
+                            onChange={(e) => setEditTime(e.target.value)}
+                            className="admin-input-inline"
+                            placeholder="Ej: 09:00"
+                          />
+                        ) : (
+                          <div className="time-slots time-slots-admin">
+                            {editScheduleTimes.map((time) => {
+                              const isBooked = editBookedSlots.includes(time)
+                              return (
+                                <button
+                                  key={time}
+                                  type="button"
+                                  className={`time-slot ${editTime === time ? 'selected' : ''} ${isBooked ? 'time-slot-booked' : ''}`}
+                                  onClick={() => !isBooked && setEditTime(time)}
+                                  disabled={isBooked}
+                                  title={isBooked ? 'Ocupado' : undefined}
+                                >
+                                  {time}
+                                  {isBooked && <span className="time-slot-label"> (Ocupado)</span>}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </div>
                     ) : (
                       a.appointment_time
                     )}

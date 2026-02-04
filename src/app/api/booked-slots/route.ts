@@ -18,14 +18,18 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'date required (YYYY-MM-DD)' }, { status: 400 })
   }
 
+  const excludeId = searchParams.get('exclude_id') || undefined
+
   try {
     const supabase = createAdminClient()
-    const { data, error } = await supabase
+    let query = supabase
       .from('admission_appointments')
       .select('appointment_time')
       .eq('appointment_date', date)
       .eq('level', level)
       .neq('status', 'cancelled')
+    if (excludeId) query = query.neq('id', excludeId)
+    const { data, error } = await query
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
