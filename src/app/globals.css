@@ -1325,7 +1325,8 @@ body {
   display: flex;
   gap: 0.5rem;
   justify-content: center;
-  flex-wrap: wrap;
+  align-items: center;
+  flex-wrap: nowrap;
   margin-top: 1rem;
 }
 
@@ -1340,6 +1341,8 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .level-badge:hover {
