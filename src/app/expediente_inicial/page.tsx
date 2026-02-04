@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { getAppointmentForExpediente, submitExpedienteInicial, type ExpedienteFormData } from './actions'
@@ -27,6 +27,70 @@ const GRADE_LABELS: Record<string, string> = {
   secundaria_7: '7mo',
   secundaria_8: '8vo',
   secundaria_9: '9no',
+}
+
+/* Campos obligatorios: key del form y etiqueta para el mensaje */
+const REQUIRED_FIELDS: { key: keyof ExpedienteFormData; label: string }[] = [
+  { key: 'nivel', label: 'Nivel' },
+  { key: 'grado', label: 'Grado al que desea ingresar' },
+  { key: 'ciclo_escolar', label: 'Ciclo escolar' },
+  { key: 'nombre_alumno', label: 'Nombre del alumno' },
+  { key: 'apellido_paterno_alumno', label: 'Apellido paterno del alumno' },
+  { key: 'apellido_materno_alumno', label: 'Apellido materno del alumno' },
+  { key: 'fecha_nacimiento', label: 'Fecha de nacimiento' },
+  { key: 'lugar_nacimiento', label: 'Lugar de nacimiento' },
+  { key: 'sexo', label: 'Sexo' },
+  { key: 'edad', label: 'Edad' },
+  { key: 'escuela_procedencia', label: 'Escuela de procedencia' },
+  { key: 'padre_nombre', label: 'Nombre del padre' },
+  { key: 'padre_apellido_paterno', label: 'Apellido paterno del padre' },
+  { key: 'padre_apellido_materno', label: 'Apellido materno del padre' },
+  { key: 'padre_edad', label: 'Edad del padre' },
+  { key: 'padre_email', label: 'Email del padre' },
+  { key: 'padre_lugar_trabajo', label: 'Lugar de trabajo del padre' },
+  { key: 'padre_estado_civil', label: 'Estado civil del padre' },
+  { key: 'padre_telefono_trabajo', label: 'Teléfono de trabajo del padre' },
+  { key: 'padre_telefono_celular', label: 'Teléfono celular del padre' },
+  { key: 'madre_nombre', label: 'Nombre de la madre' },
+  { key: 'madre_apellido_paterno', label: 'Apellido paterno de la madre' },
+  { key: 'madre_apellido_materno', label: 'Apellido materno de la madre' },
+  { key: 'madre_edad', label: 'Edad de la madre' },
+  { key: 'madre_email', label: 'Email de la madre' },
+  { key: 'madre_lugar_trabajo', label: 'Lugar de trabajo de la madre' },
+  { key: 'madre_estado_civil', label: 'Estado civil de la madre' },
+  { key: 'madre_telefono_trabajo', label: 'Teléfono de trabajo de la madre' },
+  { key: 'madre_telefono_celular', label: 'Teléfono celular de la madre' },
+  { key: 'tratamiento_medico_ultimo_ano', label: 'Tratamiento médico en el último año' },
+  { key: 'tratamiento_psicologico_razon', label: 'Razón tratamiento psicológico (o marque No)' },
+  { key: 'clase_extracurricular', label: 'Clase extracurricular' },
+  { key: 'nombre_escuela_guarderia', label: 'Nombre escuela o guardería de procedencia' },
+  { key: 'motivo_separacion', label: 'Motivo de la separación' },
+  { key: 'motivo_incorporacion', label: 'Motivo de incorporación a la institución' },
+  { key: 'preocupacion_desenvolvimiento', label: 'Preocupación sobre desenvolvimiento o aprovechamiento' },
+  { key: 'nombre_persona_info', label: 'Nombre de la persona que proporcionó la información' },
+  { key: 'relacion_alumno', label: 'Relación con el alumno' },
+  { key: 'conductas_proceso_control', label: 'Conductas en proceso de control (o indique "Ninguna")' },
+  { key: 'alergias_padecimientos', label: 'Alergias y/o padecimientos (o indique "Ninguno")' },
+  { key: 'diagnosticos_medicos', label: 'Diagnósticos médicos (o indique "Ninguno")' },
+  { key: 'num_familiares_adicionales', label: 'Número de familiares adicionales' },
+  { key: 'lugar_ocupa_aspirante', label: 'Lugar que ocupa el aspirante' },
+  { key: 'edades_familiares', label: 'Edades de familiares' },
+  { key: 'telefono_principal', label: 'Teléfono principal de contacto' },
+]
+
+function getMissingFields(data: ExpedienteFormData): string[] {
+  const missing: string[] = []
+  for (const { key, label } of REQUIRED_FIELDS) {
+    if (key === 'tratamiento_psicologico_razon' && data.tratamiento_psicologico_si === false) continue
+    const value = data[key]
+    if (value === undefined || value === null) {
+      missing.push(label)
+      continue
+    }
+    if (typeof value === 'string' && value.trim() === '') missing.push(label)
+    if (typeof value === 'number' && Number.isNaN(value)) missing.push(label)
+  }
+  return missing
 }
 
 const CONDUCTAS_OPTIONS = [
@@ -122,6 +186,8 @@ function ExpedienteInicialContent() {
   const [prefillLoading, setPrefillLoading] = useState(!!citaId)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [validationErrors, setValidationErrors] = useState<string[]>([])
+  const validationRef = useRef<HTMLDivElement>(null)
 
   const setField = useCallback(<K extends keyof ExpedienteFormData>(key: K, value: ExpedienteFormData[K]) => {
     setForm(prev => ({ ...prev, [key]: value }))
@@ -168,6 +234,14 @@ function ExpedienteInicialContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitError(null)
+    setValidationErrors([])
+    const missing = getMissingFields(form)
+    if (missing.length > 0) {
+      setValidationErrors(missing)
+      setLoading(false)
+      setTimeout(() => validationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100)
+      return
+    }
     setLoading(true)
     try {
       await submitExpedienteInicial({ ...form, appointment_id: form.appointment_id || citaId || null })
@@ -484,6 +558,18 @@ function ExpedienteInicialContent() {
             <input type="tel" placeholder="10 dígitos" value={form.telefono_principal || ''} onChange={e => setField('telefono_principal', e.target.value)} />
           </div>
         </section>
+
+        {validationErrors.length > 0 && (
+          <div ref={validationRef} className="expediente-validation-errors" role="alert">
+            <p className="expediente-validation-title">Faltan los siguientes campos por llenar:</p>
+            <ul>
+              {validationErrors.map((label) => (
+                <li key={label}>{label}</li>
+              ))}
+            </ul>
+            <p className="expediente-validation-hint">Por favor complete todos los campos antes de enviar.</p>
+          </div>
+        )}
 
         {submitError && (
           <div className="expediente-error">

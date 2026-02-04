@@ -3828,6 +3828,34 @@ body {
   font-size: 0.9rem;
 }
 
+.expediente-validation-errors {
+  background: #fef3c7;
+  border: 2px solid #f59e0b;
+  color: #92400e;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  margin: 0 1.5rem 1rem;
+  animation: expedienteFadeUp 0.3s ease-out;
+}
+
+.expediente-validation-title {
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.expediente-validation-errors ul {
+  margin: 0 0 0.5rem;
+  padding-left: 1.25rem;
+  line-height: 1.6;
+}
+
+.expediente-validation-hint {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.95;
+}
+
 .expediente-error {
   background: #fef2f2;
   border: 1px solid #fecaca;
