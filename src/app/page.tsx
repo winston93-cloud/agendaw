@@ -27,7 +27,11 @@ export default function Home() {
               <p className="hero-subtitle hero-intro">
                 Agenda tu entrevista de admisión en línea — seguro, sencillo y en pocos minutos.
               </p>
-              <p className="hero-blink-text"><span className="hero-blink-emoji" aria-hidden>🎓</span> Más de 30 años formando líderes <span className="hero-blink-emoji" aria-hidden>✨</span></p>
+              <p className="hero-blink-text">
+                <span className="hero-blink-emoji" aria-hidden>🎓</span>
+                <span className="hero-blink-label">Más de 30 años formando líderes</span>
+                <span className="hero-blink-emoji" aria-hidden>✨</span>
+              </p>
               <Carousel />
               <ScrollButton
                 targetSelector="#agendar-ahora"
