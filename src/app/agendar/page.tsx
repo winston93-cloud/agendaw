@@ -57,6 +57,7 @@ export default function AgendarPage() {
   const [scheduleTimes, setScheduleTimes] = useState<string[]>([])
   const [bookedSlots, setBookedSlots] = useState<string[]>([])
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [lastAppointmentId, setLastAppointmentId] = useState<string | null>(null)
   const [showLeaveConfirmModal, setShowLeaveConfirmModal] = useState(false)
   const [pendingLeaveAction, setPendingLeaveAction] = useState<'prevStep' | 'goHome' | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -339,7 +340,7 @@ export default function AgendarPage() {
   const handleSubmit = async () => {
     setSubmitError(null)
     try {
-      await createAdmissionAppointment({
+      const result = await createAdmissionAppointment({
         campus: formData.campus,
         level: formData.level,
         grade_level: formData.gradeLevel,
@@ -361,6 +362,7 @@ export default function AgendarPage() {
         appointment_date: formData.appointmentDate,
         appointment_time: formData.appointmentTime,
       })
+      setLastAppointmentId(result?.id ?? null)
       setShowSuccessModal(true)
     } catch (e) {
       setSubmitError('No se pudo guardar la cita. Intenta de nuevo o contacta al plantel.')
@@ -372,12 +374,23 @@ export default function AgendarPage() {
       {/* Modal de confirmación exitosa */}
       {showSuccessModal && (
         <div className="success-modal-overlay" onClick={() => setShowSuccessModal(false)}>
-          <div className="success-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="success-modal success-modal-with-expediente" onClick={(e) => e.stopPropagation()}>
             <div className="success-modal-icon">✓</div>
             <h3 className="success-modal-title">Cita agendada exitosamente</h3>
             <p className="success-modal-text">
               Hemos registrado tu solicitud. Recibirás un correo de confirmación en <strong>{formData.parentEmail}</strong> con los detalles de tu cita.
             </p>
+            {lastAppointmentId && (
+              <div className="success-modal-expediente">
+                <p className="success-modal-expediente-title">Requisito importante</p>
+                <p className="success-modal-expediente-text">
+                  Debe llenar el <strong>Expediente Inicial del Aspirante</strong> antes de la fecha de su cita. Es requisito para que la psicología le entregue los resultados de admisión. Los primeros datos (nivel, grado, nombre del alumno, etc.) ya vendrán precargados con la información de su solicitud.
+                </p>
+                <Link href={`/expediente_inicial?cita=${lastAppointmentId}`} className="success-modal-btn success-modal-btn-expediente" onClick={() => setShowSuccessModal(false)}>
+                  Llenar Expediente Inicial
+                </Link>
+              </div>
+            )}
             <Link href="/" className="success-modal-btn" onClick={() => setShowSuccessModal(false)}>
               Volver al inicio
             </Link>

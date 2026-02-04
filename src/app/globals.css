@@ -1384,6 +1384,47 @@ body {
   box-shadow: 0 6px 20px rgba(59, 130, 246, 0.45);
 }
 
+.success-modal-with-expediente .success-modal-text {
+  margin-bottom: 1rem;
+}
+
+.success-modal-expediente {
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.success-modal-expediente-title {
+  font-weight: 700;
+  color: #92400e;
+  font-size: 0.95rem;
+  margin: 0 0 0.5rem;
+}
+
+.success-modal-expediente-text {
+  font-size: 0.9rem;
+  color: #78350f;
+  line-height: 1.5;
+  margin: 0 0 1rem !important;
+}
+
+.success-modal-btn-expediente {
+  display: inline-block;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.success-modal-btn-expediente:hover {
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.45) !important;
+}
+
 /* Modal: ¿Desea enviar antes de salir? */
 .leave-confirm-modal-overlay {
   position: fixed;

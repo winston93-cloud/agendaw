@@ -47,30 +47,37 @@ export async function createAdmissionAppointment(data: {
     throw new Error('Ese horario ya no está disponible. Elige otra fecha u otro horario.')
   }
 
-  const { error } = await supabase.from('admission_appointments').insert({
-    campus: data.campus,
-    level: data.level,
-    grade_level: data.grade_level,
-    student_name: data.student_name,
-    student_age: data.student_age?.trim() || '',
-    student_last_name_p: data.student_last_name_p || null,
-    student_last_name_m: data.student_last_name_m || null,
-    student_birth_date: data.student_birth_date || null,
-    school_cycle: data.school_cycle || null,
-    how_did_you_hear: data.how_did_you_hear || null,
-    parent_name: data.parent_name,
-    parent_email: data.parent_email,
-    parent_phone: data.parent_phone,
-    relationship: data.relationship,
-    appointment_date: data.appointment_date,
-    appointment_time: data.appointment_time || 'Por confirmar',
-    status: 'pending',
-  })
+  const { data: inserted, error } = await supabase
+    .from('admission_appointments')
+    .insert({
+      campus: data.campus,
+      level: data.level,
+      grade_level: data.grade_level,
+      student_name: data.student_name,
+      student_age: data.student_age?.trim() || '',
+      student_last_name_p: data.student_last_name_p || null,
+      student_last_name_m: data.student_last_name_m || null,
+      student_birth_date: data.student_birth_date || null,
+      school_cycle: data.school_cycle || null,
+      how_did_you_hear: data.how_did_you_hear || null,
+      parent_name: data.parent_name,
+      parent_email: data.parent_email,
+      parent_phone: data.parent_phone,
+      relationship: data.relationship,
+      appointment_date: data.appointment_date,
+      appointment_time: data.appointment_time || 'Por confirmar',
+      status: 'pending',
+    })
+    .select('id')
+    .single()
   if (error) throw new Error(error.message)
+  const appointmentId = (inserted as { id: string })?.id
 
   const studentName = [data.student_name, data.student_last_name_p, data.student_last_name_m].filter(Boolean).join(' ')
   const campusName = CAMPUS_NAMES[data.campus] || data.campus
   const levelLabel = LEVEL_LABELS[data.level] || data.level
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://agendaw.vercel.app')
+  const expedienteUrl = appointmentId ? `${baseUrl}/expediente_inicial?cita=${appointmentId}` : ''
   try {
     const result = await sendAdmissionConfirmation(data.parent_email, {
       parentName: data.parent_name,
@@ -79,9 +86,12 @@ export async function createAdmissionAppointment(data: {
       appointmentTime: data.appointment_time || 'Por confirmar',
       campusName,
       levelLabel,
+      expedienteUrl,
     })
     if (!result.ok) console.warn('[email]', result.error)
   } catch (e) {
     console.warn('[email]', e)
   }
+
+  return { id: appointmentId }
 }
