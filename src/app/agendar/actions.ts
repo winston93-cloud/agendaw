@@ -76,8 +76,9 @@ export async function createAdmissionAppointment(data: {
   const studentName = [data.student_name, data.student_last_name_p, data.student_last_name_m].filter(Boolean).join(' ')
   const campusName = CAMPUS_NAMES[data.campus] || data.campus
   const levelLabel = LEVEL_LABELS[data.level] || data.level
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://agendaw.vercel.app')
-  const expedienteUrl = appointmentId ? `${baseUrl}/expediente_inicial?cita=${appointmentId}` : ''
+  // Usar siempre la URL pública de producción para el enlace del correo (evitar preview de Vercel que pide login)
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://agendaw.vercel.app'
+  const expedienteUrl = appointmentId ? `${baseUrl.replace(/\/$/, '')}/expediente_inicial?cita=${appointmentId}` : ''
   try {
     const result = await sendAdmissionConfirmation(data.parent_email, {
       parentName: data.parent_name,
