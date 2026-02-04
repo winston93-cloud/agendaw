@@ -476,15 +476,15 @@ body {
   font-size: 1.4rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: #fff;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+  color: #f5d547;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
   margin: 0 0 1rem;
-  animation: heroBlink 3s ease-in-out infinite;
+  animation: heroBlink 2.2s ease-in-out infinite;
 }
 
 @keyframes heroBlink {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.55; }
+  50% { opacity: 0.25; }
 }
 
 .hero-title-cta {
