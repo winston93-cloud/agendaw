@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import ExamDateCalendar from '@/components/ExamDateCalendar'
 import { createAdmissionAppointment } from './actions'
 
@@ -56,7 +57,11 @@ export default function AgendarPage() {
   const [scheduleTimes, setScheduleTimes] = useState<string[]>([])
   const [bookedSlots, setBookedSlots] = useState<string[]>([])
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [showLeaveConfirmModal, setShowLeaveConfirmModal] = useState(false)
+  const [pendingLeaveAction, setPendingLeaveAction] = useState<'prevStep' | 'goHome' | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const allowLeaveWithoutSendRef = useRef(false)
+  const router = useRouter()
   const studentInfoRef = useRef<HTMLDivElement>(null)
   const afterHorarioRef = useRef<HTMLDivElement>(null)
   const confirmStepRef = useRef<HTMLDivElement>(null)
@@ -285,12 +290,50 @@ export default function AgendarPage() {
     return () => clearTimeout(t)
   }, []) // solo al montar
 
+  // Evitar cerrar/recargar en paso confirmación sin haber enviado (salvo que confirme que no desea enviar)
+  useEffect(() => {
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (currentStep !== 2 || showSuccessModal || allowLeaveWithoutSendRef.current) return
+      e.preventDefault()
+      ;(e as BeforeUnloadEvent & { returnValue: string }).returnValue = ''
+    }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [currentStep, showSuccessModal])
+
   const nextStep = () => {
     if (currentStep < 2) setCurrentStep(2)
   }
 
   const prevStep = () => {
     if (currentStep > 1) setCurrentStep(1)
+  }
+
+  const openLeaveConfirmModal = (action: 'prevStep' | 'goHome') => {
+    setPendingLeaveAction(action)
+    setShowLeaveConfirmModal(true)
+  }
+
+  const closeLeaveConfirmModal = () => {
+    setShowLeaveConfirmModal(false)
+    setPendingLeaveAction(null)
+  }
+
+  const confirmSendFromModal = () => {
+    closeLeaveConfirmModal()
+    handleSubmit()
+  }
+
+  const declineSendAndLeave = () => {
+    const action = pendingLeaveAction
+    allowLeaveWithoutSendRef.current = true
+    closeLeaveConfirmModal()
+    if (action === 'prevStep') {
+      setCurrentStep(1)
+      allowLeaveWithoutSendRef.current = false
+    } else if (action === 'goHome') {
+      router.push('/')
+    }
   }
 
   const handleSubmit = async () => {
@@ -342,6 +385,30 @@ export default function AgendarPage() {
         </div>
       )}
 
+      {/* Modal: ¿Desea enviar antes de salir? (paso confirmación sin enviar) */}
+      {showLeaveConfirmModal && (
+        <div className="leave-confirm-modal-overlay" onClick={closeLeaveConfirmModal}>
+          <div className="leave-confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <h3 className="leave-confirm-modal-title">¿Desea enviar su solicitud?</h3>
+            <p className="leave-confirm-modal-text">
+              Si sale sin enviar, deberá volver a llenar el formulario. Revise que haya confirmado:
+            </p>
+            <ul className="leave-confirm-modal-list">
+              <li>Envío de la documentación requerida por correo electrónico</li>
+              <li>Pago de $200 MXN en recepción el día de la cita</li>
+            </ul>
+            <div className="leave-confirm-modal-actions">
+              <button type="button" className="leave-confirm-btn leave-confirm-btn-primary" onClick={confirmSendFromModal}>
+                Sí, enviar solicitud
+              </button>
+              <button type="button" className="leave-confirm-btn leave-confirm-btn-secondary" onClick={declineSendAndLeave}>
+                No, no deseo enviar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {submitError && (
         <div className="agendar-error-banner">
           <span>{submitError}</span>
@@ -350,7 +417,13 @@ export default function AgendarPage() {
       )}
 
       <div className="agendar-header">
-        <Link href="/" className="back-link">← Volver al inicio</Link>
+        {currentStep === 2 && !showSuccessModal ? (
+          <button type="button" className="back-link" onClick={() => openLeaveConfirmModal('goHome')}>
+            ← Volver al inicio
+          </button>
+        ) : (
+          <Link href="/" className="back-link">← Volver al inicio</Link>
+        )}
         <h1>Solicitud de cita de admisión</h1>
         <p className="agendar-header-desc">Complete los datos para agendar el examen de admisión.</p>
       </div>
@@ -759,7 +832,7 @@ export default function AgendarPage() {
             </div>
 
             <div className="form-actions form-actions-confirm">
-              <button type="button" className="btn btn-secondary" onClick={prevStep}>
+              <button type="button" className="btn btn-secondary" onClick={() => openLeaveConfirmModal('prevStep')}>
                 ← Corregir datos
               </button>
               <button

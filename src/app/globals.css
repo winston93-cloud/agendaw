@@ -1384,6 +1384,94 @@ body {
   box-shadow: 0 6px 20px rgba(59, 130, 246, 0.45);
 }
 
+/* Modal: ¿Desea enviar antes de salir? */
+.leave-confirm-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1.5rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.leave-confirm-modal {
+  background: #fff;
+  border-radius: 20px;
+  padding: 2rem 1.75rem;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  animation: successModalIn 0.35s ease-out;
+}
+
+.leave-confirm-modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.leave-confirm-modal-text {
+  font-size: 0.95rem;
+  color: #475569;
+  line-height: 1.5;
+  margin: 0 0 0.75rem;
+}
+
+.leave-confirm-modal-list {
+  margin: 0 0 1.5rem;
+  padding-left: 1.25rem;
+  color: #475569;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.leave-confirm-modal-list li {
+  margin-bottom: 0.35rem;
+}
+
+.leave-confirm-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.leave-confirm-btn {
+  padding: 0.875rem 1.25rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: none;
+}
+
+.leave-confirm-btn-primary {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #2563eb 100%);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+}
+
+.leave-confirm-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.45);
+}
+
+.leave-confirm-btn-secondary {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.leave-confirm-btn-secondary:hover {
+  background: #e2e8f0;
+}
+
 .agendar-error-banner {
   position: fixed;
   top: 0;
@@ -1633,6 +1721,11 @@ body {
   padding: 0.5rem 0;
   min-height: 44px;
   justify-content: flex-start;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
 }
 
 .back-link:hover {
