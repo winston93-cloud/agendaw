@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -291,7 +290,16 @@ export default function AgendarPage() {
     return () => clearTimeout(t)
   }, []) // solo al montar
 
-  // Nota: al cerrar la pestaña el navegador solo puede mostrar su propio diálogo simple; nuestro modal solo aparece al hacer clic en "Volver al inicio" o "Corregir datos".
+  // Al cerrar la pestaña o recargar en paso confirmación: aviso nativo del navegador (no se puede mostrar nuestro modal ahí).
+  useEffect(() => {
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (currentStep !== 2 || showSuccessModal || allowLeaveWithoutSendRef.current) return
+      e.preventDefault()
+      ;(e as BeforeUnloadEvent & { returnValue: string }).returnValue = ''
+    }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [currentStep, showSuccessModal])
 
   const nextStep = () => {
     if (currentStep < 2) setCurrentStep(2)
@@ -377,8 +385,8 @@ export default function AgendarPage() {
         </div>
       )}
 
-      {/* Modal: ¿Desea enviar antes de salir? (renderizado en body para que siempre sea visible) */}
-      {showLeaveConfirmModal && typeof document !== 'undefined' && createPortal(
+      {/* Modal: ¿Desea enviar antes de salir? */}
+      {showLeaveConfirmModal && (
         <div className="leave-confirm-modal-overlay" onClick={closeLeaveConfirmModal}>
           <div className="leave-confirm-modal" onClick={(e) => e.stopPropagation()}>
             <h3 className="leave-confirm-modal-title">¿Desea enviar su solicitud?</h3>
@@ -398,8 +406,7 @@ export default function AgendarPage() {
               </button>
             </div>
           </div>
-        </div>,
-        document.body
+        </div>
       )}
 
       {submitError && (
@@ -825,7 +832,7 @@ export default function AgendarPage() {
             </div>
 
             <div className="form-actions form-actions-confirm">
-              <button type="button" className="btn btn-secondary" onClick={() => openLeaveConfirmModal('prevStep')}>
+              <button type="button" className="btn btn-secondary" onClick={prevStep}>
                 ← Corregir datos
               </button>
               <button
