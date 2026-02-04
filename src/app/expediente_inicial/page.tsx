@@ -266,7 +266,7 @@ function ExpedienteInicialContent() {
               <label>Edad</label>
               <input type="number" min={1} max={18} placeholder="Edad en años" value={form.edad ?? ''} onChange={e => setField('edad', e.target.value ? parseInt(e.target.value, 10) : undefined)} />
             </div>
-            <div className="expediente-field full-width">
+            <div className="expediente-field">
               <label>Escuela de procedencia</label>
               <input type="text" placeholder="Nombre de la escuela anterior" value={form.escuela_procedencia || ''} onChange={e => setField('escuela_procedencia', e.target.value)} />
             </div>
