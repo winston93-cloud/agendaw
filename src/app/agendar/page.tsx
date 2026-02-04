@@ -54,6 +54,7 @@ export default function AgendarPage() {
   const [scheduleTimes, setScheduleTimes] = useState<string[]>([])
   const studentInfoRef = useRef<HTMLDivElement>(null)
   const afterHorarioRef = useRef<HTMLDivElement>(null)
+  const confirmStepRef = useRef<HTMLDivElement>(null)
   const [formData, setFormData] = useState<FormData>({
     campus: '',
     level: '',
@@ -222,6 +223,13 @@ export default function AgendarPage() {
       afterHorarioRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }, [formData.appointmentTime, formData.gradeLevel, formData.appointmentDate, scheduleTimes.length, currentStep])
+
+  // Al pasar al paso de confirmar, ir al inicio de ese formulario
+  useEffect(() => {
+    if (currentStep === 2) {
+      confirmStepRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [currentStep])
 
   const nextStep = () => {
     if (currentStep < 2) setCurrentStep(2)
@@ -572,7 +580,7 @@ export default function AgendarPage() {
 
         {/* Paso 2: Confirmación */}
         {currentStep === 2 && (
-          <div className="form-step form-step-confirm">
+          <div ref={confirmStepRef} className="form-step form-step-confirm">
             <h2 className="step-heading">Confirmación de tu solicitud</h2>
             <p className="step-description">
               Revisa que todos los datos sean correctos antes de enviar.
