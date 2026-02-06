@@ -132,39 +132,56 @@ export default function AdminBuscar() {
 
   return (
     <div className="admin-buscar">
-      <div className="admin-buscar-filters">
-        <div className="admin-buscar-field">
-          <label>Nombre (alumno o tutor)</label>
-          <input
-            type="text"
-            placeholder="Escriba para buscar..."
-            value={nameQuery}
-            onChange={(e) => setNameQuery(e.target.value)}
-            className="admin-input"
-          />
-        </div>
-        <div className="admin-buscar-field">
-          <label>Fecha de agendación (cuando registró la cita)</label>
-          <input
-            type="date"
-            value={createdDate}
-            onChange={(e) => setCreatedDate(e.target.value)}
-            className="admin-input"
-          />
-        </div>
-        <div className="admin-buscar-field">
-          <label>Fecha de examen</label>
-          <input
-            type="date"
-            value={examDate}
-            onChange={(e) => setExamDate(e.target.value)}
-            className="admin-input"
-          />
+      <div className="admin-buscar-box">
+        <div className="admin-buscar-box-inner">
+          <h3 className="admin-buscar-title">
+            <span className="admin-buscar-title-icon" aria-hidden>🔍</span>
+            Criterios de búsqueda
+          </h3>
+          <div className="admin-buscar-filters">
+            <div className="admin-buscar-field admin-buscar-field-name">
+              <label>Nombre (alumno o tutor)</label>
+              <input
+                type="text"
+                placeholder="Escriba para buscar..."
+                value={nameQuery}
+                onChange={(e) => setNameQuery(e.target.value)}
+                className="admin-input"
+              />
+            </div>
+            <div className="admin-buscar-field admin-buscar-field-date">
+              <label>Fecha de agendación</label>
+              <input
+                type="date"
+                value={createdDate}
+                onChange={(e) => setCreatedDate(e.target.value)}
+                className="admin-input"
+              />
+            </div>
+            <div className="admin-buscar-field admin-buscar-field-date">
+              <label>Fecha de examen</label>
+              <input
+                type="date"
+                value={examDate}
+                onChange={(e) => setExamDate(e.target.value)}
+                className="admin-input"
+              />
+            </div>
+          </div>
+          <p className="admin-buscar-hint">
+            Use al menos un criterio. La búsqueda se actualiza al escribir o elegir fecha.
+          </p>
         </div>
       </div>
-      <p className="admin-hint">Use al menos un criterio. La búsqueda se actualiza al escribir o elegir fecha.</p>
 
-      {loading && <p className="admin-buscar-loading">Buscando…</p>}
+      {loading && (
+        <div className="admin-buscar-loading" role="status" aria-live="polite">
+          <span className="admin-buscar-loading-dot" />
+          <span className="admin-buscar-loading-dot" />
+          <span className="admin-buscar-loading-dot" />
+          <span>Buscando…</span>
+        </div>
+      )}
 
       {!loading && nameQuery.trim().length > 0 && nameQuery.trim().length < 2 && !createdDate && !examDate && (
         <p className="admin-hint">Escriba al menos 2 caracteres para buscar por nombre.</p>
