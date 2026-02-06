@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { searchAdmissionAppointments, updateAppointment } from './actions'
 import ExamDateCalendar from '@/components/ExamDateCalendar'
 import type { AdmissionAppointment } from '@/types/database'
@@ -47,6 +47,7 @@ export default function AdminBuscar() {
   const [editBlockedDates, setEditBlockedDates] = useState<string[]>([])
   const [editScheduleTimes, setEditScheduleTimes] = useState<string[]>([])
   const [editBookedSlots, setEditBookedSlots] = useState<string[]>([])
+  const resultsRef = useRef<HTMLDivElement>(null)
 
   const runSearch = useCallback(async () => {
     if (!nameQuery.trim() && !createdDate && !examDate) {
@@ -74,6 +75,12 @@ export default function AdminBuscar() {
     const t = setTimeout(runSearch, 350)
     return () => clearTimeout(t)
   }, [runSearch])
+
+  useEffect(() => {
+    if (!loading && results.length > 0 && resultsRef.current) {
+      resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [loading, results.length])
 
   useEffect(() => {
     if (!reagendarId || !editLevel) return
@@ -192,7 +199,7 @@ export default function AdminBuscar() {
       )}
 
       {!loading && results.length > 0 && (
-        <div className="admin-buscar-results">
+        <div ref={resultsRef} className="admin-buscar-results">
           {results.map((a) => (
             <div key={a.id} className={`admin-buscar-card ${selected?.id === a.id ? 'selected' : ''}`}>
               <button
