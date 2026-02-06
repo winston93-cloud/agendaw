@@ -50,6 +50,8 @@ export default function AdminBuscar() {
   const resultsRef = useRef<HTMLDivElement>(null)
   const selectedCardRef = useRef<HTMLDivElement>(null)
   const nameInputRef = useRef<HTMLInputElement>(null)
+  const reagendarRef = useRef<HTMLDivElement>(null)
+  const reagendarTimeRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const t = setTimeout(() => nameInputRef.current?.focus({ preventScroll: false }), 0)
@@ -96,6 +98,22 @@ export default function AdminBuscar() {
     }, 100)
     return () => clearTimeout(t)
   }, [selected])
+
+  useEffect(() => {
+    if (!reagendarId) return
+    const t = setTimeout(() => {
+      reagendarRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 150)
+    return () => clearTimeout(t)
+  }, [reagendarId])
+
+  useEffect(() => {
+    if (!reagendarId || !editDate || !editTime) return
+    const t = setTimeout(() => {
+      reagendarTimeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }, 100)
+    return () => clearTimeout(t)
+  }, [reagendarId, editDate, editTime])
 
   useEffect(() => {
     if (!reagendarId || !editLevel) return
@@ -257,7 +275,7 @@ export default function AdminBuscar() {
                     <p><strong>Estado:</strong> <span className={`status-pill status-${a.status}`}>{a.status}</span></p>
                   </div>
                   {reagendarId === a.id ? (
-                    <div className="admin-buscar-reagendar">
+                    <div ref={reagendarRef} className="admin-buscar-reagendar">
                       <h4>Reagendar cita</h4>
                       <div className="admin-buscar-calendar">
                         <label>Nueva fecha</label>
@@ -299,7 +317,7 @@ export default function AdminBuscar() {
                           )}
                         </div>
                       )}
-                      <div className="admin-buscar-actions">
+                      <div ref={reagendarTimeRef} className="admin-buscar-actions">
                         <button type="button" className="btn btn-primary" onClick={saveReagendar}>Guardar</button>
                         <button type="button" className="btn btn-secondary" onClick={cancelReagendar}>Cancelar</button>
                       </div>
