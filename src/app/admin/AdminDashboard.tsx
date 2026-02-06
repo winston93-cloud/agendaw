@@ -4,11 +4,12 @@ import { useState } from 'react'
 import AdminCitas from './AdminCitas'
 import AdminBloquear from './AdminBloquear'
 import AdminHorarios from './AdminHorarios'
+import AdminBuscar from './AdminBuscar'
 import type { AdmissionAppointment } from '@/types/database'
 import type { BlockedDate } from '@/types/database'
 import type { AdmissionSchedule } from '@/types/database'
 
-type Section = 'citas' | 'horarios' | 'bloquear' | null
+type Section = 'citas' | 'horarios' | 'bloquear' | 'buscar' | null
 
 const CARDS: { id: Section; icon: string; title: string; description: string; accent: string }[] = [
   {
@@ -31,6 +32,13 @@ const CARDS: { id: Section; icon: string; title: string; description: string; ac
     title: 'Días bloqueados por nivel',
     description: 'Bloquear fechas para un nivel',
     accent: 'bloquear',
+  },
+  {
+    id: 'buscar',
+    icon: '🔍',
+    title: 'Buscar alumno',
+    description: 'Búsqueda por nombre o fecha; ver datos y reagendar',
+    accent: 'buscar',
   },
 ]
 
@@ -74,6 +82,15 @@ export default function AdminDashboard({
               Si bloqueas un día para un nivel (ej. Secundaria), los otros niveles (Maternal/Kinder, Primaria) siguen pudiendo agendar ese día.
             </p>
             <AdminBloquear blockedDates={blockedDates} />
+          </section>
+        )}
+        {activeSection === 'buscar' && (
+          <section className="admin-section admin-section-buscar">
+            <h2><span className="admin-section-icon">🔍</span> Buscar alumno</h2>
+            <p className="admin-hint">
+              Busque por nombre del alumno o tutor, por fecha en que se agendó la cita o por fecha del examen. Al seleccionar un resultado verá el registro completo y podrá reagendar.
+            </p>
+            <AdminBuscar />
           </section>
         )}
       </div>

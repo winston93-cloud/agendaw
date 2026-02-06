@@ -26,6 +26,43 @@ export async function getAdmissionAppointments(filters?: { date?: string; level?
   return data
 }
 
+/** Búsqueda para panel: por nombre (alumno/tutor), fecha de agendación (created_at) o fecha de examen (appointment_date) */
+export async function searchAdmissionAppointments(params: {
+  name?: string
+  createdDate?: string
+  appointmentDate?: string
+}) {
+  let supabase
+  try {
+    supabase = createAdminClient()
+  } catch {
+    return []
+  }
+  let query = supabase
+    .from('admission_appointments')
+    .select('*')
+    .order('appointment_date', { ascending: false })
+    .order('created_at', { ascending: false })
+
+  const name = params.name?.trim()
+  if (name && name.length >= 2) {
+    const safe = name.replace(/'/g, "''")
+    query = query.or(`student_name.ilike.%${safe}%,parent_name.ilike.%${safe}%`)
+  }
+  if (params.createdDate) {
+    const start = `${params.createdDate}T00:00:00.000Z`
+    const end = `${params.createdDate}T23:59:59.999Z`
+    query = query.gte('created_at', start).lte('created_at', end)
+  }
+  if (params.appointmentDate) {
+    query = query.eq('appointment_date', params.appointmentDate)
+  }
+
+  const { data, error } = await query
+  if (error) throw new Error(error.message)
+  return data
+}
+
 export async function updateAppointment(
   id: string,
   updates: { appointment_date?: string; appointment_time?: string; status?: string; notes?: string }

@@ -3041,6 +3041,14 @@ body {
   border-color: rgba(239, 68, 68, 0.4);
 }
 
+.admin-card-buscar::before {
+  background: linear-gradient(90deg, #059669, #10b981);
+}
+
+.admin-card-buscar:hover {
+  border-color: rgba(5, 150, 105, 0.4);
+}
+
 .admin-card-icon {
   font-size: 2.5rem;
   margin-bottom: 0.75rem;
@@ -3139,6 +3147,10 @@ body {
   background: linear-gradient(180deg, #ef4444, #f97316);
 }
 
+.admin-section-buscar::before {
+  background: linear-gradient(180deg, #059669, #10b981);
+}
+
 .admin-section h2 {
   font-size: 1.35rem;
   font-weight: 700;
@@ -3160,6 +3172,147 @@ body {
   font-size: 0.9rem;
   margin-bottom: 1rem;
   line-height: 1.5;
+}
+
+/* Buscar alumno */
+.admin-buscar {
+  margin-top: 0.5rem;
+}
+
+.admin-buscar-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.admin-buscar-field label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.35rem;
+}
+
+.admin-buscar-field .admin-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.admin-buscar-loading {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin: 1rem 0;
+}
+
+.admin-buscar-results {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.admin-buscar-card {
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.admin-buscar-card.selected {
+  border-color: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+.admin-buscar-card-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  text-align: left;
+  background: #f8fafc;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.admin-buscar-card-head:hover {
+  background: #f1f5f9;
+}
+
+.admin-buscar-card-name {
+  font-weight: 700;
+  color: #1e293b;
+  flex: 1;
+}
+
+.admin-buscar-card-meta {
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.admin-buscar-card-arrow {
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.admin-buscar-card-body {
+  padding: 1rem 1.25rem 1.25rem;
+  background: #fff;
+  border-top: 1px solid #e2e8f0;
+}
+
+.admin-buscar-detail {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.admin-buscar-detail p {
+  margin: 0 0 0.5rem;
+}
+
+.admin-buscar-detail p:last-child {
+  margin-bottom: 0;
+}
+
+.admin-buscar-reagendar {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.admin-buscar-reagendar h4 {
+  font-size: 1rem;
+  margin: 0 0 0.75rem;
+  color: #1e293b;
+}
+
+.admin-buscar-calendar,
+.admin-buscar-time {
+  margin-bottom: 1rem;
+}
+
+.admin-buscar-calendar label,
+.admin-buscar-time label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.admin-buscar-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .admin-filters {
