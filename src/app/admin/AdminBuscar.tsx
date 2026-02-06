@@ -162,6 +162,7 @@ export default function AdminBuscar() {
                 placeholder="Escriba para buscar..."
                 value={nameQuery}
                 onChange={(e) => setNameQuery(e.target.value)}
+                onFocus={() => setNameQuery('')}
                 className="admin-input"
               />
             </div>
@@ -171,6 +172,7 @@ export default function AdminBuscar() {
                 type="date"
                 value={createdDate}
                 onChange={(e) => setCreatedDate(e.target.value)}
+                onFocus={() => setCreatedDate('')}
                 className="admin-input"
               />
             </div>
@@ -180,6 +182,7 @@ export default function AdminBuscar() {
                 type="date"
                 value={examDate}
                 onChange={(e) => setExamDate(e.target.value)}
+                onFocus={() => setExamDate('')}
                 className="admin-input"
               />
             </div>
