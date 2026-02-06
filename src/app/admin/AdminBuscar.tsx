@@ -48,6 +48,7 @@ export default function AdminBuscar() {
   const [editScheduleTimes, setEditScheduleTimes] = useState<string[]>([])
   const [editBookedSlots, setEditBookedSlots] = useState<string[]>([])
   const resultsRef = useRef<HTMLDivElement>(null)
+  const selectedCardRef = useRef<HTMLDivElement>(null)
 
   const runSearch = useCallback(async () => {
     if (!nameQuery.trim() && !createdDate && !examDate) {
@@ -81,6 +82,14 @@ export default function AdminBuscar() {
       resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }, [loading, results.length])
+
+  useEffect(() => {
+    if (!selected) return
+    const t = setTimeout(() => {
+      selectedCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }, 100)
+    return () => clearTimeout(t)
+  }, [selected])
 
   useEffect(() => {
     if (!reagendarId || !editLevel) return
@@ -201,7 +210,11 @@ export default function AdminBuscar() {
       {!loading && results.length > 0 && (
         <div ref={resultsRef} className="admin-buscar-results">
           {results.map((a) => (
-            <div key={a.id} className={`admin-buscar-card ${selected?.id === a.id ? 'selected' : ''}`}>
+            <div
+              key={a.id}
+              ref={selected?.id === a.id ? selectedCardRef : null}
+              className={`admin-buscar-card ${selected?.id === a.id ? 'selected' : ''}`}
+            >
               <button
                 type="button"
                 className="admin-buscar-card-head"
