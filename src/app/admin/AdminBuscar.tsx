@@ -49,6 +49,12 @@ export default function AdminBuscar() {
   const [editBookedSlots, setEditBookedSlots] = useState<string[]>([])
   const resultsRef = useRef<HTMLDivElement>(null)
   const selectedCardRef = useRef<HTMLDivElement>(null)
+  const nameInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    const t = setTimeout(() => nameInputRef.current?.focus({ preventScroll: false }), 0)
+    return () => clearTimeout(t)
+  }, [])
 
   const runSearch = useCallback(async () => {
     if (!nameQuery.trim() && !createdDate && !examDate) {
@@ -156,39 +162,47 @@ export default function AdminBuscar() {
           </h3>
           <div className="admin-buscar-filters">
             <div className="admin-buscar-field admin-buscar-field-name">
-              <label>Nombre (alumno o tutor)</label>
+              <label htmlFor="admin-buscar-name">Nombre (alumno o tutor)</label>
               <input
+                ref={nameInputRef}
+                id="admin-buscar-name"
                 type="text"
                 placeholder="Escriba para buscar..."
                 value={nameQuery}
                 onChange={(e) => setNameQuery(e.target.value)}
                 onFocus={() => setNameQuery('')}
                 className="admin-input"
+                autoComplete="off"
+                aria-describedby="admin-buscar-hint"
               />
             </div>
             <div className="admin-buscar-field admin-buscar-field-date">
-              <label>Fecha de agendación</label>
+              <label htmlFor="admin-buscar-created">Fecha de agendación</label>
               <input
+                id="admin-buscar-created"
                 type="date"
                 value={createdDate}
                 onChange={(e) => setCreatedDate(e.target.value)}
                 onFocus={() => setCreatedDate('')}
                 className="admin-input"
+                aria-label="Fecha de agendación (cuando registró la cita)"
               />
             </div>
             <div className="admin-buscar-field admin-buscar-field-date">
-              <label>Fecha de examen</label>
+              <label htmlFor="admin-buscar-exam">Fecha de examen</label>
               <input
+                id="admin-buscar-exam"
                 type="date"
                 value={examDate}
                 onChange={(e) => setExamDate(e.target.value)}
                 onFocus={() => setExamDate('')}
                 className="admin-input"
+                aria-label="Fecha de examen"
               />
             </div>
           </div>
-          <p className="admin-buscar-hint">
-            Use al menos un criterio. La búsqueda se actualiza al escribir o elegir fecha.
+          <p id="admin-buscar-hint" className="admin-buscar-hint">
+            Use al menos un criterio. La búsqueda se actualiza al escribir o elegir fecha. Navegue con Tab y use Enter en los resultados.
           </p>
         </div>
       </div>
@@ -211,17 +225,21 @@ export default function AdminBuscar() {
       )}
 
       {!loading && results.length > 0 && (
-        <div ref={resultsRef} className="admin-buscar-results">
-          {results.map((a) => (
+        <div ref={resultsRef} className="admin-buscar-results" role="list">
+          {results.map((a, index) => (
             <div
               key={a.id}
               ref={selected?.id === a.id ? selectedCardRef : null}
               className={`admin-buscar-card ${selected?.id === a.id ? 'selected' : ''}`}
+              role="listitem"
             >
               <button
                 type="button"
                 className="admin-buscar-card-head"
                 onClick={() => setSelected(selected?.id === a.id ? null : a)}
+                aria-expanded={selected?.id === a.id}
+                aria-controls={selected?.id === a.id ? `admin-buscar-card-body-${a.id}` : undefined}
+                id={`admin-buscar-card-${a.id}`}
               >
                 <span className="admin-buscar-card-name">{studentDisplay(a)}</span>
                 <span className="admin-buscar-card-meta">
@@ -230,7 +248,7 @@ export default function AdminBuscar() {
                 <span className="admin-buscar-card-arrow">{selected?.id === a.id ? '▼' : '▶'}</span>
               </button>
               {selected?.id === a.id && (
-                <div className="admin-buscar-card-body">
+                <div id={`admin-buscar-card-body-${a.id}`} className="admin-buscar-card-body" role="region" aria-labelledby={`admin-buscar-card-${a.id}`}>
                   <div className="admin-buscar-detail">
                     <p><strong>Aspirante:</strong> {studentDisplay(a)} · {a.grade_level} · {a.student_age} años</p>
                     <p><strong>Tutor:</strong> {a.parent_name} · {a.parent_email} · {a.parent_phone}</p>
@@ -255,9 +273,10 @@ export default function AdminBuscar() {
                               onChange={(e) => setEditTime(e.target.value)}
                               className="admin-input"
                               placeholder="Ej: 09:00"
+                              aria-label="Horario de la cita"
                             />
                           ) : (
-                            <div className="time-slots time-slots-admin">
+                            <div className="time-slots time-slots-admin" role="group" aria-label="Elegir horario">
                               {editScheduleTimes.map((time) => {
                                 const isBooked = editBookedSlots.includes(time)
                                 return (
@@ -268,6 +287,8 @@ export default function AdminBuscar() {
                                     onClick={() => !isBooked && setEditTime(time)}
                                     disabled={isBooked}
                                     title={isBooked ? 'Ocupado' : undefined}
+                                    aria-pressed={editTime === time}
+                                    aria-disabled={isBooked}
                                   >
                                     {time}
                                     {isBooked && <span className="time-slot-label"> (Ocupado)</span>}

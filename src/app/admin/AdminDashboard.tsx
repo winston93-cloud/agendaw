@@ -60,6 +60,7 @@ export default function AdminDashboard({
           type="button"
           className="admin-back-cards"
           onClick={() => setActiveSection(null)}
+          aria-label="Volver al menú de secciones"
         >
           ← Volver a las secciones
         </button>
@@ -105,6 +106,7 @@ export default function AdminDashboard({
           type="button"
           className={`admin-card admin-card-${card.accent}`}
           onClick={() => setActiveSection(card.id)}
+          aria-label={`${card.title}. ${card.description}`}
         >
           <span className="admin-card-icon">{card.icon}</span>
           <h3 className="admin-card-title">{card.title}</h3>
