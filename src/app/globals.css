@@ -4052,6 +4052,54 @@ body {
   margin-bottom: 1rem;
 }
 
+/* Sección grande Temarios (solo Secundaria) */
+.expediente-temarios-seccion {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%);
+  border: 2px solid #059669;
+  box-shadow: 0 8px 24px rgba(5, 150, 105, 0.2);
+}
+
+.expediente-temarios-titulo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #065f46;
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.expediente-temarios-desc {
+  color: #047857;
+  font-size: 1rem;
+  margin: 0 0 1.25rem;
+}
+
+.expediente-temarios-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.expediente-temarios-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-decoration: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.expediente-temarios-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
+  color: #fff;
+}
+
 .expediente-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));

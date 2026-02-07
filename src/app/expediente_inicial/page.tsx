@@ -188,6 +188,7 @@ function ExpedienteInicialContent() {
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [validationErrors, setValidationErrors] = useState<string[]>([])
   const validationRef = useRef<HTMLDivElement>(null)
+  const [secundariaGradeLevel, setSecundariaGradeLevel] = useState<string | null>(null)
 
   const setField = useCallback(<K extends keyof ExpedienteFormData>(key: K, value: ExpedienteFormData[K]) => {
     setForm(prev => ({ ...prev, [key]: value }))
@@ -201,6 +202,9 @@ function ExpedienteInicialContent() {
     getAppointmentForExpediente(citaId)
       .then(app => {
         if (app) {
+          if (app.level === 'secundaria' && app.grade_level) {
+            setSecundariaGradeLevel(app.grade_level)
+          }
           const levelLabel = LEVEL_LABELS[app.level] || app.level
           const gradeLabel = GRADE_LABELS[app.grade_level] || app.grade_level
           setForm(prev => ({
@@ -290,6 +294,31 @@ function ExpedienteInicialContent() {
 
         {prefillLoading && (
           <p className="expediente-loading">Cargando datos de la cita…</p>
+        )}
+
+        {secundariaGradeLevel && (
+          <section className="expediente-section expediente-temarios-seccion" aria-label="Temarios de examen de admisión">
+            <h2 className="expediente-temarios-titulo">📖 Temarios de examen de admisión</h2>
+            <p className="expediente-temarios-desc">Descarga los temarios para el día de tu examen según tu grado.</p>
+            <div className="expediente-temarios-links">
+              <a
+                href={secundariaGradeLevel === 'secundaria_7' ? '/api/temarios/secundaria/1' : secundariaGradeLevel === 'secundaria_8' ? '/api/temarios/secundaria/2' : '/api/temarios/secundaria/3'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="expediente-temarios-link"
+              >
+                Temario de admisión ({GRADE_LABELS[secundariaGradeLevel] || secundariaGradeLevel})
+              </a>
+              <a
+                href="/api/temarios/secundaria/ingles"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="expediente-temarios-link"
+              >
+                Temario de inglés
+              </a>
+            </div>
+          </section>
         )}
 
         {/* Datos del Alumno */}
