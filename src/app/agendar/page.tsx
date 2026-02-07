@@ -46,9 +46,6 @@ interface FormData {
   parentPhone: string
   relationship: string
   relationshipOther: string
-  // Paso 4: Confirmación
-  acceptTerms: boolean
-  documentsSent: boolean
 }
 
 export default function AgendarPage() {
@@ -87,8 +84,6 @@ export default function AgendarPage() {
     parentPhone: '',
     relationship: 'Padre',
     relationshipOther: '',
-    acceptTerms: false,
-    documentsSent: false,
   })
 
   const campusInfo = {
@@ -820,30 +815,6 @@ export default function AgendarPage() {
               </div>
             </div>
 
-            <div className="checkboxes">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={formData.documentsSent}
-                  onChange={(e) => updateFormData('documentsSent', e.target.checked)}
-                />
-                <span>
-                  Confirmo que he enviado la documentación requerida por correo electrónico
-                </span>
-              </label>
-
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={formData.acceptTerms}
-                  onChange={(e) => updateFormData('acceptTerms', e.target.checked)}
-                />
-                <span>
-                  Acepto realizar el pago de $200 MXN en recepción el día de la cita
-                </span>
-              </label>
-            </div>
-
             <div className="form-actions form-actions-confirm">
               <button type="button" className="btn btn-secondary" onClick={prevStep}>
                 ← Corregir datos
@@ -852,7 +823,6 @@ export default function AgendarPage() {
                 type="button"
                 className="btn btn-primary btn-large"
                 onClick={handleSubmit}
-                disabled={!formData.acceptTerms || !formData.documentsSent}
               >
                 Enviar solicitud
               </button>
