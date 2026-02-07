@@ -128,7 +128,27 @@ export async function sendSecundariaTemarios(
     return { ok: false, error: 'Grado de secundaria no válido para temarios' }
   }
 
-  const dir = path.join(process.cwd(), 'Secundaria')
+  const possibleDirs = [
+    path.join(process.cwd(), 'Secundaria'),
+    path.join(process.cwd(), 'public', 'Secundaria'),
+  ]
+  let dir: string | null = null
+  for (const d of possibleDirs) {
+    try {
+      if (fs.existsSync(d) && fs.statSync(d).isDirectory()) {
+        dir = d
+        break
+      }
+    } catch {
+      continue
+    }
+  }
+  if (!dir) {
+    const err = `Carpeta Secundaria no encontrada (buscada en: ${possibleDirs.join(', ')})`
+    console.error('[email temarios]', err)
+    return { ok: false, error: err }
+  }
+
   const attachments: { filename: string; content: Buffer }[] = []
   for (const filename of [temarioFile, SECUNDARIA_INGLES]) {
     try {
@@ -136,11 +156,13 @@ export async function sendSecundariaTemarios(
       const content = fs.readFileSync(filePath)
       attachments.push({ filename, content })
     } catch (e) {
-      console.warn('[email] No se pudo leer temario:', filename, e)
+      console.warn('[email temarios] No se pudo leer:', filename, e)
     }
   }
   if (attachments.length === 0) {
-    return { ok: false, error: 'No se encontraron los PDF de temarios' }
+    const err = 'No se encontraron los PDF de temarios en ' + dir
+    console.error('[email temarios]', err)
+    return { ok: false, error: err }
   }
 
   const html = `
