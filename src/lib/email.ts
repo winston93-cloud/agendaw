@@ -1,4 +1,6 @@
 import nodemailer from 'nodemailer'
+import path from 'path'
+import fs from 'fs'
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -96,6 +98,99 @@ export async function sendAdmissionConfirmation(
     return { ok: true }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Error al enviar el correo'
+    return { ok: false, error: message }
+  }
+}
+
+/** Temario por grado de secundaria: 7mo → 1°, 8vo → 2°, 9no → 3°. Inglés se envía en los tres. */
+const SECUNDARIA_TEMARIO_BY_GRADE: Record<string, string> = {
+  secundaria_7: 'TEMARIO ADMISIÓN 1°.pdf',
+  secundaria_8: 'TEMARIO ADMISIÓN 2°.pdf',
+  secundaria_9: 'TEMARIO ADMISIÓN 3°.pdf',
+}
+const SECUNDARIA_INGLES = 'TEMARIO INGLES SECUNDARIA.pdf'
+
+export type SecundariaTemariosData = {
+  parentName: string
+  studentName: string
+  appointmentDate: string
+  gradeLevel: string // secundaria_7 | secundaria_8 | secundaria_9
+}
+
+export async function sendSecundariaTemarios(
+  to: string,
+  data: SecundariaTemariosData
+): Promise<{ ok: boolean; error?: string }> {
+  const from = 'sistemas.desarrollo@winston93.edu.mx'
+  const dateFormatted = formatDate(data.appointmentDate)
+  const temarioFile = SECUNDARIA_TEMARIO_BY_GRADE[data.gradeLevel]
+  if (!temarioFile) {
+    return { ok: false, error: 'Grado de secundaria no válido para temarios' }
+  }
+
+  const dir = path.join(process.cwd(), 'Secundaria')
+  const attachments: { filename: string; content: Buffer }[] = []
+  for (const filename of [temarioFile, SECUNDARIA_INGLES]) {
+    try {
+      const filePath = path.join(dir, filename)
+      const content = fs.readFileSync(filePath)
+      attachments.push({ filename, content })
+    } catch (e) {
+      console.warn('[email] No se pudo leer temario:', filename, e)
+    }
+  }
+  if (attachments.length === 0) {
+    return { ok: false, error: 'No se encontraron los PDF de temarios' }
+  }
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Temarios de Admisión</title>
+</head>
+<body style="margin:0; padding:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 560px; margin: 0 auto; padding: 24px 16px;">
+    <tr>
+      <td style="background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%); border-radius: 16px 16px 0 0; padding: 28px 24px; text-align: center;">
+        <h1 style="margin: 0; color: #fff; font-size: 1.5rem; font-weight: 700;">Instituto Winston</h1>
+        <p style="margin: 8px 0 0; color: rgba(255,255,255,0.9); font-size: 0.95rem;">Temarios de Admisión</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="background: #ffffff; padding: 28px 24px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; border-top: none;">
+        <p style="margin: 0 0 16px; color: #334155; font-size: 1rem; line-height: 1.6;">Estimado(a) <strong>${escapeHtml(data.parentName)}</strong>,</p>
+        <p style="margin: 0 0 20px; color: #475569; font-size: 0.95rem; line-height: 1.6;">Adjunto encontrará los <strong>temarios de admisión</strong> para el día del examen de admisión de su hijo(a) <strong>${escapeHtml(data.studentName)}</strong> (Secundaria).</p>
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: #f0fdfa; border-radius: 12px; border: 1px solid #99f6e4;">
+          <tr>
+            <td style="padding: 20px;">
+              <p style="margin: 0 0 8px; color: #0f766e; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Fecha del examen de admisión</p>
+              <p style="margin: 0; color: #134e4a; font-size: 1.05rem; font-weight: 600;">${escapeHtml(dateFormatted)}</p>
+              <p style="margin: 12px 0 0; color: #64748b; font-size: 0.9rem;">En este correo se adjuntan el temario según el grado y el temario de inglés.</p>
+            </td>
+          </tr>
+        </table>
+        <p style="margin: 24px 0 0; color: #475569; font-size: 0.9rem; line-height: 1.6;">Saludos cordiales,<br><strong>Instituto Winston</strong></p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`
+
+  try {
+    await transporter.sendMail({
+      from: `"Instituto Winston" <${from}>`,
+      to,
+      subject: `Temarios de Admisión - Examen de admisión ${dateFormatted}`,
+      html,
+      attachments,
+    })
+    return { ok: true }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Error al enviar el correo de temarios'
     return { ok: false, error: message }
   }
 }
