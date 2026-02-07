@@ -56,6 +56,17 @@ export async function sendAdmissionConfirmation(
       <td style="background: #ffffff; padding: 28px 24px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; border-top: none;">
         <p style="margin: 0 0 16px; color: #334155; font-size: 1rem; line-height: 1.6;">Estimado(a) <strong>${escapeHtml(data.parentName)}</strong>,</p>
         <p style="margin: 0 0 20px; color: #475569; font-size: 0.95rem; line-height: 1.6;">Su solicitud de cita de admisión ha sido registrada correctamente.</p>
+        ${data.expedienteUrl ? `
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-bottom: 24px;">
+          <tr>
+            <td style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 12px; padding: 16px;">
+              <p style="margin: 0 0 8px; color: #92400e; font-size: 0.9rem; font-weight: 700;">Requisito importante</p>
+              <p style="margin: 0 0 12px; color: #78350f; font-size: 0.9rem; line-height: 1.5;">Debe llenar el <strong>Expediente Inicial del Aspirante</strong> antes de la fecha de su cita. Es requisito para que la psicología le entregue los resultados de admisión. Los primeros datos (nivel, grado, nombre del alumno, etc.) ya estarán precargados con la información de su solicitud.</p>
+              <a href="${escapeHtml(data.expedienteUrl)}" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; padding: 12px 24px; border-radius: 10px; font-weight: 600; text-decoration: none; font-size: 0.95rem;">Llenar Expediente Inicial</a>
+            </td>
+          </tr>
+        </table>
+        ` : ''}
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
           <tr>
             <td style="padding: 20px;">
@@ -69,17 +80,6 @@ export async function sendAdmissionConfirmation(
           </tr>
         </table>
         <p style="margin: 20px 0 0; color: #64748b; font-size: 0.9rem; line-height: 1.6;">Recuerde enviar la documentación requerida por correo y realizar el pago de <strong>$200 MXN</strong> en recepción el día de su cita.</p>
-        ${data.expedienteUrl ? `
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top: 24px;">
-          <tr>
-            <td style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 12px; padding: 16px;">
-              <p style="margin: 0 0 8px; color: #92400e; font-size: 0.9rem; font-weight: 700;">Requisito importante</p>
-              <p style="margin: 0 0 12px; color: #78350f; font-size: 0.9rem; line-height: 1.5;">Debe llenar el <strong>Expediente Inicial del Aspirante</strong> antes de la fecha de su cita. Es requisito para que la psicología le entregue los resultados de admisión. Los primeros datos (nivel, grado, nombre del alumno, etc.) ya estarán precargados con la información de su solicitud.</p>
-              <a href="${escapeHtml(data.expedienteUrl)}" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; padding: 12px 24px; border-radius: 10px; font-weight: 600; text-decoration: none; font-size: 0.95rem;">Llenar Expediente Inicial</a>
-            </td>
-          </tr>
-        </table>
-        ` : ''}
         <p style="margin: 24px 0 0; color: #475569; font-size: 0.9rem; line-height: 1.6;">Saludos cordiales,<br><strong>Instituto Winston</strong></p>
       </td>
     </tr>
