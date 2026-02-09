@@ -80,6 +80,10 @@ export async function createAdmissionAppointment(data: {
   // Usar siempre la URL pública de producción para el enlace del correo (evitar preview de Vercel que pide login)
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://agendaw.vercel.app'
   const expedienteUrl = appointmentId ? `${baseUrl.replace(/\/$/, '')}/expediente_inicial?cita=${appointmentId}` : ''
+  
+  let emailSent = false
+  let smsSent = false
+
   try {
     const result = await sendAdmissionConfirmation(data.parent_email, {
       parentName: data.parent_name,
@@ -90,6 +94,7 @@ export async function createAdmissionAppointment(data: {
       levelLabel,
       expedienteUrl,
     })
+    emailSent = result.ok
     if (!result.ok) console.warn('[email]', result.error)
   } catch (e) {
     console.warn('[email]', e)
@@ -103,6 +108,7 @@ export async function createAdmissionAppointment(data: {
         appointmentTime: data.appointment_time || 'Por confirmar',
         expedienteUrl,
       })
+      smsSent = smsResult.ok
       if (!smsResult.ok) console.warn('[sms]', smsResult.error)
     } catch (e) {
       console.warn('[sms]', e)
@@ -123,5 +129,5 @@ export async function createAdmissionAppointment(data: {
     }
   }
 
-  return { id: appointmentId }
+  return { id: appointmentId, emailSent, smsSent }
 }

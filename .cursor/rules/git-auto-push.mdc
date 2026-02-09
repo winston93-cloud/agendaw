@@ -1,0 +1,12 @@
+---
+description: Subir cambios a Git automáticamente después de modificar código
+alwaysApply: true
+---
+
+# Git: subir siempre al terminar
+
+- Después de **cualquier cambio** en el código (archivos del proyecto), **sube a Git sin que el usuario lo pida**.
+- Al terminar la tarea: `git add` de los archivos modificados/nuevos, `git commit -m "mensaje descriptivo"` y `git push origin main`.
+- No preguntes "¿subo a Git?"; hazlo por defecto al cerrar los cambios.
+- Excepción: si el usuario dice explícitamente que no suba o que no haga commit, no lo hagas.
+- Mensaje de commit: breve y en español (ej. "feat: ...", "fix: ...", "ux: ...").

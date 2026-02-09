@@ -1366,6 +1366,55 @@ body {
   margin: 0 0 1.5rem;
 }
 
+.success-modal-status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1rem 0 1.5rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.status-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.status-ok .status-icon {
+  background: #10b981;
+  color: white;
+}
+
+.status-ok {
+  color: #065f46;
+}
+
+.status-fail .status-icon {
+  background: #ef4444;
+  color: white;
+}
+
+.status-fail {
+  color: #991b1b;
+}
+
 .success-modal-btn {
   display: inline-block;
   background: linear-gradient(135deg, var(--primary-color) 0%, #2563eb 100%);

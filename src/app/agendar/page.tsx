@@ -55,6 +55,8 @@ export default function AgendarPage() {
   const [bookedSlots, setBookedSlots] = useState<string[]>([])
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [lastAppointmentId, setLastAppointmentId] = useState<string | null>(null)
+  const [emailSent, setEmailSent] = useState(false)
+  const [smsSent, setSmsSent] = useState(false)
   const [showLeaveConfirmModal, setShowLeaveConfirmModal] = useState(false)
   const [pendingLeaveAction, setPendingLeaveAction] = useState<'prevStep' | 'goHome' | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -358,6 +360,8 @@ export default function AgendarPage() {
         appointment_time: formData.appointmentTime,
       })
       setLastAppointmentId(result?.id ?? null)
+      setEmailSent(result?.emailSent ?? false)
+      setSmsSent(result?.smsSent ?? false)
       setShowSuccessModal(true)
     } catch (e) {
       setSubmitError('No se pudo guardar la cita. Intenta de nuevo o contacta al plantel.')
@@ -375,6 +379,16 @@ export default function AgendarPage() {
             <p className="success-modal-text">
               Hemos registrado tu solicitud. Recibirás un correo de confirmación en <strong>{formData.parentEmail}</strong> con los detalles de tu cita.
             </p>
+            <div className="success-modal-status">
+              <p className={`status-item ${emailSent ? 'status-ok' : 'status-fail'}`}>
+                <span className="status-icon">{emailSent ? '✓' : '✗'}</span>
+                <span>{emailSent ? 'Correo enviado' : 'Correo no se pudo enviar'}</span>
+              </p>
+              <p className={`status-item ${smsSent ? 'status-ok' : 'status-fail'}`}>
+                <span className="status-icon">{smsSent ? '✓' : '✗'}</span>
+                <span>{smsSent ? 'SMS enviado' : 'SMS no se pudo enviar'}</span>
+              </p>
+            </div>
             {lastAppointmentId && (
               <div className="success-modal-expediente">
                 <p className="success-modal-expediente-title">Requisito importante</p>
