@@ -2,6 +2,7 @@
 
 import { createAdminClient } from '@/lib/supabase/server'
 import { sendAdmissionConfirmation, sendSecundariaTemarios } from '@/lib/email'
+import { sendAdmissionSms } from '@/lib/sms'
 
 const CAMPUS_NAMES: Record<string, string> = {
   winston: 'Instituto Educativo Winston',
@@ -92,6 +93,20 @@ export async function createAdmissionAppointment(data: {
     if (!result.ok) console.warn('[email]', result.error)
   } catch (e) {
     console.warn('[email]', e)
+  }
+
+  if (data.parent_phone?.trim() && expedienteUrl) {
+    try {
+      const smsResult = await sendAdmissionSms(data.parent_phone, {
+        studentName: studentName || data.student_name,
+        appointmentDate: data.appointment_date,
+        appointmentTime: data.appointment_time || 'Por confirmar',
+        expedienteUrl,
+      })
+      if (!smsResult.ok) console.warn('[sms]', smsResult.error)
+    } catch (e) {
+      console.warn('[sms]', e)
+    }
   }
 
   if (data.level === 'secundaria' && data.grade_level) {
