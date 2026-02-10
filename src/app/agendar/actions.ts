@@ -4,15 +4,20 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { sendAdmissionConfirmation, sendSecundariaTemarios } from '@/lib/email'
 import { sendAdmissionSms } from '@/lib/sms'
 
-const CAMPUS_NAMES: Record<string, string> = {
-  winston: 'Instituto Educativo Winston',
-  churchill: 'Instituto Winston Churchill',
-}
 const LEVEL_LABELS: Record<string, string> = {
   maternal: 'Maternal',
   kinder: 'Kinder',
   primaria: 'Primaria',
   secundaria: 'Secundaria',
+}
+
+/** Retorna el nombre del plantel según el nivel educativo */
+function getCampusNameByLevel(level: string): string {
+  if (level === 'maternal' || level === 'kinder') {
+    return 'Instituto Educativo Winston'
+  }
+  // primaria y secundaria
+  return 'Winston Churchill'
 }
 
 export async function createAdmissionAppointment(data: {
@@ -75,7 +80,7 @@ export async function createAdmissionAppointment(data: {
   const appointmentId = (inserted as { id: string })?.id
 
   const studentName = [data.student_name, data.student_last_name_p, data.student_last_name_m].filter(Boolean).join(' ')
-  const campusName = CAMPUS_NAMES[data.campus] || data.campus
+  const campusName = getCampusNameByLevel(data.level)
   const levelLabel = LEVEL_LABELS[data.level] || data.level
   // Usar siempre la URL pública de producción para el enlace del correo (evitar preview de Vercel que pide login)
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://agendaw.vercel.app'
