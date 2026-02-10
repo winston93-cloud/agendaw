@@ -57,7 +57,7 @@ export async function sendAdmissionSms(
     apikey: apiKey.trim(),
     recipients,
     message,
-    shorturl: '1', // acortar URL para ahorrar caracteres
+    // NO usar shorturl porque pierde el parámetro ?cita=ID
   })
 
   try {
