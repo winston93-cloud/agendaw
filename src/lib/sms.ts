@@ -36,7 +36,7 @@ export function buildAdmissionSmsText(data: AdmissionSmsData): string {
   })()
   
   // Mensaje: nombre plantel completo, nombre completo del alumno, fecha, hora, expediente inicial
-  const msg = `${data.campusName}: Cita registrada para ${data.studentName}. Fecha: ${dateShort} a las ${data.appointmentTime}. Llene el Expediente Inicial: ${data.expedienteUrl}`
+  const msg = `${data.campusName}: Cita registrada. ${data.studentName}. ${dateShort} ${data.appointmentTime}. Expediente Inicial: ${data.expedienteUrl}`
   
   // Limitar a 2 segmentos SMS (306 caracteres)
   return msg.length > 306 ? msg.slice(0, 303) + '...' : msg
