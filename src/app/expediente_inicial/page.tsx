@@ -199,9 +199,11 @@ function ExpedienteInicialContent() {
       setPrefillLoading(false)
       return
     }
+    console.log('[expediente-page] Precargando datos para cita:', citaId)
     getAppointmentForExpediente(citaId)
       .then(app => {
         if (app) {
+          console.log('[expediente-page] Datos recibidos, precargando form...')
           if (app.level === 'secundaria' && app.grade_level) {
             setSecundariaGradeLevel(app.grade_level)
           }

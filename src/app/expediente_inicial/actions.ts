@@ -68,13 +68,24 @@ export type ExpedienteFormData = {
 }
 
 export async function getAppointmentForExpediente(appointmentId: string) {
+  console.log('[expediente] Buscando cita:', appointmentId)
   const supabase = createAdminClient()
   const { data, error } = await supabase
     .from('admission_appointments')
     .select('id, campus, level, grade_level, student_name, student_last_name_p, student_last_name_m, student_birth_date, school_cycle, parent_name, parent_email, parent_phone')
     .eq('id', appointmentId)
     .single()
-  if (error || !data) return null
+  
+  if (error) {
+    console.error('[expediente] Error al buscar cita:', error)
+    return null
+  }
+  if (!data) {
+    console.warn('[expediente] No se encontró cita con id:', appointmentId)
+    return null
+  }
+  
+  console.log('[expediente] Cita encontrada:', data.student_name, data.level, data.grade_level)
   return data
 }
 

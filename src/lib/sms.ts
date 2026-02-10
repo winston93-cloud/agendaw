@@ -23,19 +23,20 @@ export type AdmissionSmsData = {
   expedienteUrl: string
 }
 
-/** Arma el texto del SMS en ~1 segmento (≤160 caracteres), con enlace al expediente. */
+/** Arma el texto del SMS compacto para que quepa el enlace completo (max ~160 caracteres). */
 export function buildAdmissionSmsText(data: AdmissionSmsData): string {
   const dateShort = (() => {
     try {
       const d = new Date(data.appointmentDate + 'T12:00:00')
-      return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
+      return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })
     } catch {
       return data.appointmentDate
     }
   })()
-  const name = data.studentName.length > 25 ? data.studentName.slice(0, 22) + '...' : data.studentName
-  const msg = `Winston: Cita registrada. ${name}. ${dateShort} ${data.appointmentTime}. Expediente: ${data.expedienteUrl}`
-  return msg.length > 160 ? msg.slice(0, 157) + '...' : msg
+  const name = data.studentName.split(' ')[0] // Solo primer nombre
+  // Formato ultra-compacto: "Winston: Cita ${nombre} ${fecha} ${hora}. Expediente: ${url}"
+  const msg = `Winston: Cita ${name} ${dateShort} ${data.appointmentTime}. Expediente: ${data.expedienteUrl}`
+  return msg
 }
 
 /**
