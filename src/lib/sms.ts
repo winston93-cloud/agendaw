@@ -1,8 +1,9 @@
 /**
  * SMS vía SMS Mobile API (app en tu celular).
  * Endpoint: https://api.smsmobileapi.com/sendsms/
- * Parámetros: apikey, recipients, message. Opcional: shorturl=1 para acortar URLs.
- * Actualizado: 2026-02-09
+ * Parámetros: apikey, recipients, message.
+ * NO usar shorturl para preservar parámetros de query en URLs.
+ * Actualizado: 2026-02-10
  */
 
 const SMSMOBILEAPI_URL = 'https://api.smsmobileapi.com/sendsms/'
