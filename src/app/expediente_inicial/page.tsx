@@ -184,6 +184,7 @@ function ExpedienteInicialContent() {
   const [form, setForm] = useState<ExpedienteFormData>(initialForm)
   const [loading, setLoading] = useState(false)
   const [prefillLoading, setPrefillLoading] = useState(!!citaId)
+  const [prefillError, setPrefillError] = useState<string | null>(null)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [validationErrors, setValidationErrors] = useState<string[]>([])
@@ -230,11 +231,13 @@ function ExpedienteInicialContent() {
           }))
         } else {
           console.warn('[expediente-page] No se encontraron datos para la cita:', citaId)
+          setPrefillError('No se encontró la cita. Verifica que el enlace sea correcto o agenda una nueva cita.')
         }
         setPrefillLoading(false)
       })
       .catch(err => {
         console.error('[expediente-page] Error al precargar:', err)
+        setPrefillError('Error al cargar los datos de la cita.')
         setPrefillLoading(false)
       })
   }, [citaId])
@@ -306,6 +309,19 @@ function ExpedienteInicialContent() {
 
         {prefillLoading && (
           <p className="expediente-loading">Cargando datos de la cita…</p>
+        )}
+
+        {prefillError && (
+          <div className="expediente-error" style={{ 
+            padding: '1rem', 
+            margin: '1rem 0', 
+            background: '#fee', 
+            border: '2px solid #fcc', 
+            borderRadius: '8px',
+            color: '#c00'
+          }}>
+            <strong>⚠️ {prefillError}</strong>
+          </div>
         )}
 
         {secundariaGradeLevel && (
