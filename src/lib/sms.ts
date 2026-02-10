@@ -67,8 +67,26 @@ export async function sendAdmissionSms(
       console.warn('[sms]', res.status, text)
       return { ok: false, error: `SMS API: ${res.status}` }
     }
-    // La API puede devolver JSON o texto; si contiene "error" o "fail" consideramos fallo
-    if (text.toLowerCase().includes('error') || text.toLowerCase().includes('fail')) {
+    
+    // La API devuelve JSON con {"result":{"error":0,"sent":"1"}} cuando tiene éxito
+    try {
+      const json = JSON.parse(text)
+      if (json.result) {
+        // error:0 y sent:"1" indican éxito
+        const isSuccess = json.result.error === 0 || json.result.error === '0' || json.result.sent === '1' || json.result.sent === 1
+        if (isSuccess) {
+          return { ok: true }
+        } else {
+          console.warn('[sms]', text)
+          return { ok: false, error: json.result.error || 'SMS no enviado' }
+        }
+      }
+    } catch {
+      // Si no es JSON válido, revisar el texto
+    }
+    
+    // Fallback: si contiene "fail" consideramos fallo
+    if (text.toLowerCase().includes('fail')) {
       console.warn('[sms]', text)
       return { ok: false, error: text.slice(0, 100) }
     }
