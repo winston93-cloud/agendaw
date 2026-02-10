@@ -76,8 +76,12 @@ export async function createAdmissionAppointment(data: {
     })
     .select('id')
     .single()
-  if (error) throw new Error(error.message)
+  if (error) {
+    console.error('[agendar] Error al insertar cita:', error)
+    throw new Error(error.message)
+  }
   const appointmentId = (inserted as { id: string })?.id
+  console.log('[agendar] Cita creada con ID:', appointmentId)
 
   const studentName = [data.student_name, data.student_last_name_p, data.student_last_name_m].filter(Boolean).join(' ')
   const campusName = getCampusNameByLevel(data.level)
