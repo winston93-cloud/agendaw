@@ -196,6 +196,7 @@ function ExpedienteInicialContent() {
 
   useEffect(() => {
     if (!citaId) {
+      console.log('[expediente-page] No hay citaId en URL')
       setPrefillLoading(false)
       return
     }
@@ -203,7 +204,11 @@ function ExpedienteInicialContent() {
     getAppointmentForExpediente(citaId)
       .then(app => {
         if (app) {
-          console.log('[expediente-page] Datos recibidos, precargando form...')
+          console.log('[expediente-page] Datos recibidos, precargando form:', {
+            student: app.student_name,
+            level: app.level,
+            grade: app.grade_level
+          })
           if (app.level === 'secundaria' && app.grade_level) {
             setSecundariaGradeLevel(app.grade_level)
           }
@@ -223,10 +228,15 @@ function ExpedienteInicialContent() {
             padre_email: app.parent_email?.trim() || '',
             padre_telefono_celular: app.parent_phone?.trim() || '',
           }))
+        } else {
+          console.warn('[expediente-page] No se encontraron datos para la cita:', citaId)
         }
         setPrefillLoading(false)
       })
-      .catch(() => setPrefillLoading(false))
+      .catch(err => {
+        console.error('[expediente-page] Error al precargar:', err)
+        setPrefillLoading(false)
+      })
   }, [citaId])
 
   const toggleConducta = (label: string) => {
