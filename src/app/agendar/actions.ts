@@ -112,6 +112,7 @@ export async function createAdmissionAppointment(data: {
   if (data.parent_phone?.trim() && expedienteUrl) {
     try {
       const smsResult = await sendAdmissionSms(data.parent_phone, {
+        campusName,
         studentName: studentName || data.student_name,
         appointmentDate: data.appointment_date,
         appointmentTime: data.appointment_time || 'Por confirmar',

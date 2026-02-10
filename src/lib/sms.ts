@@ -17,26 +17,29 @@ function normalizePhone(phone: string): string {
 }
 
 export type AdmissionSmsData = {
+  campusName: string
   studentName: string
   appointmentDate: string // YYYY-MM-DD
   appointmentTime: string
   expedienteUrl: string
 }
 
-/** Arma el texto del SMS compacto para que quepa el enlace completo (max ~160 caracteres). */
+/** Arma el texto del SMS en máximo 2 segmentos (~306 caracteres). */
 export function buildAdmissionSmsText(data: AdmissionSmsData): string {
   const dateShort = (() => {
     try {
       const d = new Date(data.appointmentDate + 'T12:00:00')
-      return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })
+      return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })
     } catch {
       return data.appointmentDate
     }
   })()
-  const name = data.studentName.split(' ')[0] // Solo primer nombre
-  // Formato ultra-compacto: "Winston: Cita ${nombre} ${fecha} ${hora}. Expediente: ${url}"
-  const msg = `Winston: Cita ${name} ${dateShort} ${data.appointmentTime}. Expediente: ${data.expedienteUrl}`
-  return msg
+  
+  // Mensaje: nombre plantel completo, nombre completo del alumno, fecha, hora, expediente inicial
+  const msg = `${data.campusName}: Cita registrada para ${data.studentName}. Fecha: ${dateShort} a las ${data.appointmentTime}. Llene el Expediente Inicial: ${data.expedienteUrl}`
+  
+  // Limitar a 2 segmentos SMS (306 caracteres)
+  return msg.length > 306 ? msg.slice(0, 303) + '...' : msg
 }
 
 /**
