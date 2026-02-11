@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { updateAppointment, completeAdmissionAndCreateAlumno } from './actions'
+import { updateAppointment, completeAdmissionAndCreateAlumno, checkExpedienteExists } from './actions'
 import ExamDateCalendar from '@/components/ExamDateCalendar'
 import type { AdmissionAppointment } from '@/types/database'
 
@@ -29,12 +29,26 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
   const [editBookedSlots, setEditBookedSlots] = useState<string[]>([])
   const [filterLevel, setFilterLevel] = useState<string>('')
   const [filterStatus, setFilterStatus] = useState<string>('')
+  const [expedientesMap, setExpedientesMap] = useState<Record<string, boolean>>({})
 
   const filtered = appointments.filter((a) => {
     if (filterLevel && a.level !== filterLevel) return false
     if (filterStatus && a.status !== filterStatus) return false
     return true
   })
+
+  // Cargar qué citas tienen expediente inicial
+  useEffect(() => {
+    const loadExpedientes = async () => {
+      const map: Record<string, boolean> = {}
+      for (const apt of appointments) {
+        const hasExpediente = await checkExpedienteExists(apt.id)
+        map[apt.id] = hasExpediente
+      }
+      setExpedientesMap(map)
+    }
+    loadExpedientes()
+  }, [appointments])
 
   const startEdit = (a: AdmissionAppointment) => {
     setEditingId(a.id)
@@ -99,17 +113,23 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
 
   const updateStatus = async (id: string, status: string) => {
     try {
-      if (status === 'completed') {
-        // Crear alumno en MySQL al completar
-        const result = await completeAdmissionAndCreateAlumno(id)
-        if (result.success) {
-          alert(result.message)
-          window.location.reload() // Recargar para ver cambios
-        } else {
-          alert('❌ Error: ' + result.message)
-        }
+      await updateAppointment(id, { status })
+    } catch (e) {
+      alert((e as Error).message)
+    }
+  }
+
+  const aprobarAlumno = async (id: string) => {
+    if (!confirm('¿Aprobar alumno y crear en el sistema? Esta acción creará el registro en MySQL.')) {
+      return
+    }
+    try {
+      const result = await completeAdmissionAndCreateAlumno(id)
+      if (result.success) {
+        alert(result.message)
+        window.location.reload()
       } else {
-        await updateAppointment(id, { status })
+        alert('❌ Error: ' + result.message)
       }
     } catch (e) {
       alert((e as Error).message)
@@ -242,9 +262,33 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                         </button>
                       </>
                     ) : (
-                      <button type="button" className="btn btn-secondary btn-sm" onClick={() => startEdit(a)}>
-                        Reagendar
-                      </button>
+                      <>
+                        <button type="button" className="btn btn-secondary btn-sm" onClick={() => startEdit(a)}>
+                          Reagendar
+                        </button>
+                        {expedientesMap[a.id] && (
+                          <>
+                            <button 
+                              type="button" 
+                              className="btn btn-info btn-sm" 
+                              onClick={() => window.open(`/expediente_inicial?cita=${a.id}`, '_blank')}
+                              style={{ marginLeft: '0.5rem' }}
+                            >
+                              📄 Ver Expediente
+                            </button>
+                            {a.status !== 'completed' && (
+                              <button 
+                                type="button" 
+                                className="btn btn-success btn-sm" 
+                                onClick={() => aprobarAlumno(a.id)}
+                                style={{ marginLeft: '0.5rem' }}
+                              >
+                                ✓ Aprobar
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </>
                     )}
                   </td>
                 </tr>

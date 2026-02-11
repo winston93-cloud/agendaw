@@ -187,6 +187,19 @@ export async function completeAdmissionAndCreateAlumno(appointmentId: string): P
   }
 }
 
+/**
+ * Verifica si existe el expediente inicial para una cita
+ */
+export async function checkExpedienteExists(appointmentId: string): Promise<boolean> {
+  const supabase = createAdminClient()
+  const { data } = await supabase
+    .from('expediente_inicial')
+    .select('id')
+    .eq('appointment_id', appointmentId)
+    .single()
+  return !!data
+}
+
 export async function getBlockedDates(level?: AdmissionLevel) {
   let supabase
   try {
