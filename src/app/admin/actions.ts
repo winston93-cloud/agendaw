@@ -137,7 +137,7 @@ export async function completeAdmissionAndCreateAlumno(appointmentId: string): P
     }
 
     // Verificar si ya existe el alumno
-    const existingRef = await checkAlumnoExists(
+    const existingRef = await checkAlumnoExistsInMySQL(
       expediente.nombre_alumno || appointment.student_name,
       expediente.apellido_paterno_alumno || appointment.student_last_name_p || ''
     )
