@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { updateAppointment } from './actions'
+import { updateAppointment, completeAdmissionAndCreateAlumno } from './actions'
 import ExamDateCalendar from '@/components/ExamDateCalendar'
 import type { AdmissionAppointment } from '@/types/database'
 
@@ -99,7 +99,18 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
 
   const updateStatus = async (id: string, status: string) => {
     try {
-      await updateAppointment(id, { status })
+      if (status === 'completed') {
+        // Crear alumno en MySQL al completar
+        const result = await completeAdmissionAndCreateAlumno(id)
+        if (result.success) {
+          alert(result.message)
+          window.location.reload() // Recargar para ver cambios
+        } else {
+          alert('❌ Error: ' + result.message)
+        }
+      } else {
+        await updateAppointment(id, { status })
+      }
     } catch (e) {
       alert((e as Error).message)
     }
