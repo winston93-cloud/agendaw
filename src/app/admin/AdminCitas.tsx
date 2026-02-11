@@ -271,7 +271,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                             <button 
                               type="button" 
                               className="btn btn-info btn-sm" 
-                              onClick={() => window.open(`/expediente_inicial?cita=${a.id}`, '_blank')}
+                              onClick={() => window.open(`/expediente_inicial/ver?cita=${a.id}`, '_blank')}
                               style={{ fontWeight: '600' }}
                             >
                               📄 Ver Expediente
