@@ -253,18 +253,18 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                   </td>
                   <td>
                     {editingId === a.id ? (
-                      <>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                         <button type="button" className="btn btn-primary btn-sm" onClick={saveEdit}>
                           Guardar
                         </button>
                         <button type="button" className="btn btn-secondary btn-sm" onClick={cancelEdit}>
                           Cancelar
                         </button>
-                      </>
+                      </div>
                     ) : (
-                      <>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'stretch' }}>
                         <button type="button" className="btn btn-secondary btn-sm" onClick={() => startEdit(a)}>
-                          Reagendar
+                          🔄 Reagendar
                         </button>
                         {expedientesMap[a.id] && (
                           <>
@@ -272,7 +272,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                               type="button" 
                               className="btn btn-info btn-sm" 
                               onClick={() => window.open(`/expediente_inicial?cita=${a.id}`, '_blank')}
-                              style={{ marginLeft: '0.5rem' }}
+                              style={{ fontWeight: '600' }}
                             >
                               📄 Ver Expediente
                             </button>
@@ -281,14 +281,14 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                                 type="button" 
                                 className="btn btn-success btn-sm" 
                                 onClick={() => aprobarAlumno(a.id)}
-                                style={{ marginLeft: '0.5rem' }}
+                                style={{ fontWeight: '700', fontSize: '0.9rem' }}
                               >
-                                ✓ Aprobar
+                                ✅ Aprobar Alumno
                               </button>
                             )}
                           </>
                         )}
-                      </>
+                      </div>
                     )}
                   </td>
                 </tr>
