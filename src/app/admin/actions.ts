@@ -3,6 +3,7 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { AdmissionLevel } from '@/types/database'
+import { createAlumnoInMySQL, checkAlumnoExists as checkAlumnoExistsInMySQL, type AlumnoData } from '@/lib/mysql'
 
 export async function getAdmissionAppointments(filters?: { date?: string; level?: string; status?: string }) {
   let supabase
