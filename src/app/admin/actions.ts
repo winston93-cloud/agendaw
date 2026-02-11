@@ -95,6 +95,98 @@ export async function updateAppointment(
   revalidatePath('/admin')
 }
 
+/**
+ * Marca una cita como completada y crea el alumno en MySQL
+ * Retorna el alumno_ref asignado en MySQL
+ */
+export async function completeAdmissionAndCreateAlumno(appointmentId: string): Promise<{
+  success: boolean
+  alumno_ref?: number
+  message: string
+}> {
+  try {
+    const supabase = createAdminClient()
+    
+    // Obtener datos completos de la cita y expediente
+    const { data: appointment } = await supabase
+      .from('admission_appointments')
+      .select('*')
+      .eq('id', appointmentId)
+      .single()
+    
+    if (!appointment) {
+      return { success: false, message: 'No se encontró la cita' }
+    }
+
+    const { data: expediente } = await supabase
+      .from('expediente_inicial')
+      .select('*')
+      .eq('appointment_id', appointmentId)
+      .single()
+
+    if (!expediente) {
+      return { success: false, message: 'El alumno no ha llenado el expediente inicial' }
+    }
+
+    // Mapear nivel a número para MySQL
+    const nivelMap: Record<string, string> = {
+      maternal: '1',
+      kinder: '2',
+      primaria: '3',
+      secundaria: '4',
+    }
+
+    // Verificar si ya existe el alumno
+    const existingRef = await checkAlumnoExists(
+      expediente.nombre_alumno || appointment.student_name,
+      expediente.apellido_paterno_alumno || appointment.student_last_name_p || ''
+    )
+
+    if (existingRef) {
+      return {
+        success: false,
+        message: `El alumno ya existe con referencia ${existingRef}`,
+      }
+    }
+
+    // Crear alumno en MySQL
+    const alumnoData: AlumnoData = {
+      alumno_app: appointment.grade_level || '',
+      alumno_apm: expediente.apellido_paterno_alumno || appointment.student_last_name_p || '',
+      alumno_nombre: expediente.nombre_alumno || appointment.student_name || '',
+      alumno_nivel: nivelMap[appointment.level] || '1',
+      alumno_grado: expediente.grado || '',
+      alumno_grupo: '',
+      alumno_status: '1', // Activo
+      alumno_nuevo_ingreso: '1', // Nuevo ingreso de agenda
+      alumno_ciclo_escolar: expediente.ciclo_escolar || appointment.school_cycle || '',
+    }
+
+    const alumno_ref = await createAlumnoInMySQL(alumnoData)
+
+    // Actualizar status en Supabase
+    await supabase
+      .from('admission_appointments')
+      .update({ 
+        status: 'completed',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', appointmentId)
+
+    return {
+      success: true,
+      alumno_ref,
+      message: `✓ Alta exitosa. Alumno creado con referencia: ${alumno_ref}`,
+    }
+  } catch (error) {
+    console.error('[completeAdmission]', error)
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Error al crear alumno en MySQL',
+    }
+  }
+}
+
 export async function getBlockedDates(level?: AdmissionLevel) {
   let supabase
   try {
