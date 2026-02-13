@@ -354,15 +354,15 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                         Editando...
                       </div>
                     ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                         <button 
                           type="button" 
                           className="btn btn-secondary btn-sm" 
                           onClick={() => startEdit(a)}
                           title="Reagendar fecha/hora"
-                          style={{ padding: '0.4rem 0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#475569', width: '100%' }}
+                          style={{ padding: '0.25rem 0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#475569', width: '100%', minHeight: '28px' }}
                         >
-                          <span style={{ fontSize: '1.1rem' }}>📅</span> <span style={{ fontSize: '0.8rem', fontWeight: '600' }}>Reagendar</span>
+                          <span style={{ fontSize: '0.9rem' }}>📅</span> <span style={{ fontSize: '0.75rem', fontWeight: '600' }}>Reagendar</span>
                         </button>
                         
                         {expedientesMap[a.id] && (
@@ -372,9 +372,9 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                               className="btn btn-info btn-sm" 
                               onClick={() => window.open(`/expediente_inicial/ver?cita=${a.id}`, '_blank')}
                               title="Ver expediente completo"
-                              style={{ padding: '0.4rem 0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#3b82f6', border: 'none', color: 'white', width: '100%' }}
+                              style={{ padding: '0.25rem 0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', background: '#3b82f6', border: 'none', color: 'white', width: '100%', minHeight: '28px' }}
                             >
-                              <span style={{ fontSize: '1.1rem' }}>👁️</span> <span style={{ fontSize: '0.8rem', fontWeight: '600' }}>Ver Exp.</span>
+                              <span style={{ fontSize: '0.9rem' }}>👁️</span> <span style={{ fontSize: '0.75rem', fontWeight: '600' }}>Ver Exp.</span>
                             </button>
                             
                             {a.status !== 'completed' && (
@@ -383,9 +383,9 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                                 className="btn btn-success btn-sm" 
                                 onClick={() => aprobarAlumno(a.id)}
                                 title="Aprobar ingreso y crear alumno"
-                                style={{ padding: '0.4rem 0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#10b981', border: 'none', color: 'white', width: '100%' }}
+                                style={{ padding: '0.25rem 0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', background: '#10b981', border: 'none', color: 'white', width: '100%', minHeight: '28px' }}
                               >
-                                <span style={{ fontSize: '1.1rem' }}>✅</span> <span style={{ fontSize: '0.8rem', fontWeight: '600' }}>Aprobar</span>
+                                <span style={{ fontSize: '0.9rem' }}>✅</span> <span style={{ fontSize: '0.75rem', fontWeight: '600' }}>Aprobar</span>
                               </button>
                             )}
                           </>
