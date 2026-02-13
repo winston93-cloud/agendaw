@@ -202,13 +202,15 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                     {editingId === a.id ? (
                       <div className="admin-edit-time">
                         {editScheduleTimes.length === 0 ? (
-                          <input
-                            type="text"
-                            value={editTime}
-                            onChange={(e) => setEditTime(e.target.value)}
-                            className="admin-input-inline"
-                            placeholder="Ej: 09:00"
-                          />
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            <input
+                              type="text"
+                              value={editTime}
+                              onChange={(e) => setEditTime(e.target.value)}
+                              className="admin-input-inline"
+                              placeholder="Ej: 09:00"
+                            />
+                          </div>
                         ) : (
                           <div className="time-slots time-slots-admin">
                             {editScheduleTimes.map((time) => {
@@ -229,6 +231,26 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                             })}
                           </div>
                         )}
+                        
+                        {/* Botones de acción integrados */}
+                        <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', justifyContent: 'flex-start' }}>
+                          <button 
+                            type="button" 
+                            className="btn btn-primary btn-sm" 
+                            onClick={saveEdit}
+                            style={{ background: '#10b981', borderColor: '#10b981', color: 'white', display: 'flex', alignItems: 'center', gap: '4px' }}
+                          >
+                            <span>✓</span> Confirmar Cambio
+                          </button>
+                          <button 
+                            type="button" 
+                            className="btn btn-danger btn-sm" 
+                            onClick={cancelEdit}
+                            style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                          >
+                            <span>✕</span> Cancelar
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       a.appointment_time
@@ -259,13 +281,8 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                   </td>
                   <td style={{ minWidth: '180px', padding: '0.5rem' }}>
                     {editingId === a.id ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        <button type="button" className="btn btn-primary btn-sm" onClick={saveEdit} style={{ width: '100%' }}>
-                          Guardar
-                        </button>
-                        <button type="button" className="btn btn-secondary btn-sm" onClick={cancelEdit} style={{ width: '100%' }}>
-                          Cancelar
-                        </button>
+                      <div style={{ color: '#64748b', fontSize: '0.85rem', fontStyle: 'italic', textAlign: 'center' }}>
+                        Editando...
                       </div>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
