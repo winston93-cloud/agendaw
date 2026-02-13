@@ -219,7 +219,8 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Fecha</th>
+                <th>Fecha Agendación</th>
+                <th>Fecha Examen</th>
                 <th>Hora</th>
                 <th>Nivel</th>
                 <th>Aspirante</th>
@@ -231,6 +232,15 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
             <tbody>
               {filtered.map((a) => (
                 <tr key={a.id}>
+                  <td style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                    {new Date(a.created_at).toLocaleDateString('es-MX', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </td>
                   <td>
                     {editingId === a.id ? (
                       <div className="admin-edit-date">
