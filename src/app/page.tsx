@@ -64,7 +64,7 @@ export default function Home() {
       <div className="container container-process">
         <div className="process-section">
           <h2 className="section-title">¿Cómo funciona?</h2>
-          <p className="section-subtitle">Solo 3 sencillos pasos</p>
+          <p className="section-subtitle">Es muy sencillo</p>
 
           {/* Banner aviso: pago el día de la cita — arriba de los pasos */}
           <div className="process-banner">
@@ -81,46 +81,9 @@ export default function Home() {
           </div>
 
           <div className="steps-grid">
-            {/* Step 1 */}
-            <div className="step-card">
-              <div className="step-number">1</div>
-              <div className="step-icon">📄</div>
-              <h3 className="step-title">Reúne tu documentación</h3>
-              <ul className="step-list">
-                <li>Constancia del nivel actual (Maternal/Kinder 1)</li>
-                <li>Última boleta interna del año en curso</li>
-                <li>Boleta oficial del ciclo anterior</li>
-                <li>Carta de Buena Conducta</li>
-              </ul>
-            </div>
-
-            {/* Step 2 */}
-            <div className="step-card">
-              <div className="step-number">2</div>
-              <div className="step-icon">📧</div>
-              <h3 className="step-title">Envía tu documentación</h3>
-              <p className="step-description">
-                Envía los documentos por email según el nivel:
-              </p>
-              <div className="email-list">
-                <div className="email-item">
-                  <strong>Maternal/Kinder:</strong>
-                  <span>psicologia.kinder@winston93.edu.mx</span>
-                </div>
-                <div className="email-item">
-                  <strong>Primaria:</strong>
-                  <span>psicologia.primaria@winston93.edu.mx</span>
-                </div>
-                <div className="email-item">
-                  <strong>Secundaria:</strong>
-                  <span>psicologia.secundaria@winston93.edu.mx</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Step 3 */}
+            {/* Step 1: Solo agenda tu cita */}
             <div id="agendar-ahora" className="step-card step-highlight">
-              <div className="step-number">3</div>
+              <div className="step-number">1</div>
               <div className="step-icon">📅</div>
               <h3 className="step-title">Agenda tu cita</h3>
               <p className="step-description">
