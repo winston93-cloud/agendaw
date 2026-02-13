@@ -189,8 +189,22 @@ export async function completeAdmissionAndCreateAlumno(appointmentId: string): P
 }
 
 /**
- * Verifica si existe el expediente inicial para una cita
+ * Verifica si existen expedientes para múltiples citas en una sola consulta
  */
+export async function checkExpedientesBatch(appointmentIds: string[]): Promise<Record<string, boolean>> {
+  const supabase = createAdminClient()
+  const { data } = await supabase
+    .from('expediente_inicial')
+    .select('appointment_id')
+    .in('appointment_id', appointmentIds)
+  
+  const map: Record<string, boolean> = {}
+  data?.forEach((row: { appointment_id: string | null }) => {
+    if (row.appointment_id) map[row.appointment_id] = true
+  })
+  return map
+}
+
 export async function checkExpedienteExists(appointmentId: string): Promise<boolean> {
   const supabase = createAdminClient()
   const { data } = await supabase

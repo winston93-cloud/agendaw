@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { updateAppointment, completeAdmissionAndCreateAlumno, checkExpedienteExists } from './actions'
+import { updateAppointment, completeAdmissionAndCreateAlumno, checkExpedientesBatch } from './actions'
 import ExamDateCalendar from '@/components/ExamDateCalendar'
 import type { AdmissionAppointment } from '@/types/database'
 
@@ -37,15 +37,20 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
     return true
   })
 
-  // Cargar qué citas tienen expediente inicial
+  // Cargar qué citas tienen expediente inicial (Optimizado: una sola consulta)
   useEffect(() => {
     const loadExpedientes = async () => {
-      const map: Record<string, boolean> = {}
-      for (const apt of appointments) {
-        const hasExpediente = await checkExpedienteExists(apt.id)
-        map[apt.id] = hasExpediente
+      // Obtener IDs de citas visibles
+      const appointmentIds = appointments.map(a => a.id)
+      if (appointmentIds.length === 0) return
+
+      try {
+        // Consultar todos los expedientes de una sola vez
+        const resultMap = await checkExpedientesBatch(appointmentIds)
+        setExpedientesMap(resultMap)
+      } catch (e) {
+        console.error('Error cargando expedientes:', e)
       }
-      setExpedientesMap(map)
     }
     loadExpedientes()
   }, [appointments])
@@ -251,9 +256,9 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                       <option value="completed">Completada</option>
                     </select>
                   </td>
-                  <td>
+                  <td style={{ minWidth: '220px' }}>
                     {editingId === a.id ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <button type="button" className="btn btn-primary btn-sm" onClick={saveEdit}>
                           Guardar
                         </button>
@@ -262,28 +267,38 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                         </button>
                       </div>
                     ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'stretch' }}>
-                        <button type="button" className="btn btn-secondary btn-sm" onClick={() => startEdit(a)}>
-                          🔄 Reagendar
+                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <button 
+                          type="button" 
+                          className="btn btn-secondary btn-sm" 
+                          onClick={() => startEdit(a)}
+                          title="Reagendar cita"
+                          style={{ padding: '0.4rem 0.8rem' }}
+                        >
+                          🔄
                         </button>
+                        
                         {expedientesMap[a.id] && (
                           <>
                             <button 
                               type="button" 
                               className="btn btn-info btn-sm" 
                               onClick={() => window.open(`/expediente_inicial/ver?cita=${a.id}`, '_blank')}
-                              style={{ fontWeight: '600' }}
+                              title="Ver Expediente"
+                              style={{ fontWeight: '600', padding: '0.4rem 0.8rem', background: '#3b82f6', color: 'white', border: 'none' }}
                             >
-                              📄 Ver Expediente
+                              📄
                             </button>
+                            
                             {a.status !== 'completed' && (
                               <button 
                                 type="button" 
                                 className="btn btn-success btn-sm" 
                                 onClick={() => aprobarAlumno(a.id)}
-                                style={{ fontWeight: '700', fontSize: '0.9rem' }}
+                                title="Aprobar y Crear Alumno"
+                                style={{ fontWeight: '700', fontSize: '0.85rem', padding: '0.4rem 0.8rem', background: '#10b981', color: 'white', border: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
                               >
-                                ✅ Aprobar Alumno
+                                ✅ Aprobar
                               </button>
                             )}
                           </>
