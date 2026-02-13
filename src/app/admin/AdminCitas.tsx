@@ -358,7 +358,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                       <option value="completed">Completada</option>
                     </select>
                   </td>
-                  <td style={{ minWidth: '120px', padding: '0.25rem' }}>
+                  <td style={{ minWidth: '120px', padding: '0.25rem', paddingRight: '1rem' }}>
                     {editingId === a.id ? (
                       <div style={{ color: '#64748b', fontSize: '0.85rem', fontStyle: 'italic', textAlign: 'center' }}>
                         Editando...
