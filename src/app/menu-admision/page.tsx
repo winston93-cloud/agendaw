@@ -48,7 +48,7 @@ function MenuContent() {
             textShadow: '0 1px 2px rgba(0,0,0,0.1)',
             lineHeight: '1.6'
           }}>
-            ⚠️ <strong>Importante:</strong> Para recibir los resultados del examen de admisión, es obligatorio completar ambos requisitos antes de la fecha de su cita.
+            ⚠️ <strong>Importante:</strong> Para recibir los resultados del examen de admisión, es obligatorio completar <span style={{ color: '#fbbf24', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AMBOS REQUISITOS</span> antes de la fecha de su cita.
           </p>
         </div>
       </header>
@@ -97,8 +97,24 @@ function MenuContent() {
           <Link 
             href={`/documentacion?cita=${citaId}`}
             className="menu-card"
-            style={{ textDecoration: 'none' }}
+            style={{ textDecoration: 'none', position: 'relative' }}
           >
+            <div style={{ 
+              position: 'absolute', 
+              top: '-12px', 
+              left: '50%', 
+              transform: 'translateX(-50%)', 
+              background: '#059669', 
+              color: 'white', 
+              padding: '4px 12px', 
+              borderRadius: '20px', 
+              fontSize: '0.85rem', 
+              fontWeight: '700',
+              boxShadow: '0 4px 6px rgba(5, 150, 105, 0.3)',
+              zIndex: 10
+            }}>
+              PASO 2 DE 2
+            </div>
             <div className="menu-card-inner">
               <div className="menu-card-icon">📤</div>
               <h3 className="menu-card-title">Subir Documentación</h3>
