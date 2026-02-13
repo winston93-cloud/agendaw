@@ -15,7 +15,7 @@ export async function getAdmissionAppointments(filters?: { date?: string; level?
   let query = supabase
     .from('admission_appointments')
     .select('*')
-    .order('appointment_date', { ascending: true })
+    .order('appointment_date', { ascending: false })
     .order('appointment_time', { ascending: true })
 
   if (filters?.date) query = query.eq('appointment_date', filters.date)
