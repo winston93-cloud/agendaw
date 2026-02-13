@@ -94,19 +94,6 @@ function MenuContent() {
           </Link>
           
         </div>
-
-        <div style={{ 
-          marginTop: '3rem', 
-          padding: '1.5rem', 
-          background: 'rgba(251, 191, 36, 0.15)',
-          border: '2px solid rgba(251, 191, 36, 0.4)',
-          borderRadius: '12px',
-          textAlign: 'center'
-        }}>
-          <p style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.95)', lineHeight: '1.6' }}>
-            ⚠️ <strong>Importante:</strong> Ambos requisitos deben completarse antes de la fecha de tu cita para que puedas recibir los resultados del examen de admisión.
-          </p>
-        </div>
       </div>
     </div>
   )
