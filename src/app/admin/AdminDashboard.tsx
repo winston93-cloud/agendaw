@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import AdminCitas from './AdminCitas'
 import AdminBloquear from './AdminBloquear'
 import AdminHorarios from './AdminHorarios'
@@ -51,7 +52,29 @@ export default function AdminDashboard({
   blockedDates: BlockedDate[]
   schedules: AdmissionSchedule[]
 }) {
-  const [activeSection, setActiveSection] = useState<Section>(null)
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const sectionParam = searchParams.get('section') as Section
+
+  // Estado local sincronizado con URL
+  const [activeSection, setActiveSectionState] = useState<Section>(sectionParam)
+
+  // Sincronizar cuando cambia la URL (por navegación atrás/adelante)
+  useEffect(() => {
+    setActiveSectionState(sectionParam)
+  }, [sectionParam])
+
+  const handleSetSection = (section: Section) => {
+    setActiveSectionState(section)
+    const params = new URLSearchParams(searchParams)
+    if (section) {
+      params.set('section', section)
+    } else {
+      params.delete('section')
+    }
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+  }
 
   if (activeSection) {
     return (
@@ -59,7 +82,7 @@ export default function AdminDashboard({
         <button
           type="button"
           className="admin-back-cards"
-          onClick={() => setActiveSection(null)}
+          onClick={() => handleSetSection(null)}
           aria-label="Volver al menú de secciones"
         >
           ← Volver a las secciones
@@ -105,7 +128,7 @@ export default function AdminDashboard({
           key={card.id}
           type="button"
           className={`admin-card admin-card-${card.accent}`}
-          onClick={() => setActiveSection(card.id)}
+          onClick={() => handleSetSection(card.id)}
           aria-label={`${card.title}. ${card.description}`}
         >
           <span className="admin-card-icon">{card.icon}</span>
