@@ -42,12 +42,10 @@ export async function sendDocumentacion(data: {
   const psicologiaEmail = PSICOLOGIA_EMAILS[data.level] || PSICOLOGIA_EMAILS.primaria
   
   const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
+    service: 'gmail',
     auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASSWORD,
+      user: 'sistemas.desarrollo@winston93.edu.mx',
+      pass: 'ckxc xdfg oxqx jtmm', // App Password de Gmail
     },
   })
 
@@ -110,7 +108,7 @@ export async function sendDocumentacion(data: {
 
   try {
     await transporter.sendMail({
-      from: `"Sistema de Admisión" <${process.env.SMTP_USER}>`,
+      from: `"Sistema de Admisión" <sistemas.desarrollo@winston93.edu.mx>`,
       to: psicologiaEmail,
       cc: 'sistemas.desarrollo@winston93.edu.mx',
       subject: `Documentación de Admisión - ${data.studentName}`,
@@ -119,7 +117,7 @@ export async function sendDocumentacion(data: {
     })
     return { ok: true }
   } catch (error) {
-    console.error('[sendDocumentacion]', error)
+    console.error('[sendDocumentacion] Error:', error)
     return { ok: false, error: error instanceof Error ? error.message : 'Error al enviar' }
   }
 }
