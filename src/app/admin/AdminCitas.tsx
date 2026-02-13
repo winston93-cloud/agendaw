@@ -156,7 +156,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
 
   return (
     <div className="admin-citas">
-      <div className="admin-filters">
+      <div className="admin-filters" style={{ alignItems: 'flex-end' }}>
         <div className="admin-filters-group">
           <label className="admin-filter-label">Nivel:</label>
           <select value={filterLevel} onChange={(e) => setFilterLevel(e.target.value)} className="admin-filter-select">
@@ -181,24 +181,29 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
 
         <div className="admin-filters-divider"></div>
 
-        <div className="admin-filters-group admin-filters-dates">
-          <label className="admin-filter-label">Desde:</label>
-          <input 
-            type="date" 
-            value={filterStartDate} 
-            onChange={(e) => setFilterStartDate(e.target.value)}
-            className="admin-filter-date"
-          />
-        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748b' }}>Fecha de Examen</span>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div className="admin-filters-group admin-filters-dates">
+              <label className="admin-filter-label">Desde:</label>
+              <input 
+                type="date" 
+                value={filterStartDate} 
+                onChange={(e) => setFilterStartDate(e.target.value)}
+                className="admin-filter-date"
+              />
+            </div>
 
-        <div className="admin-filters-group admin-filters-dates">
-          <label className="admin-filter-label">Hasta:</label>
-          <input 
-            type="date" 
-            value={filterEndDate} 
-            onChange={(e) => setFilterEndDate(e.target.value)}
-            className="admin-filter-date"
-          />
+            <div className="admin-filters-group admin-filters-dates">
+              <label className="admin-filter-label">Hasta:</label>
+              <input 
+                type="date" 
+                value={filterEndDate} 
+                onChange={(e) => setFilterEndDate(e.target.value)}
+                className="admin-filter-date"
+              />
+            </div>
+          </div>
         </div>
 
         {(filterStartDate || filterEndDate) && (
