@@ -337,7 +337,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                   </td>
                   <td>{LEVEL_LABELS[a.level] || a.level}</td>
                   <td>
-                    <strong>{a.student_name}</strong>
+                    <strong>{`${a.student_name} ${a.student_last_name_p || ''} ${a.student_last_name_m || ''}`.trim()}</strong>
                     <br />
                     <small>{a.grade_level} · {a.student_age} años</small>
                   </td>
