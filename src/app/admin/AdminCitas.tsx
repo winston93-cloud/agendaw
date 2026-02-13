@@ -1,3 +1,4 @@
+// Componente para administrar citas
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -257,43 +258,43 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                     </select>
                   </td>
                   <td style={{ minWidth: '220px' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                      <button 
-                        type="button" 
-                        className="btn btn-secondary btn-sm" 
-                        onClick={() => startEdit(a)}
-                        title="Reagendar cita"
-                        style={{ padding: '0.4rem 0.8rem' }}
-                      >
-                        🔄
-                      </button>
-                      
-                      {expedientesMap[a.id] && (
-                        <>
-                          <button 
-                            type="button" 
-                            className="btn btn-info btn-sm" 
-                            onClick={() => window.open(`/expediente_inicial/ver?cita=${a.id}`, '_blank')}
-                            title="Ver Expediente"
-                            style={{ fontWeight: '600', padding: '0.4rem 0.8rem', background: '#3b82f6', color: 'white', border: 'none' }}
-                          >
-                            📄
-                          </button>
-                          
-                          {a.status !== 'completed' && (
+                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <button 
+                          type="button" 
+                          className="btn btn-secondary btn-sm" 
+                          onClick={() => startEdit(a)}
+                          title="Reagendar fecha/hora"
+                          style={{ padding: '0.5rem 0.8rem', display: 'flex', alignItems: 'center', gap: '6px', background: '#f1f5f9', border: '1px solid #cbd5e1', color: '#475569' }}
+                        >
+                          <span style={{ fontSize: '1.1rem' }}>📅</span> <span style={{ fontSize: '0.85rem', fontWeight: '600' }}>Reagendar</span>
+                        </button>
+                        
+                        {expedientesMap[a.id] && (
+                          <>
                             <button 
                               type="button" 
-                              className="btn btn-success btn-sm" 
-                              onClick={() => aprobarAlumno(a.id)}
-                              title="Aprobar y Crear Alumno"
-                              style={{ fontWeight: '700', fontSize: '0.85rem', padding: '0.4rem 0.8rem', background: '#10b981', color: 'white', border: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
+                              className="btn btn-info btn-sm" 
+                              onClick={() => window.open(`/expediente_inicial/ver?cita=${a.id}`, '_blank')}
+                              title="Ver expediente completo"
+                              style={{ padding: '0.5rem 0.8rem', display: 'flex', alignItems: 'center', gap: '6px', background: '#3b82f6', border: 'none', color: 'white' }}
                             >
-                              ✅ Aprobar
+                              <span style={{ fontSize: '1.1rem' }}>👁️</span> <span style={{ fontSize: '0.85rem', fontWeight: '600' }}>Ver Exp.</span>
                             </button>
-                          )}
-                        </>
-                      )}
-                    </div>
+                            
+                            {a.status !== 'completed' && (
+                              <button 
+                                type="button" 
+                                className="btn btn-success btn-sm" 
+                                onClick={() => aprobarAlumno(a.id)}
+                                title="Aprobar ingreso y crear alumno"
+                                style={{ padding: '0.5rem 0.8rem', display: 'flex', alignItems: 'center', gap: '6px', background: '#10b981', border: 'none', color: 'white' }}
+                              >
+                                <span style={{ fontSize: '1.1rem' }}>✅</span> <span style={{ fontSize: '0.85rem', fontWeight: '600' }}>Aprobar</span>
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
                   </td>
                 </tr>
               ))}
