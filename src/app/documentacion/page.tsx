@@ -1,3 +1,4 @@
+// Página para subir documentación requerida (Paso 2 del proceso)
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
@@ -176,41 +177,74 @@ function DocumentacionContent() {
           </div>
 
           {[0, 1, 2, 3].map(index => (
-            <div key={index} className="expediente-field" style={{ marginBottom: '1rem' }}>
-              <label className="expediente-label">
-                Documento {index + 1} {index === 0 ? '(Constancia - solo Maternal/Kinder 1)' : index === 1 ? '(Boleta interna)' : index === 2 ? '(Boleta oficial)' : '(Carta Buena Conducta)'}
+            <div key={index} className="expediente-field" style={{ marginBottom: '1.5rem' }}>
+              <label className="expediente-label" style={{ fontSize: '0.95rem', marginBottom: '0.5rem', display: 'block' }}>
+                {index === 0 ? '📝 Constancia del nivel actual (solo Maternal/Kinder 1)' : index === 1 ? '📊 Última boleta interna del año en curso' : index === 2 ? '📜 Boleta oficial del ciclo escolar anterior' : '🤝 Carta de Buena Conducta del ciclo actual'}
               </label>
-              <input
-                type="file"
-                accept=".pdf,.jpg,.jpeg,.png"
-                onChange={(e) => handleFileChange(index, e.target.files?.[0] || null)}
-                className="expediente-input"
-                style={{ 
-                  padding: '0.75rem',
-                  background: 'white',
-                  border: '2px dashed #cbd5e1',
-                  borderRadius: '8px',
-                  cursor: 'pointer'
-                }}
-              />
-              {files[index] && (
-                <p style={{ fontSize: '0.85rem', color: '#059669', marginTop: '0.25rem' }}>
-                  ✓ {files[index].name}
-                </p>
-              )}
+              
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="file"
+                  id={`file-${index}`}
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={(e) => handleFileChange(index, e.target.files?.[0] || null)}
+                  style={{ 
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    opacity: 0,
+                    cursor: 'pointer',
+                    zIndex: 2
+                  }}
+                />
+                <div style={{ 
+                  padding: '1.5rem',
+                  background: files[index] ? '#f0fdf4' : '#f8fafc',
+                  border: `2px dashed ${files[index] ? '#22c55e' : '#cbd5e1'}`,
+                  borderRadius: '12px',
+                  textAlign: 'center',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  <div style={{ fontSize: '2rem' }}>
+                    {files[index] ? '✅' : '📄'}
+                  </div>
+                  {files[index] ? (
+                    <div>
+                      <p style={{ color: '#166534', fontWeight: '600', margin: 0 }}>Archivo seleccionado:</p>
+                      <p style={{ color: '#15803d', fontSize: '0.9rem', margin: '0.25rem 0 0', wordBreak: 'break-all' }}>{files[index].name}</p>
+                      <p style={{ color: '#16a34a', fontSize: '0.8rem', margin: '0.25rem 0 0' }}>Clic para cambiar</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <p style={{ color: '#475569', fontWeight: '600', margin: 0 }}>Clic para seleccionar archivo</p>
+                      <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: '0.25rem 0 0' }}>PDF, JPG o PNG</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           ))}
 
           {error && (
             <div style={{ 
               padding: '1rem', 
-              background: '#fee', 
-              border: '2px solid #fcc', 
-              borderRadius: '8px',
-              color: '#c00',
-              marginTop: '1rem'
+              background: '#fee2e2', 
+              border: '1px solid #fecaca', 
+              borderRadius: '12px',
+              color: '#991b1b',
+              marginTop: '1.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
             }}>
-              ⚠️ {error}
+              <span style={{ fontSize: '1.25rem' }}>⚠️</span>
+              {error}
             </div>
           )}
 
@@ -219,7 +253,20 @@ function DocumentacionContent() {
             onClick={handleSubmit}
             disabled={sending || files.length === 0}
             className="expediente-submit-btn"
-            style={{ marginTop: '2rem', width: '100%' }}
+            style={{ 
+              marginTop: '2rem', 
+              width: '100%',
+              padding: '1rem',
+              fontSize: '1.1rem',
+              fontWeight: '700',
+              borderRadius: '12px',
+              background: files.length > 0 ? 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)' : '#e2e8f0',
+              color: files.length > 0 ? 'white' : '#94a3b8',
+              border: 'none',
+              cursor: files.length > 0 ? 'pointer' : 'not-allowed',
+              boxShadow: files.length > 0 ? '0 4px 12px rgba(79, 70, 229, 0.3)' : 'none',
+              transition: 'all 0.2s ease'
+            }}
           >
             {sending ? 'Enviando...' : `📤 Enviar Documentación (${files.length} archivo${files.length !== 1 ? 's' : ''})`}
           </button>
