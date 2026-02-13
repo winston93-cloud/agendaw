@@ -59,19 +59,16 @@ export async function sendAdmissionConfirmation(
         ${data.expedienteUrl ? `
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-bottom: 24px;">
           <tr>
-            <td style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 12px; padding: 16px;">
+            <td style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 12px; padding: 16px; text-align: center;">
               <p style="margin: 0 0 8px; color: #92400e; font-size: 0.9rem; font-weight: 700;">Requisitos importantes</p>
               <p style="margin: 0 0 16px; color: #78350f; font-size: 0.9rem; line-height: 1.5;">
-                Para que la psicología le entregue los resultados del examen de admisión, debe completar los siguientes requisitos antes de la fecha de su cita:
+                Para que la psicología le entregue los resultados del examen de admisión, debe completar antes de su cita:<br>
+                • <strong>Expediente Inicial del Aspirante</strong><br>
+                • <strong>Subir Documentación Requerida</strong>
               </p>
-              <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                <a href="${escapeHtml(data.expedienteUrl)}" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; padding: 12px 20px; border-radius: 10px; font-weight: 600; text-decoration: none; font-size: 0.9rem; flex: 1; min-width: 200px; text-align: center;">
-                  📋 Llenar Expediente Inicial
-                </a>
-                <a href="${escapeHtml(data.expedienteUrl.replace('/expediente_inicial?', '/menu-admision?'))}" style="display: inline-block; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #fff; padding: 12px 20px; border-radius: 10px; font-weight: 600; text-decoration: none; font-size: 0.9rem; flex: 1; min-width: 200px; text-align: center;">
-                  📤 Subir Documentación
-                </a>
-              </div>
+              <a href="${escapeHtml(data.expedienteUrl.replace('/expediente_inicial?', '/menu-admision?'))}" style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; padding: 12px 24px; border-radius: 10px; font-weight: 600; text-decoration: none; font-size: 0.95rem;">
+                📋 Acceder a Requisitos
+              </a>
             </td>
           </tr>
         </table>

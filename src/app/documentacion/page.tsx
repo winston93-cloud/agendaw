@@ -159,9 +159,9 @@ function DocumentacionContent() {
         </h1>
       </header>
 
-      <div className="expediente-form-container" style={{ maxWidth: '700px' }}>
+      <div className="expediente-form-container" style={{ maxWidth: '600px', margin: '0 auto' }}>
         
-        <div className="expediente-section">
+        <div className="expediente-section" style={{ margin: '0 auto' }}>
           <h2 className="expediente-section-title">📄 Documentos requeridos</h2>
           
           <div style={{ marginBottom: '1.5rem' }}>
