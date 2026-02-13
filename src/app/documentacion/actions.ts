@@ -67,58 +67,57 @@ export async function sendDocumentacion(data: {
     
     console.log('[sendDocumentacion] Attachments prepared:', attachments.length)
 
-  const html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; text-align: center; border-radius: 8px 8px 0 0; }
-        .content { background: #f9fafb; padding: 2rem; border-radius: 0 0 8px 8px; }
-        .info-box { background: white; padding: 1rem; border-left: 4px solid #667eea; margin: 1rem 0; border-radius: 4px; }
-        .footer { text-align: center; color: #666; font-size: 0.85rem; margin-top: 2rem; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1>📤 Documentación Recibida</h1>
-          <p>Examen de Admisión</p>
-        </div>
-        <div class="content">
-          <p>Estimada Psicología,</p>
-          
-          <p>Se ha recibido la documentación del aspirante:</p>
-          
-          <div class="info-box">
-            <strong>Alumno:</strong> ${data.studentName}<br>
-            <strong>Nivel:</strong> ${data.level.charAt(0).toUpperCase() + data.level.slice(1)}<br>
-            <strong>Padre/Tutor:</strong> ${data.parentName}<br>
-            <strong>Email:</strong> ${data.parentEmail}
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; text-align: center; border-radius: 8px 8px 0 0; }
+          .content { background: #f9fafb; padding: 2rem; border-radius: 0 0 8px 8px; }
+          .info-box { background: white; padding: 1rem; border-left: 4px solid #667eea; margin: 1rem 0; border-radius: 4px; }
+          .footer { text-align: center; color: #666; font-size: 0.85rem; margin-top: 2rem; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>📤 Documentación Recibida</h1>
+            <p>Examen de Admisión</p>
           </div>
-          
-          <p><strong>Archivos adjuntos:</strong></p>
-          <ul>
-            ${data.files.map(f => `<li>${f.filename}</li>`).join('')}
-          </ul>
-          
-          <p style="margin-top: 2rem; padding: 1rem; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
-            ⚠️ <strong>Recordatorio:</strong> Esta documentación es requisito para entregar los resultados del examen de admisión al aspirante.
-          </p>
-          
-          <div class="footer">
-            <p>Este correo fue generado automáticamente por el Sistema de Admisión.<br>
-            Instituto Educativo Winston / Winston Churchill</p>
+          <div class="content">
+            <p>Estimada Psicología,</p>
+            
+            <p>Se ha recibido la documentación del aspirante:</p>
+            
+            <div class="info-box">
+              <strong>Alumno:</strong> ${data.studentName}<br>
+              <strong>Nivel:</strong> ${data.level.charAt(0).toUpperCase() + data.level.slice(1)}<br>
+              <strong>Padre/Tutor:</strong> ${data.parentName}<br>
+              <strong>Email:</strong> ${data.parentEmail}
+            </div>
+            
+            <p><strong>Archivos adjuntos:</strong></p>
+            <ul>
+              ${data.files.map(f => `<li>${f.filename}</li>`).join('')}
+            </ul>
+            
+            <p style="margin-top: 2rem; padding: 1rem; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+              ⚠️ <strong>Recordatorio:</strong> Esta documentación es requisito para entregar los resultados del examen de admisión al aspirante.
+            </p>
+            
+            <div class="footer">
+              <p>Este correo fue generado automáticamente por el Sistema de Admisión.<br>
+              Instituto Educativo Winston / Winston Churchill</p>
+            </div>
           </div>
         </div>
-      </div>
-    </body>
-    </html>
-  `
+      </body>
+      </html>
+    `
 
-  try {
     await transporter.sendMail({
       from: `"Sistema de Admisión" <sistemas.desarrollo@winston93.edu.mx>`,
       to: psicologiaEmail,
@@ -127,6 +126,7 @@ export async function sendDocumentacion(data: {
       html,
       attachments,
     })
+    
     console.log('[sendDocumentacion] Email sent successfully')
     return { ok: true }
   } catch (error) {
