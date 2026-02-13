@@ -5,6 +5,52 @@ import { revalidatePath } from 'next/cache'
 import type { AdmissionLevel } from '@/types/database'
 import { createAlumnoInMySQL, checkAlumnoExists as checkAlumnoExistsInMySQL, type AlumnoData } from '@/lib/mysql'
 
+// Verificar disponibilidad completa
+export async function getFullyBookedDates(level: AdmissionLevel, excludeAppointmentId?: string): Promise<string[]> {
+  try {
+    const supabase = createAdminClient()
+    
+    // 1. Obtener total de slots disponibles por día para este nivel
+    const { count: totalSlots, error: countError } = await supabase
+      .from('admission_schedules')
+      .select('*', { count: 'exact', head: true })
+      .eq('level', level)
+    
+    if (countError || !totalSlots) return []
+
+    // 2. Obtener conteo de citas por fecha (solo futuras o recientes para no cargar todo)
+    // Filtramos citas canceladas. Si hay excludeAppointmentId, la excluimos.
+    const today = new Date().toISOString().split('T')[0]
+    
+    let query = supabase
+      .from('admission_appointments')
+      .select('appointment_date')
+      .eq('level', level)
+      .neq('status', 'cancelled')
+      .gte('appointment_date', today)
+    
+    if (excludeAppointmentId) {
+      query = query.neq('id', excludeAppointmentId)
+    }
+
+    const { data: appointments, error: appError } = await query
+    
+    if (appError || !appointments) return []
+
+    // 3. Agrupar y contar
+    const counts: Record<string, number> = {}
+    appointments.forEach(a => {
+      counts[a.appointment_date] = (counts[a.appointment_date] || 0) + 1
+    })
+
+    // 4. Filtrar fechas llenas
+    return Object.keys(counts).filter(date => counts[date] >= totalSlots)
+  } catch (e) {
+    console.error('Error checking full dates:', e)
+    return []
+  }
+}
+
 export async function getAdmissionAppointments(filters?: { date?: string; level?: string; status?: string }) {
   let supabase
   try {

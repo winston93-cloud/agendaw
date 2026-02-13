@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { updateAppointment, completeAdmissionAndCreateAlumno, checkExpedientesBatch } from './actions'
+import { updateAppointment, completeAdmissionAndCreateAlumno, checkExpedientesBatch, getFullyBookedDates } from './actions'
 import ExamDateCalendar from '@/components/ExamDateCalendar'
 import type { AdmissionAppointment } from '@/types/database'
 
@@ -28,6 +28,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
   const [editTime, setEditTime] = useState('')
   const [editingLevel, setEditingLevel] = useState<string>('')
   const [editBlockedDates, setEditBlockedDates] = useState<string[]>([])
+  const [editFullyBookedDates, setEditFullyBookedDates] = useState<string[]>([])
   const [editScheduleTimes, setEditScheduleTimes] = useState<string[]>([])
   const [editBookedSlots, setEditBookedSlots] = useState<string[]>([])
   const [filterLevel, setFilterLevel] = useState<string>('')
@@ -80,9 +81,11 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
     Promise.all([
       fetch(`/api/blocked-dates?level=${level}`).then((r) => r.json()).then((d) => d.dates || []).catch(() => []),
       fetch(`/api/schedules?level=${level}`).then((r) => r.json()).then((d) => d.times || []).catch(() => []),
-    ]).then(([dates, times]) => {
+      getFullyBookedDates(level as any, editingId),
+    ]).then(([dates, times, fullyBooked]) => {
       setEditBlockedDates(dates)
       setEditScheduleTimes(times)
+      setEditFullyBookedDates(fullyBooked)
     })
   }, [editingId, editingLevel])
 
@@ -263,7 +266,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                         <ExamDateCalendar
                           value={editDate}
                           onChange={setEditDate}
-                          blockedDates={editBlockedDates}
+                          blockedDates={[...editBlockedDates, ...editFullyBookedDates]}
                           isAdmin={true}
                         />
                       </div>
