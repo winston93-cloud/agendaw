@@ -1,4 +1,4 @@
-// Página para subir documentación requerida (Paso 2 del proceso)
+// Página para subir documentación requerida (Paso 2 del proceso) - V2
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
@@ -177,12 +177,24 @@ function DocumentacionContent() {
           </div>
 
           {[0, 1, 2, 3].map(index => (
-            <div key={index} className="expediente-field" style={{ marginBottom: '1.5rem' }}>
-              <label className="expediente-label" style={{ fontSize: '0.95rem', marginBottom: '0.5rem', display: 'block' }}>
-                {index === 0 ? '📝 Constancia del nivel actual (solo Maternal/Kinder 1)' : index === 1 ? '📊 Última boleta interna del año en curso' : index === 2 ? '📜 Boleta oficial del ciclo escolar anterior' : '🤝 Carta de Buena Conducta del ciclo actual'}
+            <div key={index} className="expediente-field" style={{ marginBottom: '2rem' }}>
+              <label className="expediente-label" style={{ 
+                fontSize: '1rem', 
+                marginBottom: '0.75rem', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.5rem',
+                color: index === 0 ? '#4f46e5' : index === 1 ? '#0891b2' : index === 2 ? '#d97706' : '#be185d',
+                fontWeight: '700'
+              }}>
+                <span style={{ fontSize: '1.5rem' }}>
+                  {index === 0 ? '📝' : index === 1 ? '📊' : index === 2 ? '📜' : '🤝'}
+                </span>
+                {index === 0 ? 'Constancia del nivel actual' : index === 1 ? 'Última boleta interna' : index === 2 ? 'Boleta oficial anterior' : 'Carta de Buena Conducta'}
+                {index === 0 && <span style={{ fontSize: '0.8rem', fontWeight: '400', color: '#64748b', marginLeft: 'auto' }}>(Solo Maternal/Kinder)</span>}
               </label>
               
-              <div style={{ position: 'relative' }}>
+              <div style={{ position: 'relative', transition: 'transform 0.2s ease' }}>
                 <input
                   type="file"
                   id={`file-${index}`}
@@ -200,30 +212,47 @@ function DocumentacionContent() {
                   }}
                 />
                 <div style={{ 
-                  padding: '1.5rem',
-                  background: files[index] ? '#f0fdf4' : '#f8fafc',
-                  border: `2px dashed ${files[index] ? '#22c55e' : '#cbd5e1'}`,
-                  borderRadius: '12px',
+                  padding: '2rem',
+                  background: files[index] ? '#f0fdf4' : 'white',
+                  border: `2px dashed ${
+                    files[index] 
+                      ? '#22c55e' 
+                      : index === 0 ? '#818cf8' 
+                      : index === 1 ? '#22d3ee' 
+                      : index === 2 ? '#fbbf24' 
+                      : '#f472b6'
+                  }`,
+                  borderRadius: '16px',
                   textAlign: 'center',
-                  transition: 'all 0.2s ease',
+                  transition: 'all 0.3s ease',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  gap: '0.5rem'
+                  gap: '0.75rem',
+                  boxShadow: files[index] ? '0 4px 12px rgba(34, 197, 94, 0.2)' : '0 4px 6px rgba(0,0,0,0.05)'
                 }}>
-                  <div style={{ fontSize: '2rem' }}>
-                    {files[index] ? '✅' : '📄'}
+                  <div style={{ 
+                    fontSize: '2.5rem', 
+                    filter: files[index] ? 'none' : 'grayscale(0.5)',
+                    opacity: files[index] ? 1 : 0.7,
+                    transform: files[index] ? 'scale(1.1)' : 'scale(1)',
+                    transition: 'all 0.3s ease'
+                  }}>
+                    {files[index] ? '✅' : '📤'}
                   </div>
+                  
                   {files[index] ? (
-                    <div>
-                      <p style={{ color: '#166534', fontWeight: '600', margin: 0 }}>Archivo seleccionado:</p>
-                      <p style={{ color: '#15803d', fontSize: '0.9rem', margin: '0.25rem 0 0', wordBreak: 'break-all' }}>{files[index].name}</p>
-                      <p style={{ color: '#16a34a', fontSize: '0.8rem', margin: '0.25rem 0 0' }}>Clic para cambiar</p>
+                    <div style={{ animation: 'fadeIn 0.3s ease' }}>
+                      <p style={{ color: '#166534', fontWeight: '700', margin: 0, fontSize: '1.1rem' }}>¡Archivo listo!</p>
+                      <p style={{ color: '#15803d', fontSize: '0.95rem', margin: '0.5rem 0 0', wordBreak: 'break-all', padding: '0.5rem 1rem', background: 'rgba(34, 197, 94, 0.1)', borderRadius: '8px' }}>
+                        {files[index].name}
+                      </p>
+                      <p style={{ color: '#16a34a', fontSize: '0.85rem', margin: '0.5rem 0 0' }}>Toca para cambiar</p>
                     </div>
                   ) : (
                     <div>
-                      <p style={{ color: '#475569', fontWeight: '600', margin: 0 }}>Clic para seleccionar archivo</p>
-                      <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: '0.25rem 0 0' }}>PDF, JPG o PNG</p>
+                      <p style={{ color: '#334155', fontWeight: '600', margin: 0, fontSize: '1.1rem' }}>Seleccionar archivo</p>
+                      <p style={{ color: '#64748b', fontSize: '0.9rem', margin: '0.5rem 0 0' }}>PDF, Foto o Imagen</p>
                     </div>
                   )}
                 </div>
