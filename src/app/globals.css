@@ -3647,11 +3647,13 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
   transition: all 0.2s ease;
   border-radius: 16px;
+  border: 1px solid #e2e8f0; /* Borde visible permanente */
 }
 
 .admin-table tbody tr:hover {
   transform: translateY(-3px);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1; /* Borde un poco más oscuro en hover */
   z-index: 10;
   position: relative;
 }
