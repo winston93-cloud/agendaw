@@ -11,13 +11,24 @@ const PSICOLOGIA_EMAILS: Record<string, string> = {
 }
 
 export async function getAppointmentForDocs(appointmentId: string) {
-  const supabase = createAdminClient()
-  const { data } = await supabase
-    .from('admission_appointments')
-    .select('id, level, student_name, student_last_name_p, student_last_name_m, parent_name, parent_email, appointment_date')
-    .eq('id', appointmentId)
-    .single()
-  return data || null
+  try {
+    const supabase = createAdminClient()
+    const { data, error } = await supabase
+      .from('admission_appointments')
+      .select('id, level, student_name, student_last_name_p, student_last_name_m, parent_name, parent_email, appointment_date')
+      .eq('id', appointmentId)
+      .single()
+    
+    if (error) {
+      console.error('[getAppointmentForDocs] Supabase error:', error)
+      return null
+    }
+    
+    return data || null
+  } catch (err) {
+    console.error('[getAppointmentForDocs] Exception:', err)
+    return null
+  }
 }
 
 export async function sendDocumentacion(data: {
