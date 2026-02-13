@@ -28,9 +28,27 @@ function MenuContent() {
             Selecciona una opción para continuar
           </span>
         </h1>
-        <p className="expediente-hero-subtitle" style={{ fontSize: '1rem', opacity: 0.85, maxWidth: '600px', margin: '1rem auto' }}>
-          Para que la psicología le entregue los resultados del examen de admisión, es necesario completar los siguientes requisitos:
-        </p>
+        <div style={{ 
+          background: 'rgba(255, 255, 255, 0.15)', 
+          backdropFilter: 'blur(8px)',
+          padding: '1rem 1.5rem', 
+          borderRadius: '12px',
+          maxWidth: '700px',
+          margin: '1.5rem auto 0',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)'
+        }}>
+          <p className="expediente-hero-subtitle" style={{ 
+            fontSize: '1.05rem', 
+            opacity: 1, 
+            margin: 0, 
+            fontWeight: '500',
+            color: '#fff',
+            textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+          }}>
+            Para que la psicología le entregue los resultados del examen de admisión, es necesario completar los siguientes requisitos:
+          </p>
+        </div>
       </header>
 
       <div className="expediente-form-container" style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1rem' }}>
