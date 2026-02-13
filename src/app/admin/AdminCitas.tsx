@@ -117,8 +117,9 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
         appointment_date: editDate,
         appointment_time: (editTime?.trim() || 'Por confirmar'),
       })
+      alert('✅ Cita actualizada correctamente')
       setEditingId(null)
-      router.refresh()
+      window.location.reload()
     } catch (e) {
       alert((e as Error).message)
     } finally {
