@@ -32,12 +32,16 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
   const [editBookedSlots, setEditBookedSlots] = useState<string[]>([])
   const [filterLevel, setFilterLevel] = useState<string>('')
   const [filterStatus, setFilterStatus] = useState<string>('')
+  const [filterStartDate, setFilterStartDate] = useState<string>('')
+  const [filterEndDate, setFilterEndDate] = useState<string>('')
   const [expedientesMap, setExpedientesMap] = useState<Record<string, boolean>>({})
   const [isSaving, setIsSaving] = useState(false)
 
   const filtered = appointments.filter((a) => {
     if (filterLevel && a.level !== filterLevel) return false
     if (filterStatus && a.status !== filterStatus) return false
+    if (filterStartDate && a.appointment_date < filterStartDate) return false
+    if (filterEndDate && a.appointment_date > filterEndDate) return false
     return true
   })
 
@@ -167,6 +171,37 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
           <option value="cancelled">Cancelada</option>
           <option value="completed">Completada</option>
         </select>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 500 }}>Desde:</span>
+          <input 
+            type="date" 
+            value={filterStartDate} 
+            onChange={(e) => setFilterStartDate(e.target.value)}
+            className="admin-filter-date"
+          />
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 500 }}>Hasta:</span>
+          <input 
+            type="date" 
+            value={filterEndDate} 
+            onChange={(e) => setFilterEndDate(e.target.value)}
+            className="admin-filter-date"
+          />
+        </div>
+
+        {(filterStartDate || filterEndDate) && (
+          <button 
+            onClick={() => { setFilterStartDate(''); setFilterEndDate(''); }}
+            className="btn btn-secondary btn-sm"
+            style={{ height: '42px', display: 'flex', alignItems: 'center' }}
+            title="Limpiar filtro de fechas"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       {filtered.length === 0 ? (

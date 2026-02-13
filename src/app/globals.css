@@ -3593,7 +3593,8 @@ body {
   flex-wrap: wrap;
 }
 
-.admin-filters select {
+.admin-filters select,
+.admin-filters input {
   padding: 0.6rem 1rem;
   border: 2px solid #e2e8f0;
   border-radius: 12px;
@@ -3603,12 +3604,14 @@ body {
   transition: border-color 0.2s, background 0.2s;
 }
 
-.admin-filters select:hover {
+.admin-filters select:hover,
+.admin-filters input:hover {
   border-color: #cbd5e1;
   background: #fff;
 }
 
-.admin-filters select:focus {
+.admin-filters select:focus,
+.admin-filters input:focus {
   border-color: var(--primary-color);
   background: #fff;
   outline: none;
