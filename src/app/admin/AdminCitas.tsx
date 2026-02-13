@@ -157,23 +157,32 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
   return (
     <div className="admin-citas">
       <div className="admin-filters">
-        <select value={filterLevel} onChange={(e) => setFilterLevel(e.target.value)}>
-          <option value="">Todos los niveles</option>
-          <option value="maternal">Maternal</option>
-          <option value="kinder">Kinder</option>
-          <option value="primaria">Primaria</option>
-          <option value="secundaria">Secundaria</option>
-        </select>
-        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-          <option value="">Todos los estados</option>
-          <option value="pending">Pendiente</option>
-          <option value="confirmed">Confirmada</option>
-          <option value="cancelled">Cancelada</option>
-          <option value="completed">Completada</option>
-        </select>
+        <div className="admin-filters-group">
+          <label className="admin-filter-label">Nivel:</label>
+          <select value={filterLevel} onChange={(e) => setFilterLevel(e.target.value)} className="admin-filter-select">
+            <option value="">Todos</option>
+            <option value="maternal">Maternal</option>
+            <option value="kinder">Kinder</option>
+            <option value="primaria">Primaria</option>
+            <option value="secundaria">Secundaria</option>
+          </select>
+        </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 500 }}>Desde:</span>
+        <div className="admin-filters-group">
+          <label className="admin-filter-label">Estado:</label>
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="admin-filter-select">
+            <option value="">Todos</option>
+            <option value="pending">Pendiente</option>
+            <option value="confirmed">Confirmada</option>
+            <option value="cancelled">Cancelada</option>
+            <option value="completed">Completada</option>
+          </select>
+        </div>
+
+        <div className="admin-filters-divider"></div>
+
+        <div className="admin-filters-group admin-filters-dates">
+          <label className="admin-filter-label">Desde:</label>
           <input 
             type="date" 
             value={filterStartDate} 
@@ -182,8 +191,8 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
           />
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 500 }}>Hasta:</span>
+        <div className="admin-filters-group admin-filters-dates">
+          <label className="admin-filter-label">Hasta:</label>
           <input 
             type="date" 
             value={filterEndDate} 
@@ -195,9 +204,8 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
         {(filterStartDate || filterEndDate) && (
           <button 
             onClick={() => { setFilterStartDate(''); setFilterEndDate(''); }}
-            className="btn btn-secondary btn-sm"
-            style={{ height: '42px', display: 'flex', alignItems: 'center' }}
-            title="Limpiar filtro de fechas"
+            className="admin-filter-clear"
+            title="Limpiar fechas"
           >
             ✕
           </button>

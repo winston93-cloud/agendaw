@@ -3588,34 +3588,103 @@ body {
 
 .admin-filters {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.5rem;
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
   flex-wrap: wrap;
 }
 
-.admin-filters select,
-.admin-filters input {
-  padding: 0.6rem 1rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
+.admin-filters-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-filter-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.admin-filters-divider {
+  width: 1px;
+  height: 2rem;
+  background: #e2e8f0;
+  margin: 0 0.5rem;
+}
+
+.admin-filter-select,
+.admin-filter-date {
+  padding: 0.5rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
   font-size: 0.95rem;
-  font-weight: 500;
-  background: #f8fafc;
-  transition: border-color 0.2s, background 0.2s;
+  color: #1e293b;
+  background-color: #fff;
+  transition: all 0.2s ease;
+  min-height: 40px;
 }
 
-.admin-filters select:hover,
-.admin-filters input:hover {
-  border-color: #cbd5e1;
-  background: #fff;
+.admin-filter-select:hover,
+.admin-filter-date:hover {
+  border-color: #94a3b8;
+  background-color: #f8fafc;
 }
 
-.admin-filters select:focus,
-.admin-filters input:focus {
+.admin-filter-select:focus,
+.admin-filter-date:focus {
   border-color: var(--primary-color);
-  background: #fff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.admin-filter-clear {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid #cbd5e1;
+  background: white;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+  margin-left: auto; /* Push to right on small screens if wrapped */
+}
+
+.admin-filter-clear:hover {
+  background: #f1f5f9;
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+@media (max-width: 1024px) {
+  .admin-filters {
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .admin-filters-divider {
+    display: none;
+  }
+  
+  .admin-filters-group {
+    flex: 1;
+    min-width: 200px;
+  }
+  
+  .admin-filter-select,
+  .admin-filter-date {
+    width: 100%;
+  }
 }
 
 .admin-table-wrap {
