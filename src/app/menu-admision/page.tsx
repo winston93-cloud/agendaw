@@ -31,22 +31,24 @@ function MenuContent() {
         <div style={{ 
           background: 'rgba(255, 255, 255, 0.15)', 
           backdropFilter: 'blur(8px)',
-          padding: '1rem 1.5rem', 
+          padding: '1.25rem 1.5rem', 
           borderRadius: '12px',
           maxWidth: '700px',
           margin: '1.5rem auto 0',
           border: '1px solid rgba(255, 255, 255, 0.3)',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)'
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
+          textAlign: 'center'
         }}>
-          <p className="expediente-hero-subtitle" style={{ 
+          <p style={{ 
             fontSize: '1.05rem', 
             opacity: 1, 
             margin: 0, 
             fontWeight: '500',
             color: '#fff',
-            textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+            textShadow: '0 1px 2px rgba(0,0,0,0.1)',
+            lineHeight: '1.6'
           }}>
-            Para que la psicología le entregue los resultados del examen de admisión, es necesario completar los siguientes requisitos:
+            ⚠️ <strong>Importante:</strong> Para recibir los resultados del examen de admisión, es obligatorio completar ambos requisitos antes de la fecha de su cita.
           </p>
         </div>
       </header>
