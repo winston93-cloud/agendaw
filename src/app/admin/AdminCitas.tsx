@@ -1,4 +1,4 @@
-// Componente para administrar citas - V2
+// Componente para administrar citas - V3
 'use client'
 
 import { useState, useEffect } from 'react'
