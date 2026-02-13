@@ -66,8 +66,23 @@ export default function Home() {
           <h2 className="section-title">¿Cómo funciona?</h2>
           <p className="section-subtitle">Es muy sencillo</p>
 
-          {/* Banner aviso: pago el día de la cita — arriba de los pasos */}
-          <div className="process-banner">
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
+            {/* Step 1: Solo agenda tu cita */}
+            <div id="agendar-ahora" className="step-card step-highlight" style={{ maxWidth: '400px' }}>
+              <div className="step-number">1</div>
+              <div className="step-icon">📅</div>
+              <h3 className="step-title">Agenda tu cita</h3>
+              <p className="step-description">
+                Llena el formulario y elige la fecha y hora que mejor te convenga
+              </p>
+              <Link href="/agendar" className="step-cta">
+                Agendar ahora →
+              </Link>
+            </div>
+          </div>
+
+          {/* Banner aviso: pago el día de la cita — abajo de la tarjeta */}
+          <div className="process-banner" style={{ marginTop: '2rem', maxWidth: '500px', marginLeft: 'auto', marginRight: 'auto' }}>
             <span className="process-banner-icon">💳</span>
             <div className="process-banner-content">
               <p className="process-banner-text">
@@ -80,19 +95,17 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="steps-grid">
-            {/* Step 1: Solo agenda tu cita */}
-            <div id="agendar-ahora" className="step-card step-highlight">
-              <div className="step-number">1</div>
-              <div className="step-icon">📅</div>
-              <h3 className="step-title">Agenda tu cita</h3>
-              <p className="step-description">
-                Llena el formulario y elige la fecha y hora que mejor te convenga
-              </p>
-              <Link href="/agendar" className="step-cta">
-                Agendar ahora →
-              </Link>
-            </div>
+          {/* Copyright */}
+          <div style={{ 
+            textAlign: 'center', 
+            marginTop: '3rem', 
+            paddingTop: '2rem', 
+            borderTop: '1px solid rgba(0,0,0,0.1)',
+            color: '#64748b',
+            fontSize: '0.875rem'
+          }}>
+            <p style={{ margin: 0 }}>© 2026 Instituto Educativo Winston / Winston Churchill</p>
+            <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', opacity: 0.8 }}>Sistema de Admisión v1.0</p>
           </div>
         </div>
       </div>
