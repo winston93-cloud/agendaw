@@ -65,8 +65,24 @@ function MenuContent() {
           <Link 
             href={`/expediente_inicial?cita=${citaId}`}
             className="menu-card"
-            style={{ textDecoration: 'none' }}
+            style={{ textDecoration: 'none', position: 'relative' }}
           >
+            <div style={{ 
+              position: 'absolute', 
+              top: '-12px', 
+              left: '50%', 
+              transform: 'translateX(-50%)', 
+              background: '#6366f1', 
+              color: 'white', 
+              padding: '4px 12px', 
+              borderRadius: '20px', 
+              fontSize: '0.85rem', 
+              fontWeight: '700',
+              boxShadow: '0 4px 6px rgba(99, 102, 241, 0.3)',
+              zIndex: 10
+            }}>
+              PASO 1 DE 2
+            </div>
             <div className="menu-card-inner">
               <div className="menu-card-icon">📋</div>
               <h3 className="menu-card-title">Llenar Expediente Inicial</h3>
