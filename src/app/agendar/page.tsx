@@ -391,13 +391,28 @@ export default function AgendarPage() {
             </div>
             {lastAppointmentId && (
               <div className="success-modal-expediente">
-                <p className="success-modal-expediente-title">Requisito importante</p>
+                <p className="success-modal-expediente-title">Requisitos importantes</p>
                 <p className="success-modal-expediente-text">
-                  Debe llenar el <strong>Expediente Inicial del Aspirante</strong> antes de la fecha de su cita. Es requisito para que la psicología le entregue los resultados de admisión. Los primeros datos (nivel, grado, nombre del alumno, etc.) ya vendrán precargados con la información de su solicitud.
+                  Para que la psicología le entregue los resultados de admisión, debe completar antes de su cita:
                 </p>
-                <Link href={`/expediente_inicial?cita=${lastAppointmentId}`} className="success-modal-btn success-modal-btn-expediente" onClick={() => setShowSuccessModal(false)}>
-                  Llenar Expediente Inicial
-                </Link>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '1rem' }}>
+                  <Link 
+                    href={`/expediente_inicial?cita=${lastAppointmentId}`} 
+                    className="success-modal-btn success-modal-btn-expediente" 
+                    onClick={() => setShowSuccessModal(false)}
+                    style={{ fontSize: '0.85rem', padding: '0.65rem 1rem' }}
+                  >
+                    📋 Expediente Inicial
+                  </Link>
+                  <Link 
+                    href={`/documentacion?cita=${lastAppointmentId}`} 
+                    className="success-modal-btn success-modal-btn-expediente" 
+                    onClick={() => setShowSuccessModal(false)}
+                    style={{ fontSize: '0.85rem', padding: '0.65rem 1rem', background: 'linear-gradient(135deg, #059669 0%, #047857 100%)' }}
+                  >
+                    📤 Subir Documentación
+                  </Link>
+                </div>
               </div>
             )}
             <Link href="/" className="success-modal-btn" onClick={() => setShowSuccessModal(false)}>
