@@ -164,7 +164,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
       {filtered.length === 0 ? (
         <p className="admin-empty">No hay citas con esos filtros.</p>
       ) : (
-        <div className="admin-table-wrap">
+        <div className="admin-table-wrap" style={{ background: 'transparent', border: 'none', boxShadow: 'none', overflow: 'visible' }}>
           <table className="admin-table">
             <thead>
               <tr>
