@@ -257,54 +257,43 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                     </select>
                   </td>
                   <td style={{ minWidth: '220px' }}>
-                    {editingId === a.id ? (
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button type="button" className="btn btn-primary btn-sm" onClick={saveEdit}>
-                          Guardar
-                        </button>
-                        <button type="button" className="btn btn-secondary btn-sm" onClick={cancelEdit}>
-                          Cancelar
-                        </button>
-                      </div>
-                    ) : (
-                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                        <button 
-                          type="button" 
-                          className="btn btn-secondary btn-sm" 
-                          onClick={() => startEdit(a)}
-                          title="Reagendar cita"
-                          style={{ padding: '0.4rem 0.8rem' }}
-                        >
-                          🔄
-                        </button>
-                        
-                        {expedientesMap[a.id] && (
-                          <>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <button 
+                        type="button" 
+                        className="btn btn-secondary btn-sm" 
+                        onClick={() => startEdit(a)}
+                        title="Reagendar cita"
+                        style={{ padding: '0.4rem 0.8rem' }}
+                      >
+                        🔄
+                      </button>
+                      
+                      {expedientesMap[a.id] && (
+                        <>
+                          <button 
+                            type="button" 
+                            className="btn btn-info btn-sm" 
+                            onClick={() => window.open(`/expediente_inicial/ver?cita=${a.id}`, '_blank')}
+                            title="Ver Expediente"
+                            style={{ fontWeight: '600', padding: '0.4rem 0.8rem', background: '#3b82f6', color: 'white', border: 'none' }}
+                          >
+                            📄
+                          </button>
+                          
+                          {a.status !== 'completed' && (
                             <button 
                               type="button" 
-                              className="btn btn-info btn-sm" 
-                              onClick={() => window.open(`/expediente_inicial/ver?cita=${a.id}`, '_blank')}
-                              title="Ver Expediente"
-                              style={{ fontWeight: '600', padding: '0.4rem 0.8rem', background: '#3b82f6', color: 'white', border: 'none' }}
+                              className="btn btn-success btn-sm" 
+                              onClick={() => aprobarAlumno(a.id)}
+                              title="Aprobar y Crear Alumno"
+                              style={{ fontWeight: '700', fontSize: '0.85rem', padding: '0.4rem 0.8rem', background: '#10b981', color: 'white', border: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
                             >
-                              📄
+                              ✅ Aprobar
                             </button>
-                            
-                            {a.status !== 'completed' && (
-                              <button 
-                                type="button" 
-                                className="btn btn-success btn-sm" 
-                                onClick={() => aprobarAlumno(a.id)}
-                                title="Aprobar y Crear Alumno"
-                                style={{ fontWeight: '700', fontSize: '0.85rem', padding: '0.4rem 0.8rem', background: '#10b981', color: 'white', border: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
-                              >
-                                ✅ Aprobar
-                              </button>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    )}
+                          )}
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
