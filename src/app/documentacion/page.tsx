@@ -59,22 +59,29 @@ function DocumentacionContent() {
 
   const handleSubmit = async () => {
     const filesList = Object.values(files)
+    console.log('[handleSubmit] Starting with files:', filesList.length)
+    
     if (filesList.length === 0) {
       alert('Debes subir al menos un documento')
       return
     }
 
-    if (!appointment) return
+    if (!appointment) {
+      console.error('[handleSubmit] No appointment found')
+      return
+    }
 
     setSending(true)
     setError(null)
 
     try {
+      console.log('[handleSubmit] Converting files to base64...')
       // Convertir archivos a base64 con sufijo único para evitar duplicados
       const filesData = await Promise.all(
         Object.entries(files).map(async ([indexStr, file]) => {
           const index = parseInt(indexStr)
-          return new Promise<{ filename: string; content: string; mimetype: string }>((resolve) => {
+          console.log(`[handleSubmit] Processing file ${index}:`, file.name, file.type, file.size)
+          return new Promise<{ filename: string; content: string; mimetype: string }>((resolve, reject) => {
             const reader = new FileReader()
             reader.onload = () => {
               // Agregar índice al nombre para evitar duplicados en el servidor
@@ -82,16 +89,23 @@ function DocumentacionContent() {
               const ext = file.name.split('.').pop()
               const uniqueName = `${index + 1}_${baseName}.${ext}`
               
+              console.log(`[handleSubmit] File ${index} converted. Unique name:`, uniqueName)
               resolve({
                 filename: uniqueName,
                 content: reader.result as string,
                 mimetype: file.type,
               })
             }
+            reader.onerror = (err) => {
+              console.error(`[handleSubmit] FileReader error for file ${index}:`, err)
+              reject(new Error('Error al leer archivo'))
+            }
             reader.readAsDataURL(file)
           })
         })
       )
+
+      console.log('[handleSubmit] All files converted. Total:', filesData.length)
 
       const studentName = [
         appointment.student_name,
@@ -99,6 +113,7 @@ function DocumentacionContent() {
         appointment.student_last_name_m
       ].filter(Boolean).join(' ')
 
+      console.log('[handleSubmit] Calling sendDocumentacion...')
       const result = await sendDocumentacion({
         appointmentId: appointment.id,
         level: appointment.level,
@@ -108,13 +123,18 @@ function DocumentacionContent() {
         files: filesData,
       })
 
+      console.log('[handleSubmit] sendDocumentacion result:', result)
+
       if (result.ok) {
+        console.log('[handleSubmit] Success!')
         setSuccess(true)
       } else {
+        console.error('[handleSubmit] Server returned error:', result.error)
         setError(result.error || 'Error al enviar documentación')
       }
     } catch (err) {
-      setError('Error al procesar los archivos')
+      console.error('[handleSubmit] Exception:', err)
+      setError(err instanceof Error ? err.message : 'Error al procesar los archivos')
     } finally {
       setSending(false)
     }
@@ -324,12 +344,12 @@ function DocumentacionContent() {
 
 export default function DocumentacionPage() {
   return (
-    <Suspense fallback={
-      <div className="expediente-page">
+    <div className="expediente-page">
+      <Suspense fallback={
         <p style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255,255,255,0.9)' }}>Cargando…</p>
-      </div>
-    }>
-      <DocumentacionContent />
-    </Suspense>
+      }>
+        <DocumentacionContent />
+      </Suspense>
+    </div>
   )
 }

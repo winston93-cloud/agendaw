@@ -39,21 +39,33 @@ export async function sendDocumentacion(data: {
   parentName: string
   files: { filename: string; content: string; mimetype: string }[]
 }) {
-  const psicologiaEmail = PSICOLOGIA_EMAILS[data.level] || PSICOLOGIA_EMAILS.primaria
-  
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: 'sistemas.desarrollo@winston93.edu.mx',
-      pass: 'ckxc xdfg oxqx jtmm', // App Password de Gmail
-    },
-  })
+  try {
+    console.log('[sendDocumentacion] Starting. Files count:', data.files.length)
+    
+    const psicologiaEmail = PSICOLOGIA_EMAILS[data.level] || PSICOLOGIA_EMAILS.primaria
+    console.log('[sendDocumentacion] Target email:', psicologiaEmail)
+    
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'sistemas.desarrollo@winston93.edu.mx',
+        pass: 'ckxc xdfg oxqx jtmm', // App Password de Gmail
+      },
+    })
 
-  const attachments = data.files.map(file => ({
-    filename: file.filename,
-    content: Buffer.from(file.content.split(',')[1], 'base64'),
-    contentType: file.mimetype,
-  }))
+    console.log('[sendDocumentacion] Transporter created')
+
+    const attachments = data.files.map((file, idx) => {
+      console.log(`[sendDocumentacion] Processing file ${idx}: ${file.filename}`)
+      const base64Content = file.content.includes(',') ? file.content.split(',')[1] : file.content
+      return {
+        filename: file.filename,
+        content: Buffer.from(base64Content, 'base64'),
+        contentType: file.mimetype,
+      }
+    })
+    
+    console.log('[sendDocumentacion] Attachments prepared:', attachments.length)
 
   const html = `
     <!DOCTYPE html>
@@ -115,9 +127,12 @@ export async function sendDocumentacion(data: {
       html,
       attachments,
     })
+    console.log('[sendDocumentacion] Email sent successfully')
     return { ok: true }
   } catch (error) {
     console.error('[sendDocumentacion] Error:', error)
-    return { ok: false, error: error instanceof Error ? error.message : 'Error al enviar' }
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido al enviar'
+    console.error('[sendDocumentacion] Error message:', errorMessage)
+    return { ok: false, error: errorMessage }
   }
 }
