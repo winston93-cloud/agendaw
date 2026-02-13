@@ -63,12 +63,14 @@ export default function ExamDateCalendar({ value, onChange, blockedDates = [], i
     const dayStr = format(date, 'yyyy-MM-dd')
     if (blockedDates.includes(dayStr)) return true
     
-    // Si es admin, permitimos fechas cercanas pero NO pasadas
+    // Si es admin, permitimos fechas cercanas pero NO pasadas ni HOY (mínimo 1 día de anticipación si se desea evitar "de un día para otro" estricto, o permitir mañana)
+    // El usuario pidió "no puede reagendar de un día para otro", interpretamos como mínimo 24h o día siguiente.
     if (isAdmin) {
       const today = new Date()
       const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
       const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
-      return isBefore(dayStart, todayStart)
+      // Bloquear hoy y pasado. Permitir mañana en adelante.
+      return isBefore(dayStart, addDays(todayStart, 1))
     }
 
     const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
