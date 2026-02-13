@@ -3586,104 +3586,204 @@ body {
   flex-wrap: wrap;
 }
 
+/* Modern Admin Filters */
 .admin-filters {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-  padding: 1rem 1.5rem;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1.25rem;
   background: white;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+  border-radius: 20px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
   flex-wrap: wrap;
+  position: relative;
+  overflow: visible;
 }
 
 .admin-filters-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: #f8fafc;
+  padding: 0.75rem 1rem;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+  min-width: 180px;
+}
+
+.admin-filters-group:hover,
+.admin-filters-group:focus-within {
+  background: white;
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transform: translateY(-2px);
+}
+
+.admin-filter-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.filter-input-wrapper {
+  position: relative;
+}
+
+.admin-filter-select {
+  width: 100%;
+  padding: 0.5rem 0.25rem;
+  border: none;
+  background: transparent;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right center;
+  padding-right: 1.5rem;
+}
+
+.admin-filters-divider {
+  width: 1px;
+  height: 3rem;
+  background: linear-gradient(to bottom, transparent, #cbd5e1, transparent);
+  margin: 0 0.5rem;
+}
+
+/* Date Range Group Style */
+.admin-filters-group-dates {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: #eff6ff; /* Light blue background for dates */
+  padding: 0.75rem 1.25rem;
+  border-radius: 14px;
+  border: 1px solid #bfdbfe;
+  transition: all 0.2s ease;
+}
+
+.admin-filters-group-dates:hover,
+.admin-filters-group-dates:focus-within {
+  background: #dbeafe;
+  border-color: #60a5fa;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+  transform: translateY(-2px);
+}
+
+.admin-filters-date-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #2563eb;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-filters-date-inputs {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-.admin-filter-label {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #64748b;
-  white-space: nowrap;
+.date-input-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.admin-filters-divider {
-  width: 1px;
-  height: 2rem;
-  background: #e2e8f0;
-  margin: 0 0.5rem;
+.date-input-container label {
+  font-size: 0.8rem;
+  color: #475569;
+  font-weight: 500;
 }
 
-.admin-filter-select,
 .admin-filter-date {
-  padding: 0.5rem 1rem;
-  border: 1px solid #cbd5e1;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: 8px;
-  font-size: 0.95rem;
+  background: white;
+  font-size: 0.9rem;
   color: #1e293b;
-  background-color: #fff;
-  transition: all 0.2s ease;
-  min-height: 40px;
-}
-
-.admin-filter-select:hover,
-.admin-filter-date:hover {
-  border-color: #94a3b8;
-  background-color: #f8fafc;
-}
-
-.admin-filter-select:focus,
-.admin-filter-date:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  font-family: inherit;
   outline: none;
+  transition: all 0.2s;
+  max-width: 130px;
+}
+
+.admin-filter-date:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.date-separator {
+  color: #94a3b8;
+  font-weight: bold;
 }
 
 .admin-filter-clear {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  border: 1px solid #cbd5e1;
-  background: white;
-  color: #64748b;
+  border-radius: 12px;
+  border: 2px dashed #fecaca;
+  background: #fff;
+  color: #ef4444;
   cursor: pointer;
   transition: all 0.2s;
-  font-size: 0.9rem;
-  margin-left: auto; /* Push to right on small screens if wrapped */
+  margin-left: auto;
 }
 
 .admin-filter-clear:hover {
-  background: #f1f5f9;
-  color: #ef4444;
+  background: #fef2f2;
   border-color: #ef4444;
+  transform: rotate(90deg) scale(1.1);
 }
 
 @media (max-width: 1024px) {
   .admin-filters {
-    gap: 1rem;
     padding: 1rem;
+    gap: 0.75rem;
   }
   
   .admin-filters-divider {
     display: none;
   }
   
-  .admin-filters-group {
-    flex: 1;
-    min-width: 200px;
+  .admin-filters-group,
+  .admin-filters-group-dates {
+    width: 100%;
+    min-width: 0;
   }
   
-  .admin-filter-select,
-  .admin-filter-date {
+  .admin-filters-date-inputs {
+    flex-wrap: wrap;
+  }
+  
+  .admin-filter-clear {
     width: 100%;
+    height: 36px;
+    margin-top: 0.5rem;
+    border-style: solid;
   }
 }
 
