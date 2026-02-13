@@ -2,6 +2,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { updateAppointment, completeAdmissionAndCreateAlumno, checkExpedientesBatch } from './actions'
 import ExamDateCalendar from '@/components/ExamDateCalendar'
 import type { AdmissionAppointment } from '@/types/database'
@@ -21,6 +22,7 @@ function apiLevel(level: string): string {
 }
 
 export default function AdminCitas({ appointments }: { appointments: AdmissionAppointment[] }) {
+  const router = useRouter()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editDate, setEditDate] = useState('')
   const [editTime, setEditTime] = useState('')
@@ -31,6 +33,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
   const [filterLevel, setFilterLevel] = useState<string>('')
   const [filterStatus, setFilterStatus] = useState<string>('')
   const [expedientesMap, setExpedientesMap] = useState<Record<string, boolean>>({})
+  const [isSaving, setIsSaving] = useState(false)
 
   const filtered = appointments.filter((a) => {
     if (filterLevel && a.level !== filterLevel) return false
@@ -104,14 +107,18 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
       alert('Elige un horario de la lista.')
       return
     }
+    setIsSaving(true)
     try {
       await updateAppointment(editingId, {
         appointment_date: editDate,
         appointment_time: (editTime?.trim() || 'Por confirmar'),
       })
       setEditingId(null)
+      router.refresh()
     } catch (e) {
       alert((e as Error).message)
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -120,6 +127,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
   const updateStatus = async (id: string, status: string) => {
     try {
       await updateAppointment(id, { status })
+      router.refresh()
     } catch (e) {
       alert((e as Error).message)
     }
@@ -187,6 +195,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                           value={editDate}
                           onChange={setEditDate}
                           blockedDates={editBlockedDates}
+                          isAdmin={true}
                         />
                       </div>
                     ) : (
@@ -238,14 +247,16 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                             type="button" 
                             className="btn btn-primary btn-sm" 
                             onClick={saveEdit}
-                            style={{ background: '#10b981', borderColor: '#10b981', color: 'white', display: 'flex', alignItems: 'center', gap: '4px' }}
+                            disabled={isSaving}
+                            style={{ background: '#10b981', borderColor: '#10b981', color: 'white', display: 'flex', alignItems: 'center', gap: '4px', opacity: isSaving ? 0.7 : 1 }}
                           >
-                            <span>✓</span> Confirmar Cambio
+                            <span>{isSaving ? '...' : '✓'}</span> {isSaving ? 'Guardando...' : 'Confirmar Cambio'}
                           </button>
                           <button 
                             type="button" 
                             className="btn btn-danger btn-sm" 
                             onClick={cancelEdit}
+                            disabled={isSaving}
                             style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
                           >
                             <span>✕</span> Cancelar
