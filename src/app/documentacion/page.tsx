@@ -18,7 +18,7 @@ function DocumentacionContent() {
   const citaId = searchParams.get('cita')
   const [appointment, setAppointment] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [files, setFiles] = useState<File[]>([])
+  const [files, setFiles] = useState<Record<number, File>>({})
   const [sending, setSending] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -47,18 +47,19 @@ function DocumentacionContent() {
 
   const handleFileChange = (index: number, file: File | null) => {
     setFiles(prev => {
-      const newFiles = [...prev]
+      const newFiles = { ...prev }
       if (file) {
         newFiles[index] = file
       } else {
-        newFiles.splice(index, 1)
+        delete newFiles[index]
       }
       return newFiles
     })
   }
 
   const handleSubmit = async () => {
-    if (files.length === 0) {
+    const filesList = Object.values(files)
+    if (filesList.length === 0) {
       alert('Debes subir al menos un documento')
       return
     }
@@ -69,14 +70,20 @@ function DocumentacionContent() {
     setError(null)
 
     try {
-      // Convertir archivos a base64
+      // Convertir archivos a base64 con sufijo único para evitar duplicados
       const filesData = await Promise.all(
-        files.map(async (file) => {
+        Object.entries(files).map(async ([indexStr, file]) => {
+          const index = parseInt(indexStr)
           return new Promise<{ filename: string; content: string; mimetype: string }>((resolve) => {
             const reader = new FileReader()
             reader.onload = () => {
+              // Agregar índice al nombre para evitar duplicados en el servidor
+              const baseName = file.name.replace(/\.[^/.]+$/, '')
+              const ext = file.name.split('.').pop()
+              const uniqueName = `${index + 1}_${baseName}.${ext}`
+              
               resolve({
-                filename: file.name,
+                filename: uniqueName,
                 content: reader.result as string,
                 mimetype: file.type,
               })
@@ -280,7 +287,7 @@ function DocumentacionContent() {
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={sending || files.length === 0}
+            disabled={sending || Object.keys(files).length === 0}
             className="expediente-submit-btn"
             style={{ 
               marginTop: '2rem', 
@@ -289,15 +296,15 @@ function DocumentacionContent() {
               fontSize: '1.1rem',
               fontWeight: '700',
               borderRadius: '12px',
-              background: files.length > 0 ? 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)' : '#e2e8f0',
-              color: files.length > 0 ? 'white' : '#94a3b8',
+              background: Object.keys(files).length > 0 ? 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)' : '#e2e8f0',
+              color: Object.keys(files).length > 0 ? 'white' : '#94a3b8',
               border: 'none',
-              cursor: files.length > 0 ? 'pointer' : 'not-allowed',
-              boxShadow: files.length > 0 ? '0 4px 12px rgba(79, 70, 229, 0.3)' : 'none',
+              cursor: Object.keys(files).length > 0 ? 'pointer' : 'not-allowed',
+              boxShadow: Object.keys(files).length > 0 ? '0 4px 12px rgba(79, 70, 229, 0.3)' : 'none',
               transition: 'all 0.2s ease'
             }}
           >
-            {sending ? 'Enviando...' : `📤 Enviar Documentación (${files.length} archivo${files.length !== 1 ? 's' : ''})`}
+            {sending ? 'Enviando...' : `📤 ENVIAR DOCUMENTACIÓN (${Object.keys(files).length} ARCHIVO${Object.keys(files).length !== 1 ? 'S' : ''})`}
           </button>
 
           <p className="expediente-submit-note" style={{ marginTop: '1rem' }}>
