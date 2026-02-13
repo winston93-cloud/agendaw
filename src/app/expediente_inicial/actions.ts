@@ -156,6 +156,15 @@ export async function submitExpedienteInicial(data: ExpedienteFormData) {
     telefono_principal: data.telefono_principal || null,
     updated_at: new Date().toISOString(),
   }
+  
   const { error } = await supabase.from('expediente_inicial').insert(row)
   if (error) throw new Error(error.message)
+
+  // Actualizar estado de la cita a 'confirmed' automáticamente
+  if (data.appointment_id) {
+    await supabase
+      .from('admission_appointments')
+      .update({ status: 'confirmed', updated_at: new Date().toISOString() })
+      .eq('id', data.appointment_id)
+  }
 }
