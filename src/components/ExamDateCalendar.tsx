@@ -63,10 +63,21 @@ export default function ExamDateCalendar({ value, onChange, blockedDates = [], i
     const dayStr = format(date, 'yyyy-MM-dd')
     if (blockedDates.includes(dayStr)) return true
     
-    // Si es admin, permitimos fechas cercanas (ignoramos la regla de 2 días)
-    if (isAdmin) return false
+    // Si es admin, permitimos fechas cercanas pero NO pasadas
+    if (isAdmin) {
+      const today = new Date()
+      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+      const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+      return isBefore(dayStart, todayStart)
+    }
 
     const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+    
+    // Validar que no sea fecha pasada
+    const today = new Date()
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    if (isBefore(dayStart, todayStart)) return true
+
     const minStart = new Date(minBookable.getFullYear(), minBookable.getMonth(), minBookable.getDate())
     return isBefore(dayStart, minStart)
   }
