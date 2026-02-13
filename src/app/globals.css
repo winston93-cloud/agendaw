@@ -3647,13 +3647,13 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
   transition: all 0.2s ease;
   border-radius: 16px;
-  border: 1px solid rgba(59, 130, 246, 0.35); /* Azul institucional suave */
+  border: 2px solid rgba(59, 130, 246, 0.4); /* Azul institucional visible 2px permanente */
 }
 
 .admin-table tbody tr:hover {
   transform: translateY(-3px);
   box-shadow: 0 10px 20px rgba(59, 130, 246, 0.12);
-  border-color: rgba(59, 130, 246, 0.6); /* Azul más intenso en hover */
+  border-color: rgba(59, 130, 246, 0.6);
   z-index: 10;
   position: relative;
 }
