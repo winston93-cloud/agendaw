@@ -13,6 +13,9 @@ const DOCS_REQUIRED = [
   'Carta de Buena Conducta del ciclo actual',
 ]
 
+const MAX_FILE_SIZE_MB = 5 // Límite de 5MB por archivo
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
+
 function DocumentacionContent() {
   const searchParams = useSearchParams()
   const citaId = searchParams.get('cita')
@@ -46,6 +49,11 @@ function DocumentacionContent() {
   }, [citaId])
 
   const handleFileChange = (index: number, file: File | null) => {
+    if (file && file.size > MAX_FILE_SIZE_BYTES) {
+      alert(`El archivo "${file.name}" es demasiado grande. El tamaño máximo permitido es ${MAX_FILE_SIZE_MB}MB.`)
+      return
+    }
+    
     setFiles(prev => {
       const newFiles = { ...prev }
       if (file) {

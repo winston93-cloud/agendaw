@@ -45,6 +45,48 @@ export async function sendDocumentacion(data: {
     const psicologiaEmail = PSICOLOGIA_EMAILS[data.level] || PSICOLOGIA_EMAILS.primaria
     console.log('[sendDocumentacion] Target email:', psicologiaEmail)
     
+    const supabase = createAdminClient()
+    
+    // Subir archivos a Supabase Storage en lugar de enviarlos por correo
+    const uploadedFiles: { filename: string; url: string }[] = []
+    
+    for (let i = 0; i < data.files.length; i++) {
+      const file = data.files[i]
+      console.log(`[sendDocumentacion] Uploading file ${i}: ${file.filename}`)
+      
+      const base64Content = file.content.includes(',') ? file.content.split(',')[1] : file.content
+      const buffer = Buffer.from(base64Content, 'base64')
+      
+      // Path: documentacion/{appointmentId}/{filename}
+      const storagePath = `documentacion/${data.appointmentId}/${file.filename}`
+      
+      const { error: uploadError } = await supabase.storage
+        .from('admission-documents')
+        .upload(storagePath, buffer, {
+          contentType: file.mimetype,
+          upsert: true
+        })
+      
+      if (uploadError) {
+        console.error(`[sendDocumentacion] Upload error for ${file.filename}:`, uploadError)
+        throw new Error(`Error al subir ${file.filename}: ${uploadError.message}`)
+      }
+      
+      // Obtener URL pública
+      const { data: urlData } = supabase.storage
+        .from('admission-documents')
+        .getPublicUrl(storagePath)
+      
+      uploadedFiles.push({
+        filename: file.filename,
+        url: urlData.publicUrl
+      })
+      
+      console.log(`[sendDocumentacion] File ${i} uploaded successfully: ${urlData.publicUrl}`)
+    }
+    
+    console.log('[sendDocumentacion] All files uploaded. Total:', uploadedFiles.length)
+    
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -54,18 +96,6 @@ export async function sendDocumentacion(data: {
     })
 
     console.log('[sendDocumentacion] Transporter created')
-
-    const attachments = data.files.map((file, idx) => {
-      console.log(`[sendDocumentacion] Processing file ${idx}: ${file.filename}`)
-      const base64Content = file.content.includes(',') ? file.content.split(',')[1] : file.content
-      return {
-        filename: file.filename,
-        content: Buffer.from(base64Content, 'base64'),
-        contentType: file.mimetype,
-      }
-    })
-    
-    console.log('[sendDocumentacion] Attachments prepared:', attachments.length)
 
     const html = `
       <!DOCTYPE html>
@@ -79,6 +109,8 @@ export async function sendDocumentacion(data: {
           .content { background: #f9fafb; padding: 2rem; border-radius: 0 0 8px 8px; }
           .info-box { background: white; padding: 1rem; border-left: 4px solid #667eea; margin: 1rem 0; border-radius: 4px; }
           .footer { text-align: center; color: #666; font-size: 0.85rem; margin-top: 2rem; }
+          .file-link { display: inline-block; margin: 0.5rem 0; padding: 0.5rem 1rem; background: #4f46e5; color: white; text-decoration: none; border-radius: 6px; }
+          .file-link:hover { background: #4338ca; }
         </style>
       </head>
       <body>
@@ -99,10 +131,14 @@ export async function sendDocumentacion(data: {
               <strong>Email:</strong> ${data.parentEmail}
             </div>
             
-            <p><strong>Archivos adjuntos:</strong></p>
-            <ul>
-              ${data.files.map(f => `<li>${f.filename}</li>`).join('')}
-            </ul>
+            <p><strong>Documentos disponibles para descarga:</strong></p>
+            <div style="margin: 1rem 0;">
+              ${uploadedFiles.map(f => `
+                <div style="margin: 0.5rem 0;">
+                  <a href="${f.url}" class="file-link" target="_blank">📄 ${f.filename}</a>
+                </div>
+              `).join('')}
+            </div>
             
             <p style="margin-top: 2rem; padding: 1rem; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
               ⚠️ <strong>Recordatorio:</strong> Esta documentación es requisito para entregar los resultados del examen de admisión al aspirante.
@@ -124,7 +160,6 @@ export async function sendDocumentacion(data: {
       cc: 'sistemas.desarrollo@winston93.edu.mx',
       subject: `Documentación de Admisión - ${data.studentName}`,
       html,
-      attachments,
     })
     
     console.log('[sendDocumentacion] Email sent successfully')
