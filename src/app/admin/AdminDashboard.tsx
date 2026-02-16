@@ -6,11 +6,12 @@ import AdminCitas from './AdminCitas'
 import AdminBloquear from './AdminBloquear'
 import AdminHorarios from './AdminHorarios'
 import AdminBuscar from './AdminBuscar'
+import AdminRecorridos from './AdminRecorridos'
 import type { AdmissionAppointment } from '@/types/database'
 import type { BlockedDate } from '@/types/database'
 import type { AdmissionSchedule } from '@/types/database'
 
-type Section = 'citas' | 'horarios' | 'bloquear' | 'buscar' | null
+type Section = 'citas' | 'horarios' | 'bloquear' | 'buscar' | 'recorridos' | null
 
 const CARDS: { id: Section; icon: string; title: string; description: string; accent: string }[] = [
   {
@@ -40,6 +41,13 @@ const CARDS: { id: Section; icon: string; title: string; description: string; ac
     title: 'Buscar alumno',
     description: 'Búsqueda por nombre o fecha; ver datos y reagendar',
     accent: 'buscar',
+  },
+  {
+    id: 'recorridos',
+    icon: '🚌',
+    title: 'Recorridos programados',
+    description: 'Ver y gestionar recorridos programados',
+    accent: 'recorridos',
   },
 ]
 
@@ -115,6 +123,12 @@ export default function AdminDashboard({
               Busque por nombre del alumno o tutor, por fecha en que se agendó la cita o por fecha del examen. Al seleccionar un resultado verá el registro completo y podrá reagendar.
             </p>
             <AdminBuscar />
+          </section>
+        )}
+        {activeSection === 'recorridos' && (
+          <section className="admin-section admin-section-recorridos">
+            <h2><span className="admin-section-icon">🚌</span> Recorridos programados</h2>
+            <AdminRecorridos />
           </section>
         )}
       </div>
