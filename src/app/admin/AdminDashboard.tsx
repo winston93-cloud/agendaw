@@ -16,7 +16,7 @@ const CARDS: { id: Section; icon: string; title: string; description: string; ac
   {
     id: 'citas',
     icon: '📅',
-    title: 'Citas programadas',
+    title: 'Examenes programados',
     description: 'Ver, reagendar y cambiar estado de las citas',
     accent: 'citas',
   },
@@ -89,7 +89,7 @@ export default function AdminDashboard({
         </button>
         {activeSection === 'citas' && (
           <section className="admin-section admin-section-citas">
-            <h2><span className="admin-section-icon">📅</span> Citas programadas</h2>
+            <h2><span className="admin-section-icon">📅</span> Examenes programados</h2>
             <AdminCitas appointments={appointments} />
           </section>
         )}
