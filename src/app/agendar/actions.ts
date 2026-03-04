@@ -101,6 +101,7 @@ export async function createAdmissionAppointment(data: {
       appointmentTime: data.appointment_time || 'Por confirmar',
       campusName,
       levelLabel,
+      level: data.level,
       expedienteUrl,
     })
     emailSent = result.ok

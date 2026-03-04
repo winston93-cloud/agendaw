@@ -419,6 +419,7 @@ export async function createRecorrido(input: {
       parentEmail: row.parent_email,
       parentPhone: row.parent_phone,
       levelLabel,
+      level: input.level,
       tourDate: row.tour_date,
       tourTime: row.tour_time,
     }
@@ -509,6 +510,7 @@ export async function updateRecorrido(
         parentPhone: finalParentPhone,
         parentEmail: finalParentEmail,
         levelLabel,
+        level,
         tourDate: tour_date,
         tourTime: tour_time,
       }
