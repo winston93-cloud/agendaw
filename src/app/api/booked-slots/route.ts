@@ -1,16 +1,23 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 
-const VALID_LEVELS = ['maternal', 'kinder', 'primaria', 'secundaria']
+// Grupos de campus: mismos niveles comparten psicóloga y no se pueden duplicar horario
+const CAMPUS_GROUPS: Record<string, string[]> = {
+  maternal:        ['maternal', 'kinder'],
+  kinder:          ['maternal', 'kinder'],
+  maternal_kinder: ['maternal', 'kinder'],
+  primaria:        ['primaria', 'secundaria'],
+  secundaria:      ['primaria', 'secundaria'],
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const level = searchParams.get('level')
-  const date = searchParams.get('date')
+  const date  = searchParams.get('date')
 
-  if (!level || !VALID_LEVELS.includes(level)) {
+  if (!level || !CAMPUS_GROUPS[level]) {
     return NextResponse.json(
-      { error: 'level required: maternal | kinder | primaria | secundaria' },
+      { error: 'level required: maternal | kinder | maternal_kinder | primaria | secundaria' },
       { status: 400 }
     )
   }
@@ -18,7 +25,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'date required (YYYY-MM-DD)' }, { status: 400 })
   }
 
-  const excludeId = searchParams.get('exclude_id') || undefined
+  const excludeId  = searchParams.get('exclude_id') || undefined
+  const levelsToCheck = CAMPUS_GROUPS[level]
 
   try {
     const supabase = createAdminClient()
@@ -26,7 +34,7 @@ export async function GET(request: Request) {
       .from('admission_appointments')
       .select('appointment_time')
       .eq('appointment_date', date)
-      .eq('level', level)
+      .in('level', levelsToCheck)
       .neq('status', 'cancelled')
     if (excludeId) query = query.neq('id', excludeId)
     const { data, error } = await query
