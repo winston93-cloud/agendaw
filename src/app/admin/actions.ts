@@ -216,7 +216,7 @@ export async function completeAdmissionAndCreateAlumno(appointmentId: string): P
       alumno_nivel: nivelMap[appointment.level] || '1',
       alumno_grado: expediente.grado || '',
       alumno_grupo: '',
-      alumno_status: '1', // Activo
+      alumno_status: '2',
       alumno_nuevo_ingreso: '1', // Nuevo ingreso de agenda
       alumno_ciclo_escolar: parsedCiclo,
     }
