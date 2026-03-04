@@ -456,37 +456,38 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                         <option value="completed">Completada</option>
                       </select>
                     </td>
-                    <td style={{ minWidth: '170px', width: '170px', padding: '0.25rem 0.5rem 0.25rem 0.25rem' }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <td style={{ minWidth: '200px', padding: '0.5rem' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
 
                         {/* Botón reagendar → solo solicitar */}
                         {reqStatus === 'aprobada' ? (
-                          <span style={{ padding: '0.25rem 0.5rem', background: '#d1fae5', color: '#065f46', border: '1.5px solid #6ee7b7', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '700', textAlign: 'center', display: 'block', whiteSpace: 'normal', lineHeight: '1.3' }}>
-                            ✅ Reagendación<br/>aprobada
+                          <span style={{ padding: '0.3rem 0.6rem', background: '#d1fae5', color: '#065f46', border: '1.5px solid #6ee7b7', borderRadius: '6px', fontSize: '0.72rem', fontWeight: '700', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                            ✅ Reagendación aprobada
                           </span>
                         ) : reqStatus === 'pendiente' ? (
-                          <StatusBadge status="pendiente" label="⏳ Reagendación pend." />
+                          <span style={{ padding: '0.3rem 0.6rem', background: '#fef9c3', color: '#92400e', border: '1.5px solid #fde68a', borderRadius: '6px', fontSize: '0.72rem', fontWeight: '700', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                            ⏳ Reagendación pendiente
+                          </span>
                         ) : (
                           <button type="button"
                             onClick={() => { setSolicitudDate(''); setSolicitudTime(''); setSolicitudMsg(''); setModal({ type: 'solicitar-reagendar', appointment: a }) }}
-                            style={{ padding: '0.2rem 0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', background: '#f5f3ff', border: '1px solid #c4b5fd', color: '#7c3aed', width: '100%', minHeight: '26px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: '600' }}
+                            style={{ padding: '0.3rem 0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', background: '#f5f3ff', border: '1px solid #c4b5fd', color: '#7c3aed', whiteSpace: 'nowrap', borderRadius: '6px', cursor: 'pointer', fontSize: '0.72rem', fontWeight: '600' }}
                           >
-                            <span style={{ fontSize: '0.8rem' }}>📋</span>
-                            {reqStatus === 'rechazada' ? 'Resolicitar reagendar' : 'Solicitar reagendar'}
+                            📋 {reqStatus === 'rechazada' ? 'Resolicitar reagendar' : 'Solicitar reagendar'}
                           </button>
                         )}
 
                         {expedientesMap[a.id] && (<>
-                          <button type="button" className="btn btn-info btn-sm"
+                          <button type="button"
                             onClick={() => window.open(`/expediente_inicial/ver?cita=${a.id}`, '_blank')}
-                            style={{ padding: '0.2rem 0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', background: '#3b82f6', border: 'none', color: 'white', width: '100%', minHeight: '26px' }}>
-                            <span style={{ fontSize: '0.85rem' }}>👁️</span> <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Ver Exp.</span>
+                            style={{ padding: '0.3rem 0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', background: '#3b82f6', border: 'none', color: 'white', whiteSpace: 'nowrap', borderRadius: '6px', cursor: 'pointer', fontSize: '0.72rem', fontWeight: '600' }}>
+                            👁️ Ver Expediente
                           </button>
                           {a.status !== 'completed' && (
-                            <button type="button" className="btn btn-success btn-sm"
+                            <button type="button"
                               onClick={() => setModal({ type: 'confirm-aprobar', appointment: a })}
-                              style={{ padding: '0.2rem 0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', background: '#10b981', border: 'none', color: 'white', width: '100%', minHeight: '26px' }}>
-                              <span style={{ fontSize: '0.85rem' }}>✅</span> <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Aprobar</span>
+                              style={{ padding: '0.3rem 0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', background: '#10b981', border: 'none', color: 'white', whiteSpace: 'nowrap', borderRadius: '6px', cursor: 'pointer', fontSize: '0.72rem', fontWeight: '600' }}>
+                              ✅ Aprobar ingreso
                             </button>
                           )}
                         </>)}
