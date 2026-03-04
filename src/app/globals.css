@@ -4287,6 +4287,13 @@ body {
   color: #64748b;
 }
 
+.admin-recorridos-item-emails {
+  font-size: 0.8rem;
+  color: #64748b;
+  width: 100%;
+  margin-top: 0.35rem;
+}
+
 .admin-recorridos-item-actions {
   display: flex;
   gap: 0.5rem;

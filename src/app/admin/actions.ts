@@ -410,8 +410,8 @@ export async function createRecorrido(input: {
       parent_email: input.parent_email.trim(),
       notes: input.notes?.trim() || null,
     }
-    const { error } = await supabase.from('tour_recorridos').insert(row)
-    if (error) return { ok: false, error: error.message }
+    const { data: inserted, error } = await supabase.from('tour_recorridos').insert(row).select('id').single()
+    if (error || !inserted) return { ok: false, error: error?.message ?? 'Error al crear recorrido' }
 
     const levelLabel = { maternal: 'Maternal', kinder: 'Kinder', primaria: 'Primaria', secundaria: 'Secundaria' }[input.level]
     const parentData = {
@@ -426,12 +426,16 @@ export async function createRecorrido(input: {
       sendRecorridoConfirmationToParent(parentData),
       sendRecorridoNotificationToDirector(input.level, parentData),
     ])
-    if (!parentResult.ok) {
-      console.error('[createRecorrido] Error email al papá:', parentResult.error)
-    }
-    if (!directorResult.ok) {
-      console.error('[createRecorrido] Error email a directora:', directorResult.error)
-    }
+    await supabase
+      .from('tour_recorridos')
+      .update({
+        email_parent_sent: parentResult.ok,
+        email_director_sent: directorResult.ok,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', inserted.id)
+    if (!parentResult.ok) console.error('[createRecorrido] Error email al papá:', parentResult.error)
+    if (!directorResult.ok) console.error('[createRecorrido] Error email a directora:', directorResult.error)
 
     revalidatePath('/admin')
     return { ok: true }

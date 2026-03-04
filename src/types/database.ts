@@ -118,6 +118,8 @@ export interface TourRecorrido {
   parent_phone: string
   parent_email: string
   notes?: string
+  email_parent_sent?: boolean
+  email_director_sent?: boolean
   created_at: string
   updated_at: string
 }

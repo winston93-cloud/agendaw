@@ -220,6 +220,11 @@ export default function AdminRecorridos({ recorridos }: { recorridos: TourRecorr
                         <span className="admin-recorridos-item-nivel">{LEVEL_LABELS[r.level as TourRecorridoLevel]}</span>
                         <span className="admin-recorridos-item-nombre">{r.parent_name}</span>
                         <span className="admin-recorridos-item-contacto">{r.parent_phone} · {r.parent_email}</span>
+                        <span className="admin-recorridos-item-emails">
+                          Correo papá: {r.email_parent_sent === true ? '✓ Enviado' : r.email_parent_sent === false ? '✗ No enviado' : '—'}
+                          {' · '}
+                          Correo directora: {r.email_director_sent === true ? '✓ Enviado' : r.email_director_sent === false ? '✗ No enviado' : '—'}
+                        </span>
                       </div>
                       <div className="admin-recorridos-item-actions">
                         <button
