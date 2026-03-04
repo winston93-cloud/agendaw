@@ -14,6 +14,29 @@ const LEVEL_LABELS: Record<string, string> = {
   secundaria: 'Secundaria',
 }
 
+const GRADE_LABELS: Record<string, string> = {
+  maternal_a: 'Maternal A',
+  maternal_b: 'Maternal B',
+  kinder_1: 'Kinder 1',
+  kinder_2: 'Kinder 2',
+  kinder_3: 'Kinder 3',
+  primaria_1: '1° Primaria',
+  primaria_2: '2° Primaria',
+  primaria_3: '3° Primaria',
+  primaria_4: '4° Primaria',
+  primaria_5: '5° Primaria',
+  primaria_6: '6° Primaria',
+  secundaria_7: '7mo (1° Secundaria)',
+  secundaria_8: '8vo (2° Secundaria)',
+  secundaria_9: '9no (3° Secundaria)',
+}
+
+type ModalState =
+  | { type: 'confirm-aprobar'; appointment: AdmissionAppointment }
+  | { type: 'result'; ok: boolean; message: string }
+  | { type: 'error'; message: string }
+  | null
+
 function apiLevel(level: string): string {
   if (level === 'maternal' || level === 'kinder') return 'maternal_kinder'
   if (level === 'primaria') return 'primaria'
@@ -23,6 +46,8 @@ function apiLevel(level: string): string {
 
 export default function AdminCitas({ appointments }: { appointments: AdmissionAppointment[] }) {
   const router = useRouter()
+  const [modal, setModal] = useState<ModalState>(null)
+  const [approving, setApproving] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editDate, setEditDate] = useState('')
   const [editTime, setEditTime] = useState('')
@@ -111,7 +136,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
   const saveEdit = async () => {
     if (!editingId) return
     if (editScheduleTimes.length > 0 && !editTime?.trim()) {
-      alert('Elige un horario de la lista.')
+      setModal({ type: 'error', message: 'Elige un horario de la lista.' })
       return
     }
     setIsSaving(true)
@@ -120,11 +145,10 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
         appointment_date: editDate,
         appointment_time: (editTime?.trim() || 'Por confirmar'),
       })
-      alert('✅ Cita actualizada correctamente')
       setEditingId(null)
-      window.location.reload()
+      setModal({ type: 'result', ok: true, message: '✅ Cita actualizada correctamente' })
     } catch (e) {
-      alert((e as Error).message)
+      setModal({ type: 'error', message: (e as Error).message })
     } finally {
       setIsSaving(false)
     }
@@ -137,29 +161,125 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
       await updateAppointment(id, { status })
       router.refresh()
     } catch (e) {
-      alert((e as Error).message)
+      setModal({ type: 'error', message: (e as Error).message })
     }
   }
 
-  const aprobarAlumno = async (id: string) => {
-    if (!confirm('¿Aprobar alumno y crear en el sistema? Esta acción creará el registro en MySQL.')) {
-      return
-    }
+  const aprobarAlumno = (appointment: AdmissionAppointment) => {
+    setModal({ type: 'confirm-aprobar', appointment })
+  }
+
+  const confirmarAprobacion = async (id: string) => {
+    setApproving(true)
     try {
       const result = await completeAdmissionAndCreateAlumno(id)
       if (result.success) {
-        alert(result.message)
-        window.location.reload()
+        setModal({ type: 'result', ok: true, message: result.message })
       } else {
-        alert('❌ Error: ' + result.message)
+        setModal({ type: 'result', ok: false, message: result.message })
       }
     } catch (e) {
-      alert((e as Error).message)
+      setModal({ type: 'result', ok: false, message: (e as Error).message })
+    } finally {
+      setApproving(false)
     }
   }
 
   return (
     <div className="admin-citas">
+      {/* MODAL CONFIRMAR APROBACIÓN */}
+      {modal?.type === 'confirm-aprobar' && (
+        <div className="modal-overlay" onClick={() => !approving && setModal(null)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header modal-header-confirm">
+              <span className="modal-header-icon">✅</span>
+              <h3>Confirmar aprobación de ingreso</h3>
+            </div>
+            <div className="modal-body">
+              <p className="modal-body-subtitle">Estás a punto de dar de alta al siguiente aspirante en MySQL:</p>
+              <div className="modal-info-grid">
+                <div className="modal-info-item">
+                  <span className="modal-info-label">Alumno</span>
+                  <span className="modal-info-value">
+                    {`${modal.appointment.student_name} ${modal.appointment.student_last_name_p || ''} ${modal.appointment.student_last_name_m || ''}`.trim()}
+                  </span>
+                </div>
+                <div className="modal-info-item">
+                  <span className="modal-info-label">Nivel</span>
+                  <span className="modal-info-value">{LEVEL_LABELS[modal.appointment.level] || modal.appointment.level}</span>
+                </div>
+                <div className="modal-info-item">
+                  <span className="modal-info-label">Grado</span>
+                  <span className="modal-info-value">{GRADE_LABELS[modal.appointment.grade_level] || modal.appointment.grade_level}</span>
+                </div>
+              </div>
+              <p className="modal-body-warning">Esta acción creará el registro permanentemente en el sistema escolar.</p>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setModal(null)}
+                disabled={approving}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="btn btn-success"
+                onClick={() => confirmarAprobacion(modal.appointment.id)}
+                disabled={approving}
+              >
+                {approving ? 'Procesando…' : '✅ Aprobar ingreso'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL RESULTADO */}
+      {modal?.type === 'result' && (
+        <div className="modal-overlay" onClick={() => { setModal(null); if (modal.ok) window.location.reload() }}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className={`modal-header ${modal.ok ? 'modal-header-success' : 'modal-header-error'}`}>
+              <span className="modal-header-icon">{modal.ok ? '✅' : '❌'}</span>
+              <h3>{modal.ok ? 'Operación exitosa' : 'Error'}</h3>
+            </div>
+            <div className="modal-body">
+              <p className="modal-result-message">{modal.message}</p>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => { setModal(null); if (modal.ok) window.location.reload() }}
+              >
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL ERROR SIMPLE */}
+      {modal?.type === 'error' && (
+        <div className="modal-overlay" onClick={() => setModal(null)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header modal-header-error">
+              <span className="modal-header-icon">⚠️</span>
+              <h3>Atención</h3>
+            </div>
+            <div className="modal-body">
+              <p className="modal-result-message">{modal.message}</p>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-primary" onClick={() => setModal(null)}>Aceptar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
       <div className="admin-filters" style={{ alignItems: 'flex-end' }}>
         <div className="admin-filters-group">
           <label className="admin-filter-label">
@@ -395,7 +515,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                               <button 
                                 type="button" 
                                 className="btn btn-success btn-sm" 
-                                onClick={() => aprobarAlumno(a.id)}
+                                onClick={() => aprobarAlumno(a)}
                                 title="Aprobar ingreso y crear alumno"
                                 style={{ padding: '0.2rem 0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', background: '#10b981', border: 'none', color: 'white', width: '100%', minHeight: '26px' }}
                               >

@@ -3301,6 +3301,127 @@ body {
   line-height: 1.5;
 }
 
+/* ========== Modales admin ========== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9000;
+  padding: 1rem;
+}
+
+.modal-box {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.2);
+  width: 100%;
+  max-width: 440px;
+  overflow: hidden;
+  animation: modalPop 0.2s ease-out;
+}
+
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(0.93) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  color: #fff;
+}
+
+.modal-header-confirm { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); }
+.modal-header-success { background: linear-gradient(135deg, #059669 0%, #10b981 100%); }
+.modal-header-error   { background: linear-gradient(135deg, #dc2626 0%, #f97316 100%); }
+
+.modal-header-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-body-subtitle {
+  margin: 0 0 1rem;
+  color: #475569;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.modal-info-grid {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.modal-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.modal-info-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.modal-info-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+  text-align: right;
+}
+
+.modal-body-warning {
+  font-size: 0.85rem;
+  color: #b45309;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  margin: 0;
+}
+
+.modal-result-message {
+  font-size: 1rem;
+  color: #334155;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 0 1.5rem 1.5rem;
+}
+
 /* Buscar alumno */
 .admin-buscar {
   margin-top: 0.5rem;
