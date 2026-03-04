@@ -253,7 +253,11 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                     )}
                     <div className="time-slots time-slots-admin">
                       {calScheduleTimes.map(t => {
-                        const isBooked = solicitudDate ? calBookedSlots.includes(t) : false
+                        // Si la fecha propuesta es la misma que la actual, el horario original también está ocupado
+                        const isSameDay = solicitudDate === modal.appointment.appointment_date
+                        const isBooked = solicitudDate
+                          ? (calBookedSlots.includes(t) || (isSameDay && t === modal.appointment.appointment_time))
+                          : false
                         return (
                           <button key={t} type="button"
                             className={`time-slot ${solicitudTime === t ? 'selected' : ''} ${isBooked ? 'time-slot-booked' : ''}`}
