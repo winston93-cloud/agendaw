@@ -96,8 +96,10 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
       setSolicitudDate(''); setSolicitudTime('')
       return
     }
-    const apt   = modal.appointment
-    const level = toAdminLevel(apt.level)
+    const apt        = modal.appointment
+    const level      = toAdminLevel(apt.level)   // para blocked-dates, schedules y fullyBooked
+    const exactLevel = apt.level                  // para booked-slots (por nivel exacto)
+    void exactLevel  // usada en el siguiente useEffect
     // Cargar todo al abrir el modal (sin esperar a que se seleccione fecha)
     Promise.all([
       fetch(`/api/blocked-dates?level=${level}`).then(r => r.json()).then(d => d.dates || []).catch(() => []),
@@ -119,10 +121,10 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
       return
     }
     const apt   = modal.appointment
-    const level = toAdminLevel(apt.level)
     setCalLoadingSlots(true)
     setSolicitudTime('')    // resetear hora al cambiar fecha
-    fetch(`/api/booked-slots?level=${level}&date=${solicitudDate}&exclude_id=${apt.id}`)
+    // Usar nivel exacto para que solo bloquee horarios del mismo nivel
+    fetch(`/api/booked-slots?level=${apt.level}&date=${solicitudDate}&exclude_id=${apt.id}`)
       .then(r => r.json())
       .then(d => setCalBookedSlots(d.times || []))
       .catch(() => setCalBookedSlots([]))
