@@ -196,7 +196,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
               <h3>Confirmar aprobación de ingreso</h3>
             </div>
             <div className="modal-body">
-              <p className="modal-body-subtitle">Estás a punto de dar de alta al siguiente aspirante en MySQL:</p>
+              <p className="modal-body-subtitle">Estás a punto de dar de alta al siguiente aspirante en Servicios Administrativos:</p>
               <div className="modal-info-grid">
                 <div className="modal-info-item">
                   <span className="modal-info-label">Alumno</span>
@@ -213,7 +213,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                   <span className="modal-info-value">{GRADE_LABELS[modal.appointment.grade_level] || modal.appointment.grade_level}</span>
                 </div>
               </div>
-              <p className="modal-body-warning">Esta acción creará el registro permanentemente en el sistema escolar.</p>
+              <p className="modal-body-warning">Esta acción creará el registro permanentemente en Servicios Administrativos.</p>
             </div>
             <div className="modal-footer">
               <button
