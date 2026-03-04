@@ -150,6 +150,18 @@ export async function createPermissionRequest(data: {
   return { ok: true, id: inserted.id }
 }
 
+// ─── OBTENER SOLICITUDES (para el panel psicólogas) ──────────────────────
+export async function getAllRecentRequests() {
+  const supabase = createAdminClient()
+  const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+  const { data } = await supabase
+    .from('permission_requests')
+    .select('*')
+    .gte('created_at', since)
+    .order('created_at', { ascending: false })
+  return (data ?? []) as PermissionRequest[]
+}
+
 // ─── OBTENER SOLICITUDES (para el dashboard directoras) ───────────────────
 export async function getPermissionRequests(level: AdmissionLevel) {
   const supabase = createAdminClient()

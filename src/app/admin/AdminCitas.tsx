@@ -1,166 +1,90 @@
-// Componente para administrar citas - V3
+// Componente para administrar citas - V4
 'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { updateAppointment, completeAdmissionAndCreateAlumno, checkExpedientesBatch, getFullyBookedDates } from './actions'
-import { createPermissionRequest } from './dashboard/actions'
-import ExamDateCalendar from '@/components/ExamDateCalendar'
-import type { AdmissionAppointment } from '@/types/database'
+import { updateAppointment, completeAdmissionAndCreateAlumno, checkExpedientesBatch } from './actions'
+import { createPermissionRequest, getAllRecentRequests } from './dashboard/actions'
+import type { AdmissionAppointment, PermissionRequest } from '@/types/database'
 
 const LEVEL_LABELS: Record<string, string> = {
-  maternal: 'Maternal',
-  kinder: 'Kinder',
-  primaria: 'Primaria',
-  secundaria: 'Secundaria',
+  maternal: 'Maternal', kinder: 'Kinder', primaria: 'Primaria', secundaria: 'Secundaria',
 }
 
 const GRADE_LABELS: Record<string, string> = {
-  maternal_a: 'Maternal A',
-  maternal_b: 'Maternal B',
-  kinder_1: 'Kinder 1',
-  kinder_2: 'Kinder 2',
-  kinder_3: 'Kinder 3',
-  primaria_1: '1° Primaria',
-  primaria_2: '2° Primaria',
-  primaria_3: '3° Primaria',
-  primaria_4: '4° Primaria',
-  primaria_5: '5° Primaria',
-  primaria_6: '6° Primaria',
-  secundaria_7: '7mo (1° Secundaria)',
-  secundaria_8: '8vo (2° Secundaria)',
-  secundaria_9: '9no (3° Secundaria)',
+  maternal_a: 'Maternal A', maternal_b: 'Maternal B',
+  kinder_1: 'Kinder 1', kinder_2: 'Kinder 2', kinder_3: 'Kinder 3',
+  primaria_1: '1° Primaria', primaria_2: '2° Primaria', primaria_3: '3° Primaria',
+  primaria_4: '4° Primaria', primaria_5: '5° Primaria', primaria_6: '6° Primaria',
+  secundaria_7: '7mo (1° Sec.)', secundaria_8: '8vo (2° Sec.)', secundaria_9: '9no (3° Sec.)',
 }
 
+type ReqStatus = 'pendiente' | 'aprobada' | 'rechazada'
+
 type ModalState =
-  | { type: 'confirm-aprobar'; appointment: AdmissionAppointment }
   | { type: 'solicitar-reagendar'; appointment: AdmissionAppointment }
-  | { type: 'result'; ok: boolean; message: string }
-  | { type: 'error'; message: string }
+  | { type: 'confirm-aprobar';     appointment: AdmissionAppointment }
+  | { type: 'result';  ok: boolean; message: string }
+  | { type: 'error';   message: string }
   | null
 
-function apiLevel(level: string): string {
-  if (level === 'maternal' || level === 'kinder') return 'maternal_kinder'
-  if (level === 'primaria') return 'primaria'
-  if (level === 'secundaria') return 'secundaria'
-  return level
+function StatusBadge({ status, label }: { status: ReqStatus; label?: string }) {
+  const cfg = {
+    pendiente: { bg: '#fef3c7', color: '#92400e', text: label ?? '⏳ Reagendación pendiente' },
+    aprobada:  { bg: '#d1fae5', color: '#065f46', text: label ?? '✅ Reagendación aprobada'  },
+    rechazada: { bg: '#fee2e2', color: '#991b1b', text: label ?? '❌ Reagendación rechazada' },
+  }[status]
+  return (
+    <span style={{
+      fontSize: '0.7rem', fontWeight: '700', padding: '0.2rem 0.55rem',
+      borderRadius: '20px', background: cfg.bg, color: cfg.color, whiteSpace: 'nowrap',
+    }}>
+      {cfg.text}
+    </span>
+  )
 }
 
 export default function AdminCitas({ appointments }: { appointments: AdmissionAppointment[] }) {
   const router = useRouter()
-  const [modal, setModal] = useState<ModalState>(null)
-  const [approving, setApproving] = useState(false)
-  const [solicitudMsg, setSolicitudMsg] = useState('')
-  const [solicitudDate, setSolicitudDate] = useState('')
-  const [solicitudTime, setSolicitudTime] = useState('')
-  const [sendingSolicitud, setSendingSolicitud] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [editDate, setEditDate] = useState('')
-  const [editTime, setEditTime] = useState('')
-  const [editingLevel, setEditingLevel] = useState<string>('')
-  const [editBlockedDates, setEditBlockedDates] = useState<string[]>([])
-  const [editFullyBookedDates, setEditFullyBookedDates] = useState<string[]>([])
-  const [editScheduleTimes, setEditScheduleTimes] = useState<string[]>([])
-  const [editBookedSlots, setEditBookedSlots] = useState<string[]>([])
-  const [filterLevel, setFilterLevel] = useState<string>('')
-  const [filterStatus, setFilterStatus] = useState<string>('')
-  const [filterStartDate, setFilterStartDate] = useState<string>('')
-  const [filterEndDate, setFilterEndDate] = useState<string>('')
-  const [expedientesMap, setExpedientesMap] = useState<Record<string, boolean>>({})
-  const [isSaving, setIsSaving] = useState(false)
 
-  const filtered = appointments.filter((a) => {
-    if (filterLevel && a.level !== filterLevel) return false
+  const [modal,          setModal]          = useState<ModalState>(null)
+  const [approving,      setApproving]      = useState(false)
+  const [solicitudMsg,   setSolicitudMsg]   = useState('')
+  const [solicitudDate,  setSolicitudDate]  = useState('')
+  const [solicitudTime,  setSolicitudTime]  = useState('')
+  const [sendingSol,     setSendingSol]     = useState(false)
+  const [filterLevel,    setFilterLevel]    = useState('')
+  const [filterStatus,   setFilterStatus]   = useState('')
+  const [filterStart,    setFilterStart]    = useState('')
+  const [filterEnd,      setFilterEnd]      = useState('')
+  const [expedientesMap, setExpedientesMap] = useState<Record<string, boolean>>({})
+  const [statusMap,      setStatusMap]      = useState<Record<string, ReqStatus>>({})
+
+  const filtered = appointments.filter(a => {
+    if (filterLevel  && a.level  !== filterLevel)  return false
     if (filterStatus && a.status !== filterStatus) return false
-    if (filterStartDate && a.appointment_date < filterStartDate) return false
-    if (filterEndDate && a.appointment_date > filterEndDate) return false
+    if (filterStart  && a.appointment_date < filterStart) return false
+    if (filterEnd    && a.appointment_date > filterEnd)   return false
     return true
   })
 
-  // Cargar qué citas tienen expediente inicial (Optimizado: una sola consulta)
   useEffect(() => {
-    const loadExpedientes = async () => {
-      // Obtener IDs de citas visibles
-      const appointmentIds = appointments.map(a => a.id)
-      if (appointmentIds.length === 0) return
-
-      try {
-        // Consultar todos los expedientes de una sola vez
-        const resultMap = await checkExpedientesBatch(appointmentIds)
-        setExpedientesMap(resultMap)
-      } catch (e) {
-        console.error('Error cargando expedientes:', e)
-      }
-    }
-    loadExpedientes()
+    if (appointments.length === 0) return
+    checkExpedientesBatch(appointments.map(a => a.id))
+      .then(m => setExpedientesMap(m))
+      .catch(() => {})
   }, [appointments])
 
-  const startEdit = (a: AdmissionAppointment) => {
-    setEditingId(a.id)
-    setEditDate(a.appointment_date)
-    setEditTime(a.appointment_time)
-    setEditingLevel(a.level)
-  }
-
   useEffect(() => {
-    if (!editingId || !editingLevel) {
-      setEditBlockedDates([])
-      setEditScheduleTimes([])
-      return
-    }
-    const level = apiLevel(editingLevel)
-    Promise.all([
-      fetch(`/api/blocked-dates?level=${level}`).then((r) => r.json()).then((d) => d.dates || []).catch(() => []),
-      fetch(`/api/schedules?level=${level}`).then((r) => r.json()).then((d) => d.times || []).catch(() => []),
-      getFullyBookedDates(level as any, editingId),
-    ]).then(([dates, times, fullyBooked]) => {
-      setEditBlockedDates(dates)
-      setEditScheduleTimes(times)
-      setEditFullyBookedDates(fullyBooked)
-    })
-  }, [editingId, editingLevel])
-
-  useEffect(() => {
-    if (!editingId || !editDate || !editingLevel) {
-      setEditBookedSlots([])
-      return
-    }
-    fetch(`/api/booked-slots?level=${editingLevel}&date=${editDate}&exclude_id=${editingId}`)
-      .then((r) => r.json())
-      .then((d) => setEditBookedSlots(d.times || []))
-      .catch(() => setEditBookedSlots([]))
-  }, [editingId, editDate, editingLevel])
-
-  // Si al cambiar fecha/horarios el tiempo elegido ya no está disponible, limpiar
-  useEffect(() => {
-    if (!editingId || !editTime) return
-    if (editBookedSlots.includes(editTime) || (editScheduleTimes.length > 0 && !editScheduleTimes.includes(editTime))) {
-      setEditTime('')
-    }
-  }, [editingId, editTime, editBookedSlots, editScheduleTimes])
-
-  const saveEdit = async () => {
-    if (!editingId) return
-    if (editScheduleTimes.length > 0 && !editTime?.trim()) {
-      setModal({ type: 'error', message: 'Elige un horario de la lista.' })
-      return
-    }
-    setIsSaving(true)
-    try {
-      await updateAppointment(editingId, {
-        appointment_date: editDate,
-        appointment_time: (editTime?.trim() || 'Por confirmar'),
+    getAllRecentRequests().then((reqs: PermissionRequest[]) => {
+      const map: Record<string, ReqStatus> = {}
+      reqs.filter(r => r.type === 'reagendar' && r.appointment_id).forEach(r => {
+        const k = `reagendar:${r.appointment_id}`
+        if (!map[k]) map[k] = r.status as ReqStatus
       })
-      setEditingId(null)
-      setModal({ type: 'result', ok: true, message: '✅ Cita actualizada correctamente' })
-    } catch (e) {
-      setModal({ type: 'error', message: (e as Error).message })
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
-  const cancelEdit = () => setEditingId(null)
+      setStatusMap(map)
+    }).catch(() => {})
+  }, [])
 
   const updateStatus = async (id: string, status: string) => {
     try {
@@ -171,12 +95,8 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
     }
   }
 
-  const aprobarAlumno = (appointment: AdmissionAppointment) => {
-    setModal({ type: 'confirm-aprobar', appointment })
-  }
-
   const enviarSolicitudReagendar = async (appointment: AdmissionAppointment) => {
-    setSendingSolicitud(true)
+    setSendingSol(true)
     try {
       const levelMap: Record<string, 'maternal_kinder' | 'primaria' | 'secundaria'> = {
         maternal: 'maternal_kinder', kinder: 'maternal_kinder',
@@ -194,14 +114,14 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
         proposed_time:  solicitudTime || undefined,
         psych_message:  solicitudMsg.trim() || undefined,
       })
+      const k = `reagendar:${appointment.id}`
+      setStatusMap(prev => ({ ...prev, [k]: 'pendiente' }))
       setModal({ type: 'result', ok: true, message: '✅ Solicitud enviada a la directora. Recibirás respuesta por correo.' })
-      setSolicitudMsg('')
-      setSolicitudDate('')
-      setSolicitudTime('')
+      setSolicitudMsg(''); setSolicitudDate(''); setSolicitudTime('')
     } catch (e) {
       setModal({ type: 'result', ok: false, message: (e as Error).message })
     } finally {
-      setSendingSolicitud(false)
+      setSendingSol(false)
     }
   }
 
@@ -209,11 +129,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
     setApproving(true)
     try {
       const result = await completeAdmissionAndCreateAlumno(id)
-      if (result.success) {
-        setModal({ type: 'result', ok: true, message: result.message })
-      } else {
-        setModal({ type: 'result', ok: false, message: result.message })
-      }
+      setModal({ type: 'result', ok: result.success, message: result.message })
     } catch (e) {
       setModal({ type: 'result', ok: false, message: (e as Error).message })
     } finally {
@@ -223,11 +139,12 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
 
   return (
     <div className="admin-citas">
-      {/* MODAL SOLICITAR REAGENDACIÓN */}
+
+      {/* ── MODAL SOLICITAR REAGENDACIÓN ─────────────────────────── */}
       {modal?.type === 'solicitar-reagendar' && (
-        <div className="modal-overlay" onClick={() => !sendingSolicitud && setModal(null)}>
+        <div className="modal-overlay" onClick={() => !sendingSol && setModal(null)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-header modal-header-confirm" style={{ background: 'linear-gradient(135deg,#7c3aed 0%,#a78bfa 100%)' }}>
+            <div className="modal-header" style={{ background: 'linear-gradient(135deg,#7c3aed 0%,#a78bfa 100%)' }}>
               <span className="modal-header-icon">📋</span>
               <h3>Solicitar autorización — Reagendar</h3>
             </div>
@@ -243,42 +160,41 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                   <span className="modal-info-label">Cita actual</span>
                   <span className="modal-info-value">{modal.appointment.appointment_date} · {modal.appointment.appointment_time}</span>
                 </div>
-
               </div>
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
                 <div style={{ flex: 1 }}>
                   <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>Nueva fecha propuesta</label>
                   <input type="date" value={solicitudDate} onChange={e => setSolicitudDate(e.target.value)}
-                    style={{ width: '100%', marginTop: '0.25rem', padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+                    style={{ width: '100%', marginTop: '0.25rem', padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '8px', boxSizing: 'border-box' }} />
                 </div>
                 <div style={{ flex: 1 }}>
                   <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>Nueva hora propuesta</label>
                   <input type="time" value={solicitudTime} onChange={e => setSolicitudTime(e.target.value)}
-                    style={{ width: '100%', marginTop: '0.25rem', padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+                    style={{ width: '100%', marginTop: '0.25rem', padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '8px', boxSizing: 'border-box' }} />
                 </div>
               </div>
               <div style={{ marginTop: '1rem' }}>
                 <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>Mensaje para la directora (opcional)</label>
-                <textarea value={solicitudMsg} onChange={e => setSolicitudMsg(e.target.value)}
-                  rows={3} placeholder="Explica el motivo de la reagendación..."
-                  style={{ width: '100%', marginTop: '0.25rem', padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '8px', resize: 'vertical', fontFamily: 'inherit' }} />
+                <textarea value={solicitudMsg} onChange={e => setSolicitudMsg(e.target.value)} rows={3}
+                  placeholder="Explica el motivo de la reagendación..."
+                  style={{ width: '100%', marginTop: '0.25rem', padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '8px', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
               </div>
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" onClick={() => setModal(null)} disabled={sendingSolicitud}>Cancelar</button>
-              <button type="button" onClick={() => enviarSolicitudReagendar(modal.appointment)} disabled={sendingSolicitud}
+              <button type="button" className="btn btn-secondary" onClick={() => setModal(null)} disabled={sendingSol}>Cancelar</button>
+              <button type="button" onClick={() => enviarSolicitudReagendar(modal.appointment)} disabled={sendingSol}
                 style={{ padding: '0.6rem 1.25rem', background: 'linear-gradient(135deg,#7c3aed,#a78bfa)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '700', cursor: 'pointer' }}>
-                {sendingSolicitud ? 'Enviando…' : '📋 Enviar solicitud'}
+                {sendingSol ? 'Enviando…' : '📋 Enviar solicitud'}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* MODAL CONFIRMAR APROBACIÓN */}
+      {/* ── MODAL CONFIRMAR APROBACIÓN ───────────────────────────── */}
       {modal?.type === 'confirm-aprobar' && (
         <div className="modal-overlay" onClick={() => !approving && setModal(null)}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-box" onClick={e => e.stopPropagation()}>
             <div className="modal-header modal-header-confirm">
               <span className="modal-header-icon">✅</span>
               <h3>Confirmar aprobación de ingreso</h3>
@@ -304,20 +220,8 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
               <p className="modal-body-warning">Esta acción creará el registro permanentemente en Servicios Administrativos.</p>
             </div>
             <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setModal(null)}
-                disabled={approving}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className="btn btn-success"
-                onClick={() => confirmarAprobacion(modal.appointment.id)}
-                disabled={approving}
-              >
+              <button type="button" className="btn btn-secondary" onClick={() => setModal(null)} disabled={approving}>Cancelar</button>
+              <button type="button" className="btn btn-success" onClick={() => confirmarAprobacion(modal.appointment.id)} disabled={approving}>
                 {approving ? 'Procesando…' : '✅ Aprobar ingreso'}
               </button>
             </div>
@@ -325,41 +229,31 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
         </div>
       )}
 
-      {/* MODAL RESULTADO */}
+      {/* ── MODAL RESULTADO ─────────────────────────────────────── */}
       {modal?.type === 'result' && (
         <div className="modal-overlay" onClick={() => { setModal(null); if (modal.ok) window.location.reload() }}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-box" onClick={e => e.stopPropagation()}>
             <div className={`modal-header ${modal.ok ? 'modal-header-success' : 'modal-header-error'}`}>
               <span className="modal-header-icon">{modal.ok ? '✅' : '❌'}</span>
               <h3>{modal.ok ? 'Operación exitosa' : 'Error'}</h3>
             </div>
-            <div className="modal-body">
-              <p className="modal-result-message">{modal.message}</p>
-            </div>
+            <div className="modal-body"><p className="modal-result-message">{modal.message}</p></div>
             <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => { setModal(null); if (modal.ok) window.location.reload() }}
-              >
-                Aceptar
-              </button>
+              <button type="button" className="btn btn-primary" onClick={() => { setModal(null); if (modal.ok) window.location.reload() }}>Aceptar</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* MODAL ERROR SIMPLE */}
+      {/* ── MODAL ERROR ─────────────────────────────────────────── */}
       {modal?.type === 'error' && (
         <div className="modal-overlay" onClick={() => setModal(null)}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-box" onClick={e => e.stopPropagation()}>
             <div className="modal-header modal-header-error">
               <span className="modal-header-icon">⚠️</span>
               <h3>Atención</h3>
             </div>
-            <div className="modal-body">
-              <p className="modal-result-message">{modal.message}</p>
-            </div>
+            <div className="modal-body"><p className="modal-result-message">{modal.message}</p></div>
             <div className="modal-footer">
               <button type="button" className="btn btn-primary" onClick={() => setModal(null)}>Aceptar</button>
             </div>
@@ -367,14 +261,12 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
         </div>
       )}
 
-
+      {/* ── FILTROS ─────────────────────────────────────────────── */}
       <div className="admin-filters" style={{ alignItems: 'flex-end' }}>
         <div className="admin-filters-group">
-          <label className="admin-filter-label">
-            <span className="filter-icon">🎓</span> Nivel
-          </label>
+          <label className="admin-filter-label"><span className="filter-icon">🎓</span> Nivel</label>
           <div className="filter-input-wrapper">
-            <select value={filterLevel} onChange={(e) => setFilterLevel(e.target.value)} className="admin-filter-select">
+            <select value={filterLevel} onChange={e => setFilterLevel(e.target.value)} className="admin-filter-select">
               <option value="">Todos los niveles</option>
               <option value="maternal">Maternal</option>
               <option value="kinder">Kinder</option>
@@ -383,13 +275,10 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
             </select>
           </div>
         </div>
-
         <div className="admin-filters-group">
-          <label className="admin-filter-label">
-            <span className="filter-icon">📌</span> Estado
-          </label>
+          <label className="admin-filter-label"><span className="filter-icon">📌</span> Estado</label>
           <div className="filter-input-wrapper">
-            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="admin-filter-select">
+            <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="admin-filter-select">
               <option value="">Todos los estados</option>
               <option value="pending">Pendiente</option>
               <option value="confirmed">Confirmada</option>
@@ -398,47 +287,30 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
             </select>
           </div>
         </div>
-
         <div className="admin-filters-divider"></div>
-
         <div className="admin-filters-group-dates">
-          <div className="admin-filters-date-label">
-            <span className="filter-icon">📅</span> Fecha de Examen
-          </div>
+          <div className="admin-filters-date-label"><span className="filter-icon">📅</span> Fecha de Examen</div>
           <div className="admin-filters-date-inputs">
             <div className="date-input-container">
               <label>Desde:</label>
-              <input 
-                type="date" 
-                value={filterStartDate} 
-                onChange={(e) => setFilterStartDate(e.target.value)}
-                className="admin-filter-date"
-              />
+              <input type="date" value={filterStart} onChange={e => setFilterStart(e.target.value)} className="admin-filter-date" />
             </div>
             <div className="date-separator">→</div>
             <div className="date-input-container">
               <label>Hasta:</label>
-              <input 
-                type="date" 
-                value={filterEndDate} 
-                onChange={(e) => setFilterEndDate(e.target.value)}
-                className="admin-filter-date"
-              />
+              <input type="date" value={filterEnd} onChange={e => setFilterEnd(e.target.value)} className="admin-filter-date" />
             </div>
           </div>
         </div>
-
-        {(filterStartDate || filterEndDate || filterLevel || filterStatus) && (
-          <button 
-            onClick={() => { setFilterStartDate(''); setFilterEndDate(''); setFilterLevel(''); setFilterStatus(''); }}
-            className="admin-filter-clear"
-            title="Limpiar todos los filtros"
-          >
+        {(filterStart || filterEnd || filterLevel || filterStatus) && (
+          <button onClick={() => { setFilterStart(''); setFilterEnd(''); setFilterLevel(''); setFilterStatus('') }}
+            className="admin-filter-clear" title="Limpiar filtros">
             <span style={{ fontSize: '1.1rem' }}>🧹</span>
           </button>
         )}
       </div>
 
+      {/* ── TABLA ───────────────────────────────────────────────── */}
       {filtered.length === 0 ? (
         <p className="admin-empty">No hay citas con esos filtros.</p>
       ) : (
@@ -457,174 +329,74 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
               </tr>
             </thead>
             <tbody>
-              {filtered.map((a) => (
-                <tr key={a.id}>
-                  <td style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                    {new Date(a.created_at).toLocaleDateString('es-MX', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: '2-digit',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </td>
-                  <td>
-                    {editingId === a.id ? (
-                      <div className="admin-edit-date">
-                        <ExamDateCalendar
-                          value={editDate}
-                          onChange={setEditDate}
-                          blockedDates={[...editBlockedDates, ...editFullyBookedDates]}
-                          isAdmin={true}
-                        />
-                      </div>
-                    ) : (
-                      new Date(a.appointment_date + 'T12:00:00').toLocaleDateString('es-MX', {
-                        weekday: 'short',
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                      })
-                    )}
-                  </td>
-                  <td>
-                    {editingId === a.id ? (
-                      <div className="admin-edit-time">
-                        {editScheduleTimes.length === 0 ? (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            <input
-                              type="text"
-                              value={editTime}
-                              onChange={(e) => setEditTime(e.target.value)}
-                              className="admin-input-inline"
-                              placeholder="Ej: 09:00"
-                            />
-                          </div>
-                        ) : (
-                          <div className="time-slots time-slots-admin">
-                            {editScheduleTimes.map((time) => {
-                              const isBooked = editBookedSlots.includes(time)
-                              return (
-                                <button
-                                  key={time}
-                                  type="button"
-                                  className={`time-slot ${editTime === time ? 'selected' : ''} ${isBooked ? 'time-slot-booked' : ''}`}
-                                  onClick={() => !isBooked && setEditTime(time)}
-                                  disabled={isBooked}
-                                  title={isBooked ? 'Ocupado' : undefined}
-                                >
-                                  {time}
-                                  {isBooked && <span className="time-slot-label"> (Ocupado)</span>}
-                                </button>
-                              )
-                            })}
-                          </div>
-                        )}
-                        
-                        {/* Botones de acción integrados */}
-                        <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', justifyContent: 'flex-start' }}>
-                          <button 
-                            type="button" 
-                            className="btn btn-primary btn-sm" 
-                            onClick={saveEdit}
-                            disabled={isSaving}
-                            style={{ background: '#10b981', borderColor: '#10b981', color: 'white', display: 'flex', alignItems: 'center', gap: '4px', opacity: isSaving ? 0.7 : 1 }}
-                          >
-                            <span>{isSaving ? '...' : '✓'}</span> {isSaving ? 'Guardando...' : 'Confirmar Cambio'}
-                          </button>
-                          <button 
-                            type="button" 
-                            className="btn btn-danger btn-sm" 
-                            onClick={cancelEdit}
-                            disabled={isSaving}
-                            style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
-                          >
-                            <span>✕</span> Cancelar
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      a.appointment_time
-                    )}
-                  </td>
-                  <td>{LEVEL_LABELS[a.level] || a.level}</td>
-                  <td>
-                    <strong>{`${a.student_name} ${a.student_last_name_p || ''} ${a.student_last_name_m || ''}`.trim()}</strong>
-                    <br />
-                    <small>{a.grade_level} · {a.student_age} años</small>
-                  </td>
-                  <td>
-                    {a.parent_name}
-                    <br />
-                    <small>{a.parent_email} · {a.parent_phone}</small>
-                  </td>
-                  <td>
-                    <select
-                      value={a.status}
-                      onChange={(e) => updateStatus(a.id, e.target.value)}
-                      className={`admin-select-status status-pill status-${a.status}`}
-                    >
-                      <option value="pending">Pendiente</option>
-                      <option value="confirmed">Confirmada</option>
-                      <option value="cancelled">Cancelada</option>
-                      <option value="completed">Completada</option>
-                    </select>
-                  </td>
-                  <td style={{ minWidth: '120px', padding: '0.25rem', paddingRight: '1rem' }}>
-                    {editingId === a.id ? (
-                      <div style={{ color: '#64748b', fontSize: '0.85rem', fontStyle: 'italic', textAlign: 'center' }}>
-                        Editando...
-                      </div>
-                    ) : (
+              {filtered.map(a => {
+                const reqStatus = statusMap[`reagendar:${a.id}`]
+                return (
+                  <tr key={a.id}>
+                    <td style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                      {new Date(a.created_at).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                    </td>
+                    <td>
+                      {new Date(a.appointment_date + 'T12:00:00').toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
+                    </td>
+                    <td>{a.appointment_time}</td>
+                    <td>{LEVEL_LABELS[a.level] || a.level}</td>
+                    <td>
+                      <strong>{`${a.student_name} ${a.student_last_name_p || ''} ${a.student_last_name_m || ''}`.trim()}</strong>
+                      <br /><small>{a.grade_level} · {a.student_age} años</small>
+                    </td>
+                    <td>
+                      {a.parent_name}<br />
+                      <small>{a.parent_email} · {a.parent_phone}</small>
+                    </td>
+                    <td>
+                      <select value={a.status} onChange={e => updateStatus(a.id, e.target.value)}
+                        className={`admin-select-status status-pill status-${a.status}`}>
+                        <option value="pending">Pendiente</option>
+                        <option value="confirmed">Confirmada</option>
+                        <option value="cancelled">Cancelada</option>
+                        <option value="completed">Completada</option>
+                      </select>
+                    </td>
+                    <td style={{ minWidth: '130px', padding: '0.25rem 0.5rem 0.25rem 0.25rem' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                        <button 
-                          type="button" 
-                          className="btn btn-secondary btn-sm" 
-                          onClick={() => startEdit(a)}
-                          title="Reagendar fecha/hora"
-                          style={{ padding: '0.2rem 0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#475569', width: '100%', minHeight: '26px' }}
-                        >
-                          <span style={{ fontSize: '0.85rem' }}>📅</span> <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Reagendar</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => { setSolicitudDate(''); setSolicitudTime(''); setSolicitudMsg(''); setModal({ type: 'solicitar-reagendar', appointment: a }) }}
-                          title="Solicitar autorización de reagendación a directora"
-                          style={{ padding: '0.2rem 0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', background: '#f5f3ff', border: '1px solid #c4b5fd', color: '#7c3aed', width: '100%', minHeight: '26px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: '600' }}
-                        >
-                          <span style={{ fontSize: '0.8rem' }}>📋</span> Solicitar
-                        </button>
-                        
-                        {expedientesMap[a.id] && (
-                          <>
-                            <button 
-                              type="button" 
-                              className="btn btn-info btn-sm" 
-                              onClick={() => window.open(`/expediente_inicial/ver?cita=${a.id}`, '_blank')}
-                              title="Ver expediente completo"
-                              style={{ padding: '0.2rem 0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', background: '#3b82f6', border: 'none', color: 'white', width: '100%', minHeight: '26px' }}
-                            >
-                              <span style={{ fontSize: '0.85rem' }}>👁️</span> <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Ver Exp.</span>
-                            </button>
-                            
-                            {a.status !== 'completed' && (
-                              <button 
-                                type="button" 
-                                className="btn btn-success btn-sm" 
-                                onClick={() => aprobarAlumno(a)}
-                                title="Aprobar ingreso y crear alumno"
-                                style={{ padding: '0.2rem 0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', background: '#10b981', border: 'none', color: 'white', width: '100%', minHeight: '26px' }}
-                              >
-                                <span style={{ fontSize: '0.85rem' }}>✅</span> <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Aprobar</span>
-                              </button>
-                            )}
-                          </>
+
+                        {/* Botón reagendar → solo solicitar */}
+                        {reqStatus === 'aprobada' ? (
+                          <span style={{ padding: '0.25rem 0.5rem', background: '#d1fae5', color: '#065f46', border: '1.5px solid #6ee7b7', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '700', textAlign: 'center' }}>
+                            ✅ Reagendación aprobada
+                          </span>
+                        ) : reqStatus === 'pendiente' ? (
+                          <StatusBadge status="pendiente" label="⏳ Reagendación pendiente" />
+                        ) : (
+                          <button type="button"
+                            onClick={() => { setSolicitudDate(''); setSolicitudTime(''); setSolicitudMsg(''); setModal({ type: 'solicitar-reagendar', appointment: a }) }}
+                            style={{ padding: '0.2rem 0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', background: '#f5f3ff', border: '1px solid #c4b5fd', color: '#7c3aed', width: '100%', minHeight: '26px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: '600' }}
+                          >
+                            <span style={{ fontSize: '0.8rem' }}>📋</span>
+                            {reqStatus === 'rechazada' ? 'Resolicitar reagendar' : 'Solicitar reagendar'}
+                          </button>
                         )}
+
+                        {expedientesMap[a.id] && (<>
+                          <button type="button" className="btn btn-info btn-sm"
+                            onClick={() => window.open(`/expediente_inicial/ver?cita=${a.id}`, '_blank')}
+                            style={{ padding: '0.2rem 0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', background: '#3b82f6', border: 'none', color: 'white', width: '100%', minHeight: '26px' }}>
+                            <span style={{ fontSize: '0.85rem' }}>👁️</span> <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Ver Exp.</span>
+                          </button>
+                          {a.status !== 'completed' && (
+                            <button type="button" className="btn btn-success btn-sm"
+                              onClick={() => setModal({ type: 'confirm-aprobar', appointment: a })}
+                              style={{ padding: '0.2rem 0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', background: '#10b981', border: 'none', color: 'white', width: '100%', minHeight: '26px' }}>
+                              <span style={{ fontSize: '0.85rem' }}>✅</span> <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Aprobar</span>
+                            </button>
+                          )}
+                        </>)}
                       </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
