@@ -88,7 +88,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
       .catch(() => {})
   }, [appointments])
 
-  // Cargar fechas bloqueadas y horarios cuando se abre el modal de solicitar reagendar
+  // Cargar fechas bloqueadas, fechas llenas y horarios disponibles al abrir el modal
   useEffect(() => {
     if (modal?.type !== 'solicitar-reagendar') {
       setCalBlockedDates([]); setCalFullyBooked([])
@@ -98,26 +98,30 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
     }
     const apt   = modal.appointment
     const level = toAdminLevel(apt.level)
+    // Cargar todo al abrir el modal (sin esperar a que se seleccione fecha)
     Promise.all([
       fetch(`/api/blocked-dates?level=${level}`).then(r => r.json()).then(d => d.dates || []).catch(() => []),
       fetch(`/api/schedules?level=${level}`).then(r => r.json()).then(d => d.times || []).catch(() => []),
       getFullyBookedDates(level as 'maternal_kinder' | 'primaria' | 'secundaria', apt.id),
     ]).then(([blocked, times, fullyBooked]) => {
       setCalBlockedDates(blocked)
-      setCalScheduleTimes(times)
+      setCalScheduleTimes(times)   // <-- disponibles desde el primer momento
       setCalFullyBooked(fullyBooked)
     }).catch(() => {})
   }, [modal])
 
-  // Cargar slots ocupados cuando cambia la fecha propuesta en el modal
+  // Cargar slots OCUPADOS al cambiar la fecha (marca cuáles están tomados ese día)
   useEffect(() => {
-    if (modal?.type !== 'solicitar-reagendar' || !solicitudDate) {
-      setCalBookedSlots([])
+    if (modal?.type !== 'solicitar-reagendar') return
+    if (!solicitudDate) {
+      setCalBookedSlots([])   // sin fecha → ninguno ocupado, todos se ven disponibles
+      setSolicitudTime('')
       return
     }
     const apt   = modal.appointment
     const level = toAdminLevel(apt.level)
     setCalLoadingSlots(true)
+    setSolicitudTime('')    // resetear hora al cambiar fecha
     fetch(`/api/booked-slots?level=${level}&date=${solicitudDate}&exclude_id=${apt.id}`)
       .then(r => r.json())
       .then(d => setCalBookedSlots(d.times || []))
@@ -219,42 +223,52 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                 </label>
                 <ExamDateCalendar
                   value={solicitudDate}
-                  onChange={date => { setSolicitudDate(date); setSolicitudTime('') }}
+                  onChange={date => setSolicitudDate(date)}
                   blockedDates={[...calBlockedDates, ...calFullyBooked]}
                   isAdmin={true}
                 />
               </div>
 
-              {/* Slots de hora con validaciones reales */}
-              {solicitudDate && (
-                <div style={{ marginTop: '1rem' }}>
-                  <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600', display: 'block', marginBottom: '0.4rem' }}>
-                    Nueva hora propuesta
-                  </label>
-                  {calLoadingSlots ? (
-                    <p style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Cargando horarios…</p>
-                  ) : calScheduleTimes.length === 0 ? (
-                    <input type="time" value={solicitudTime} onChange={e => setSolicitudTime(e.target.value)}
-                      style={{ padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '8px', width: '100%', boxSizing: 'border-box' }} />
-                  ) : (
+              {/* Slots de hora: aparecen desde que abre el modal */}
+              <div style={{ marginTop: '1rem' }}>
+                <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600', display: 'block', marginBottom: '0.4rem' }}>
+                  Nueva hora propuesta
+                </label>
+                {calScheduleTimes.length === 0 ? (
+                  /* Sin horarios configurados → input libre */
+                  <input type="time" value={solicitudTime} onChange={e => setSolicitudTime(e.target.value)}
+                    disabled={!solicitudDate}
+                    placeholder={!solicitudDate ? 'Primero elige una fecha' : ''}
+                    style={{ padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '8px', width: '100%', boxSizing: 'border-box', opacity: solicitudDate ? 1 : 0.5 }} />
+                ) : (
+                  /* Horarios configurados → botones (todos visibles desde el inicio) */
+                  <>
+                    {!solicitudDate && (
+                      <p style={{ fontSize: '0.78rem', color: '#94a3b8', marginBottom: '0.5rem' }}>
+                        Selecciona una fecha para ver disponibilidad
+                      </p>
+                    )}
+                    {calLoadingSlots && (
+                      <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '0.5rem' }}>Verificando disponibilidad…</p>
+                    )}
                     <div className="time-slots time-slots-admin">
                       {calScheduleTimes.map(t => {
-                        const isBooked = calBookedSlots.includes(t)
+                        const isBooked = solicitudDate ? calBookedSlots.includes(t) : false
                         return (
                           <button key={t} type="button"
                             className={`time-slot ${solicitudTime === t ? 'selected' : ''} ${isBooked ? 'time-slot-booked' : ''}`}
                             onClick={() => !isBooked && setSolicitudTime(t)}
                             disabled={isBooked}
-                            title={isBooked ? 'Ocupado' : undefined}
+                            title={isBooked ? 'Ya ocupado ese día' : (!solicitudDate ? 'Elige fecha primero' : undefined)}
                           >
                             {t}{isBooked && <span className="time-slot-label"> (Ocupado)</span>}
                           </button>
                         )
                       })}
                     </div>
-                  )}
-                </div>
-              )}
+                  </>
+                )}
+              </div>
 
               <div style={{ marginTop: '1rem' }}>
                 <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>Mensaje para la directora (opcional)</label>
