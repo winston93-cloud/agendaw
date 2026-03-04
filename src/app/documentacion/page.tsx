@@ -5,8 +5,9 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { getAppointmentForDocs, sendDocumentacion } from './actions'
 
-const MAX_MB   = 5
-const MAX_BYTES = MAX_MB * 1024 * 1024
+const MAX_FILE_MB   = 5
+const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024
+const MAX_TOTAL_MB  = 20  // margen conservador vs límite de 25MB del servidor
 
 const DOC_LIST = [
   { label: 'Constancia del nivel actual', icon: '📝', note: '(Solo Maternal/Kinder)' },
@@ -42,8 +43,8 @@ function DocumentacionContent() {
   }, [citaId])
 
   const handleFileChange = (index: number, file: File | null) => {
-    if (file && file.size > MAX_BYTES) {
-      alert(`"${file.name}" supera el límite de ${MAX_MB}MB.`)
+    if (file && file.size > MAX_FILE_BYTES) {
+      alert(`"${file.name}" supera el límite de ${MAX_FILE_MB}MB por archivo.`)
       return
     }
     setFiles(prev => {
@@ -126,7 +127,10 @@ function DocumentacionContent() {
     </div>
   )
 
-  const fileCount = Object.keys(files).length
+  const fileCount    = Object.keys(files).length
+  const totalBytes   = Object.values(files).reduce((sum, f) => sum + f.size, 0)
+  const totalMB      = totalBytes / (1024 * 1024)
+  const overLimit    = totalMB > MAX_TOTAL_MB
 
   return (
     <div className="expediente-page">
@@ -192,13 +196,63 @@ function DocumentacionContent() {
                   ) : (
                     <>
                       <p style={{ color: '#334155', fontWeight: '600', margin: 0 }}>Seleccionar archivo</p>
-                      <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>PDF, foto o imagen · Máx. {MAX_MB}MB</p>
+                      <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>PDF, foto o imagen · Máx. {MAX_FILE_MB}MB</p>
                     </>
                   )}
                 </div>
               </div>
             </div>
           ))}
+
+          {/* Indicador de tamaño total */}
+          {fileCount > 0 && (
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '0.75rem 1rem',
+              background: overLimit ? '#fef2f2' : '#f0fdf4',
+              border: `1px solid ${overLimit ? '#fca5a5' : '#86efac'}`,
+              borderRadius: '10px',
+              marginBottom: '1rem',
+              transition: 'all 0.3s ease',
+            }}>
+              <span style={{ fontSize: '0.9rem', color: '#475569', fontWeight: '600' }}>
+                📦 Peso total de archivos
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                {/* barra de progreso */}
+                <div style={{ width: '120px', height: '8px', background: '#e2e8f0', borderRadius: '99px', overflow: 'hidden' }}>
+                  <div style={{
+                    height: '100%',
+                    width: `${Math.min((totalMB / MAX_TOTAL_MB) * 100, 100)}%`,
+                    background: overLimit ? '#ef4444' : totalMB > MAX_TOTAL_MB * 0.75 ? '#f97316' : '#22c55e',
+                    borderRadius: '99px',
+                    transition: 'width 0.3s ease, background 0.3s ease',
+                  }} />
+                </div>
+                <span style={{
+                  fontWeight: '800', fontSize: '1rem',
+                  color: overLimit ? '#dc2626' : '#16a34a',
+                  minWidth: '80px', textAlign: 'right',
+                }}>
+                  {totalMB.toFixed(2)} MB
+                  <span style={{ fontSize: '0.75rem', fontWeight: '500', color: '#94a3b8', marginLeft: '4px' }}>
+                    / {MAX_TOTAL_MB} MB
+                  </span>
+                </span>
+                <span style={{ fontSize: '1.2rem' }}>{overLimit ? '🔴' : '🟢'}</span>
+              </div>
+            </div>
+          )}
+
+          {overLimit && (
+            <div style={{
+              padding: '0.85rem 1rem', background: '#fee2e2', border: '1px solid #fca5a5',
+              borderRadius: '10px', color: '#991b1b', fontSize: '0.9rem',
+              display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem',
+            }}>
+              <span>⚠️</span> El peso total supera el límite. Reduce el tamaño de algún archivo antes de enviar.
+            </div>
+          )}
 
           {error && (
             <div style={{
@@ -213,13 +267,13 @@ function DocumentacionContent() {
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={sending || fileCount === 0}
+            disabled={sending || fileCount === 0 || overLimit}
             style={{
               width: '100%', padding: '1rem', fontSize: '1.1rem', fontWeight: '700',
-              borderRadius: '12px', border: 'none', cursor: fileCount > 0 ? 'pointer' : 'not-allowed',
-              background: fileCount > 0 ? 'linear-gradient(135deg,#4f46e5 0%,#4338ca 100%)' : '#e2e8f0',
-              color: fileCount > 0 ? 'white' : '#94a3b8',
-              boxShadow: fileCount > 0 ? '0 4px 12px rgba(79,70,229,0.3)' : 'none',
+              borderRadius: '12px', border: 'none', cursor: (fileCount > 0 && !overLimit) ? 'pointer' : 'not-allowed',
+              background: (fileCount > 0 && !overLimit) ? 'linear-gradient(135deg,#4f46e5 0%,#4338ca 100%)' : '#e2e8f0',
+              color: (fileCount > 0 && !overLimit) ? 'white' : '#94a3b8',
+              boxShadow: (fileCount > 0 && !overLimit) ? '0 4px 12px rgba(79,70,229,0.3)' : 'none',
             }}
           >
             {sending ? 'Enviando...' : `📤 ENVIAR DOCUMENTACIÓN (${fileCount} ARCHIVO${fileCount !== 1 ? 'S' : ''})`}
