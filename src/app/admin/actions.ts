@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { AdmissionLevel } from '@/types/database'
 import { createAlumnoInMySQL, checkAlumnoExists as checkAlumnoExistsInMySQL, type AlumnoData } from '@/lib/mysql'
-import { sendRecorridoConfirmationToParent, sendRecorridoNotificationToDirector } from '@/lib/email'
+import { sendRecorridoConfirmationToParent, sendRecorridoNotificationToDirector, sendRecorridoReagendacionToParent, sendRecorridoReagendacionToDirector } from '@/lib/email'
 
 // Verificar disponibilidad completa
 export async function getFullyBookedDates(level: AdmissionLevel, excludeAppointmentId?: string): Promise<string[]> {
@@ -458,7 +458,7 @@ export async function updateRecorrido(
 ): Promise<{ ok: boolean; error?: string }> {
   try {
     const supabase = createAdminClient()
-    const { data: current } = await supabase.from('tour_recorridos').select('level, tour_date, tour_time').eq('id', id).single()
+    const { data: current } = await supabase.from('tour_recorridos').select('level, tour_date, tour_time, parent_name, parent_phone, parent_email').eq('id', id).single()
     if (!current) return { ok: false, error: 'Recorrido no encontrado' }
     const level = (input.level ?? current.level) as TourLevel
     const tour_date = input.tour_date ?? current.tour_date
@@ -481,6 +481,14 @@ export async function updateRecorrido(
         error: `Ya existe otro recorrido para ese día y hora en el plantel (${group === 'maternal_kinder' ? 'Maternal/Kinder' : 'Primaria/Secundaria'}).`,
       }
     }
+    const dateOrTimeChanged =
+      (input.tour_date != null && input.tour_date !== current.tour_date) ||
+      (input.tour_time != null && tour_time !== (current.tour_time ?? '').trim().slice(0, 5))
+
+    const finalParentName = (input.parent_name ?? current.parent_name)?.trim() ?? ''
+    const finalParentPhone = (input.parent_phone ?? current.parent_phone)?.trim() ?? ''
+    const finalParentEmail = (input.parent_email ?? current.parent_email)?.trim() ?? ''
+
     const updates: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
       ...(input.level != null && { level: input.level }),
@@ -493,6 +501,33 @@ export async function updateRecorrido(
     }
     const { error } = await supabase.from('tour_recorridos').update(updates).eq('id', id)
     if (error) return { ok: false, error: error.message }
+
+    if (dateOrTimeChanged) {
+      const levelLabel = { maternal: 'Maternal', kinder: 'Kinder', primaria: 'Primaria', secundaria: 'Secundaria' }[level]
+      const parentData = {
+        parentName: finalParentName,
+        parentPhone: finalParentPhone,
+        parentEmail: finalParentEmail,
+        levelLabel,
+        tourDate: tour_date,
+        tourTime: tour_time,
+      }
+      const [parentResult, directorResult] = await Promise.all([
+        sendRecorridoReagendacionToParent(parentData),
+        sendRecorridoReagendacionToDirector(level, parentData),
+      ])
+      await supabase
+        .from('tour_recorridos')
+        .update({
+          email_parent_sent: parentResult.ok,
+          email_director_sent: directorResult.ok,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+      if (!parentResult.ok) console.error('[updateRecorrido] Error email reagendación al papá:', parentResult.error)
+      if (!directorResult.ok) console.error('[updateRecorrido] Error email reagendación a directora:', directorResult.error)
+    }
+
     revalidatePath('/admin')
     return { ok: true }
   } catch (e) {
