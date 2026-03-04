@@ -243,6 +243,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                   <span className="modal-info-label">Cita actual</span>
                   <span className="modal-info-value">{modal.appointment.appointment_date} · {modal.appointment.appointment_time}</span>
                 </div>
+
               </div>
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
                 <div style={{ flex: 1 }}>

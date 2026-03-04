@@ -63,8 +63,8 @@ export async function createPermissionRequest(data: {
       level: data.level,
       appointment_id:  data.appointment_id,
       student_name:    data.student_name,
-      current_date:    data.current_date,
-      current_time:    data.current_time,
+      appt_date:       data.current_date,
+      appt_time:       data.current_time,
       proposed_date:   data.proposed_date,
       proposed_time:   data.proposed_time,
       horario_action:  data.horario_action,
@@ -91,6 +91,7 @@ export async function createPermissionRequest(data: {
       detalles = `
         <tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Alumno</td><td style="padding:6px 10px;">${data.student_name ?? '—'}</td></tr>
         <tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Fecha actual</td><td style="padding:6px 10px;">${data.current_date ?? '—'} ${data.current_time ?? ''}</td></tr>
+
         <tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Propone</td><td style="padding:6px 10px;">${data.proposed_date ?? '—'} ${data.proposed_time ?? ''}</td></tr>`
     } else if (data.type === 'horario') {
       detalles = `

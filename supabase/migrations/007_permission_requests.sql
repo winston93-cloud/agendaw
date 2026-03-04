@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS public.permission_requests (
   -- ─── Campos para reagendar ───────────────────────────────
   appointment_id UUID REFERENCES public.admission_appointments(id) ON DELETE SET NULL,
   student_name   TEXT,
-  current_date   TEXT,
-  current_time   TEXT,
+  appt_date      TEXT,
+  appt_time      TEXT,
   proposed_date  TEXT,
   proposed_time  TEXT,
 

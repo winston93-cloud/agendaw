@@ -119,8 +119,8 @@ export interface PermissionRequest {
   // reagendar
   appointment_id?: string
   student_name?:   string
-  current_date?:   string
-  current_time?:   string
+  appt_date?:      string
+  appt_time?:      string
   proposed_date?:  string
   proposed_time?:  string
 

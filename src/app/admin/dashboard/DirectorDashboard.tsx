@@ -91,7 +91,7 @@ function RequestCard({ req, onRespond }: { req: PermissionRequest; onRespond: ()
               </div>
               <div className="director-req-detail-item">
                 <span className="drdi-label">Cita actual</span>
-                <span className="drdi-value">{formatDate(req.current_date)} · {req.current_time ?? '—'}</span>
+                <span className="drdi-value">{formatDate(req.appt_date)} · {req.appt_time ?? '—'}</span>
               </div>
               <div className="director-req-detail-item highlight">
                 <span className="drdi-label">Propone cambiar a</span>
