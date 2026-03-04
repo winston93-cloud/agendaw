@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateAppointment, completeAdmissionAndCreateAlumno, checkExpedientesBatch, getFullyBookedDates } from './actions'
+import { createPermissionRequest } from './dashboard/actions'
 import ExamDateCalendar from '@/components/ExamDateCalendar'
 import type { AdmissionAppointment } from '@/types/database'
 
@@ -33,6 +34,7 @@ const GRADE_LABELS: Record<string, string> = {
 
 type ModalState =
   | { type: 'confirm-aprobar'; appointment: AdmissionAppointment }
+  | { type: 'solicitar-reagendar'; appointment: AdmissionAppointment }
   | { type: 'result'; ok: boolean; message: string }
   | { type: 'error'; message: string }
   | null
@@ -48,6 +50,10 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
   const router = useRouter()
   const [modal, setModal] = useState<ModalState>(null)
   const [approving, setApproving] = useState(false)
+  const [solicitudMsg, setSolicitudMsg] = useState('')
+  const [solicitudDate, setSolicitudDate] = useState('')
+  const [solicitudTime, setSolicitudTime] = useState('')
+  const [sendingSolicitud, setSendingSolicitud] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editDate, setEditDate] = useState('')
   const [editTime, setEditTime] = useState('')
@@ -169,6 +175,36 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
     setModal({ type: 'confirm-aprobar', appointment })
   }
 
+  const enviarSolicitudReagendar = async (appointment: AdmissionAppointment) => {
+    setSendingSolicitud(true)
+    try {
+      const levelMap: Record<string, 'maternal_kinder' | 'primaria' | 'secundaria'> = {
+        maternal: 'maternal_kinder', kinder: 'maternal_kinder',
+        primaria: 'primaria', secundaria: 'secundaria',
+      }
+      const studentName = `${appointment.student_name} ${appointment.student_last_name_p ?? ''} ${appointment.student_last_name_m ?? ''}`.trim()
+      await createPermissionRequest({
+        type:           'reagendar',
+        level:          levelMap[appointment.level] ?? 'primaria',
+        appointment_id: appointment.id,
+        student_name:   studentName,
+        current_date:   appointment.appointment_date,
+        current_time:   appointment.appointment_time,
+        proposed_date:  solicitudDate || undefined,
+        proposed_time:  solicitudTime || undefined,
+        psych_message:  solicitudMsg.trim() || undefined,
+      })
+      setModal({ type: 'result', ok: true, message: '✅ Solicitud enviada a la directora. Recibirás respuesta por correo.' })
+      setSolicitudMsg('')
+      setSolicitudDate('')
+      setSolicitudTime('')
+    } catch (e) {
+      setModal({ type: 'result', ok: false, message: (e as Error).message })
+    } finally {
+      setSendingSolicitud(false)
+    }
+  }
+
   const confirmarAprobacion = async (id: string) => {
     setApproving(true)
     try {
@@ -187,6 +223,57 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
 
   return (
     <div className="admin-citas">
+      {/* MODAL SOLICITAR REAGENDACIÓN */}
+      {modal?.type === 'solicitar-reagendar' && (
+        <div className="modal-overlay" onClick={() => !sendingSolicitud && setModal(null)}>
+          <div className="modal-box" onClick={e => e.stopPropagation()}>
+            <div className="modal-header modal-header-confirm" style={{ background: 'linear-gradient(135deg,#7c3aed 0%,#a78bfa 100%)' }}>
+              <span className="modal-header-icon">📋</span>
+              <h3>Solicitar autorización — Reagendar</h3>
+            </div>
+            <div className="modal-body">
+              <div className="modal-info-grid">
+                <div className="modal-info-item">
+                  <span className="modal-info-label">Alumno</span>
+                  <span className="modal-info-value">
+                    {`${modal.appointment.student_name} ${modal.appointment.student_last_name_p ?? ''} ${modal.appointment.student_last_name_m ?? ''}`.trim()}
+                  </span>
+                </div>
+                <div className="modal-info-item">
+                  <span className="modal-info-label">Cita actual</span>
+                  <span className="modal-info-value">{modal.appointment.appointment_date} · {modal.appointment.appointment_time}</span>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>Nueva fecha propuesta</label>
+                  <input type="date" value={solicitudDate} onChange={e => setSolicitudDate(e.target.value)}
+                    style={{ width: '100%', marginTop: '0.25rem', padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>Nueva hora propuesta</label>
+                  <input type="time" value={solicitudTime} onChange={e => setSolicitudTime(e.target.value)}
+                    style={{ width: '100%', marginTop: '0.25rem', padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
+                </div>
+              </div>
+              <div style={{ marginTop: '1rem' }}>
+                <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>Mensaje para la directora (opcional)</label>
+                <textarea value={solicitudMsg} onChange={e => setSolicitudMsg(e.target.value)}
+                  rows={3} placeholder="Explica el motivo de la reagendación..."
+                  style={{ width: '100%', marginTop: '0.25rem', padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '8px', resize: 'vertical', fontFamily: 'inherit' }} />
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={() => setModal(null)} disabled={sendingSolicitud}>Cancelar</button>
+              <button type="button" onClick={() => enviarSolicitudReagendar(modal.appointment)} disabled={sendingSolicitud}
+                style={{ padding: '0.6rem 1.25rem', background: 'linear-gradient(135deg,#7c3aed,#a78bfa)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '700', cursor: 'pointer' }}>
+                {sendingSolicitud ? 'Enviando…' : '📋 Enviar solicitud'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* MODAL CONFIRMAR APROBACIÓN */}
       {modal?.type === 'confirm-aprobar' && (
         <div className="modal-overlay" onClick={() => !approving && setModal(null)}>
@@ -497,6 +584,14 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                           style={{ padding: '0.2rem 0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', background: '#f8fafc', border: '1px solid #cbd5e1', color: '#475569', width: '100%', minHeight: '26px' }}
                         >
                           <span style={{ fontSize: '0.85rem' }}>📅</span> <span style={{ fontSize: '0.7rem', fontWeight: '600' }}>Reagendar</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => { setSolicitudDate(''); setSolicitudTime(''); setSolicitudMsg(''); setModal({ type: 'solicitar-reagendar', appointment: a }) }}
+                          title="Solicitar autorización de reagendación a directora"
+                          style={{ padding: '0.2rem 0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', background: '#f5f3ff', border: '1px solid #c4b5fd', color: '#7c3aed', width: '100%', minHeight: '26px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: '600' }}
+                        >
+                          <span style={{ fontSize: '0.8rem' }}>📋</span> Solicitar
                         </button>
                         
                         {expedientesMap[a.id] && (

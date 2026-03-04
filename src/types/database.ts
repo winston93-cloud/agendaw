@@ -107,6 +107,39 @@ export interface AdmissionSchedule {
   created_at: string
 }
 
+export type PermissionRequestType   = 'reagendar' | 'horario' | 'bloqueo'
+export type PermissionRequestStatus = 'pendiente' | 'aprobada' | 'rechazada'
+
+export interface PermissionRequest {
+  id: string
+  type:   PermissionRequestType
+  level:  AdmissionLevel
+  status: PermissionRequestStatus
+
+  // reagendar
+  appointment_id?: string
+  student_name?:   string
+  current_date?:   string
+  current_time?:   string
+  proposed_date?:  string
+  proposed_time?:  string
+
+  // horario
+  horario_action?:   'agregar' | 'eliminar'
+  horario_time_new?: string
+  horario_time_old?: string
+
+  // bloqueo
+  bloqueo_date?:   string
+  bloqueo_reason?: string
+
+  psych_message?:  string
+  director_notes?: string
+
+  created_at:   string
+  responded_at?: string
+}
+
 export type TourRecorridoLevel = 'maternal' | 'kinder' | 'primaria' | 'secundaria'
 
 export interface TourRecorrido {
