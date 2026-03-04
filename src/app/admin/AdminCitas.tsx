@@ -412,7 +412,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
       {filtered.length === 0 ? (
         <p className="admin-empty">No hay citas con esos filtros.</p>
       ) : (
-        <div className="admin-table-wrap" style={{ background: 'transparent', border: 'none', boxShadow: 'none', overflow: 'visible' }}>
+        <div className="admin-table-wrap" style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}>
           <table className="admin-table">
             <thead>
               <tr>
@@ -423,7 +423,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                 <th>Aspirante</th>
                 <th>Tutor / Contacto</th>
                 <th>Estado</th>
-                <th>Acciones</th>
+                <th style={{ minWidth: '170px', width: '170px' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -456,16 +456,16 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                         <option value="completed">Completada</option>
                       </select>
                     </td>
-                    <td style={{ minWidth: '130px', padding: '0.25rem 0.5rem 0.25rem 0.25rem' }}>
+                    <td style={{ minWidth: '170px', width: '170px', padding: '0.25rem 0.5rem 0.25rem 0.25rem' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
 
                         {/* Botón reagendar → solo solicitar */}
                         {reqStatus === 'aprobada' ? (
-                          <span style={{ padding: '0.25rem 0.5rem', background: '#d1fae5', color: '#065f46', border: '1.5px solid #6ee7b7', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '700', textAlign: 'center' }}>
-                            ✅ Reagendación aprobada
+                          <span style={{ padding: '0.25rem 0.5rem', background: '#d1fae5', color: '#065f46', border: '1.5px solid #6ee7b7', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '700', textAlign: 'center', display: 'block', whiteSpace: 'normal', lineHeight: '1.3' }}>
+                            ✅ Reagendación<br/>aprobada
                           </span>
                         ) : reqStatus === 'pendiente' ? (
-                          <StatusBadge status="pendiente" label="⏳ Reagendación pendiente" />
+                          <StatusBadge status="pendiente" label="⏳ Reagendación pend." />
                         ) : (
                           <button type="button"
                             onClick={() => { setSolicitudDate(''); setSolicitudTime(''); setSolicitudMsg(''); setModal({ type: 'solicitar-reagendar', appointment: a }) }}
