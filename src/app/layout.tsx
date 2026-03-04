@@ -2,12 +2,12 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'AgendaW - Agenda tu Cita de Admisión | Winston',
+  title: 'AgendaW - Agenda tu Examen de Admisión | Winston',
   description: 'Sistema de agendamiento de citas para proceso de admisión escolar Instituto Winston. Rápido, fácil y seguro.',
   keywords: 'agenda, citas, admisión, escolar, registro, winston, churchill',
   authors: [{ name: 'Winston93 Cloud' }],
   openGraph: {
-    title: 'AgendaW - Agenda tu Cita de Admisión',
+    title: 'AgendaW - Agenda tu Examen de Admisión',
     description: 'Sistema de agendamiento de citas para proceso de admisión escolar',
     type: 'website',
   },

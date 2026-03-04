@@ -1,7 +1,7 @@
 {
   "name": "AgendaW - Sistema de Citas",
   "short_name": "AgendaW",
-  "description": "Agenda tu cita de admisión escolar",
+  "description": "Agenda tu examen de admisión escolar",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

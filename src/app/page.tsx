@@ -25,7 +25,7 @@ export default function Home() {
             {/* Contenido central */}
             <div className="hero-center-content">
               <p className="hero-subtitle hero-intro">
-                Agenda tu entrevista de admisión en línea — seguro, sencillo y en pocos minutos.
+                Agenda tu examen de admisión en línea — seguro, sencillo y en pocos minutos.
               </p>
               <p className="hero-blink-text">
                 <span className="hero-blink-emoji" aria-hidden>🎓</span>
@@ -40,7 +40,7 @@ export default function Home() {
                 mobileScrollBlock="start"
                 className="hero-cta-button hero-title-cta"
               >
-                <span className="cta-text">Agenda tu cita de admisión</span>
+                <span className="cta-text">Agenda tu examen de admisión</span>
                 <span className="cta-arrow">↓</span>
               </ScrollButton>
             </div>
@@ -71,7 +71,7 @@ export default function Home() {
             <div id="agendar-ahora" className="step-card step-highlight" style={{ maxWidth: '400px' }}>
               <div className="step-number">1</div>
               <div className="step-icon">📅</div>
-              <h3 className="step-title">Agenda tu cita</h3>
+              <h3 className="step-title">Agenda tu examen de admisión</h3>
               <p className="step-description">
                 Llena el formulario y elige la fecha y hora que mejor te convenga
               </p>
