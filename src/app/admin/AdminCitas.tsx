@@ -459,22 +459,28 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                     <td style={{ minWidth: '210px', padding: '0.5rem 0.5rem 0.5rem 0.25rem' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
 
-                        {/* Botón reagendar → solo solicitar */}
-                        {reqStatus === 'aprobada' ? (
-                          <span style={{ padding: '0.3rem 0.6rem', background: '#d1fae5', color: '#065f46', border: '1.5px solid #6ee7b7', borderRadius: '6px', fontSize: '0.72rem', fontWeight: '700', textAlign: 'center', whiteSpace: 'nowrap' }}>
-                            ✅ Reagendación aprobada
+                        {/* Botón reagendar: siempre disponible */}
+                        <button type="button"
+                          onClick={() => { setSolicitudDate(''); setSolicitudTime(''); setSolicitudMsg(''); setModal({ type: 'solicitar-reagendar', appointment: a }) }}
+                          style={{ padding: '0.3rem 0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', background: '#f5f3ff', border: '1px solid #c4b5fd', color: '#7c3aed', whiteSpace: 'nowrap', borderRadius: '6px', cursor: 'pointer', fontSize: '0.72rem', fontWeight: '600' }}
+                        >
+                          📋 Reagendación
+                        </button>
+                        {/* Indicador del estado de la última solicitud */}
+                        {reqStatus === 'aprobada' && (
+                          <span style={{ fontSize: '0.65rem', color: '#065f46', background: '#d1fae5', border: '1px solid #6ee7b7', borderRadius: '4px', padding: '0.1rem 0.4rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                            ✅ Última aprobada
                           </span>
-                        ) : reqStatus === 'pendiente' ? (
-                          <span style={{ padding: '0.3rem 0.6rem', background: '#fef9c3', color: '#92400e', border: '1.5px solid #fde68a', borderRadius: '6px', fontSize: '0.72rem', fontWeight: '700', textAlign: 'center', whiteSpace: 'nowrap' }}>
-                            ⏳ Reagendación pendiente
+                        )}
+                        {reqStatus === 'pendiente' && (
+                          <span style={{ fontSize: '0.65rem', color: '#92400e', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: '4px', padding: '0.1rem 0.4rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                            ⏳ Solicitud pendiente
                           </span>
-                        ) : (
-                          <button type="button"
-                            onClick={() => { setSolicitudDate(''); setSolicitudTime(''); setSolicitudMsg(''); setModal({ type: 'solicitar-reagendar', appointment: a }) }}
-                            style={{ padding: '0.3rem 0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', background: '#f5f3ff', border: '1px solid #c4b5fd', color: '#7c3aed', whiteSpace: 'nowrap', borderRadius: '6px', cursor: 'pointer', fontSize: '0.72rem', fontWeight: '600' }}
-                          >
-                            📋 {reqStatus === 'rechazada' ? 'Resolicitar reagendar' : 'Solicitar reagendar'}
-                          </button>
+                        )}
+                        {reqStatus === 'rechazada' && (
+                          <span style={{ fontSize: '0.65rem', color: '#991b1b', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: '4px', padding: '0.1rem 0.4rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                            ❌ Última rechazada
+                          </span>
                         )}
 
                         {expedientesMap[a.id] && (<>
