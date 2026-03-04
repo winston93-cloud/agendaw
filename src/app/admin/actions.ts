@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { AdmissionLevel } from '@/types/database'
 import { createAlumnoInMySQL, checkAlumnoExists as checkAlumnoExistsInMySQL, type AlumnoData } from '@/lib/mysql'
+import { sendRecorridoConfirmationToParent, sendRecorridoNotificationToDirector } from '@/lib/email'
 
 // Verificar disponibilidad completa
 export async function getFullyBookedDates(level: AdmissionLevel, excludeAppointmentId?: string): Promise<string[]> {
@@ -411,6 +412,27 @@ export async function createRecorrido(input: {
     }
     const { error } = await supabase.from('tour_recorridos').insert(row)
     if (error) return { ok: false, error: error.message }
+
+    const levelLabel = { maternal: 'Maternal', kinder: 'Kinder', primaria: 'Primaria', secundaria: 'Secundaria' }[input.level]
+    const parentData = {
+      parentName: row.parent_name,
+      parentEmail: row.parent_email,
+      parentPhone: row.parent_phone,
+      levelLabel,
+      tourDate: row.tour_date,
+      tourTime: row.tour_time,
+    }
+    const [parentResult, directorResult] = await Promise.all([
+      sendRecorridoConfirmationToParent(parentData),
+      sendRecorridoNotificationToDirector(input.level, parentData),
+    ])
+    if (!parentResult.ok) {
+      console.error('[createRecorrido] Error email al papá:', parentResult.error)
+    }
+    if (!directorResult.ok) {
+      console.error('[createRecorrido] Error email a directora:', directorResult.error)
+    }
+
     revalidatePath('/admin')
     return { ok: true }
   } catch (e) {

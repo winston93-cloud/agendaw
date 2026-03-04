@@ -223,6 +223,149 @@ export async function sendSecundariaTemarios(
   }
 }
 
+export type RecorridoConfirmationData = {
+  parentName: string
+  parentEmail: string
+  levelLabel: string
+  tourDate: string
+  tourTime: string
+}
+
+export async function sendRecorridoConfirmationToParent(
+  data: RecorridoConfirmationData
+): Promise<{ ok: boolean; error?: string }> {
+  const from = 'sistemas.desarrollo@winston93.edu.mx'
+  const dateFormatted = formatDate(data.tourDate)
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirmación de recorrido programado</title>
+</head>
+<body style="margin:0; padding:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 560px; margin: 0 auto; padding: 24px 16px;">
+    <tr>
+      <td style="background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%); border-radius: 16px 16px 0 0; padding: 28px 24px; text-align: center;">
+        <h1 style="margin: 0; color: #fff; font-size: 1.5rem; font-weight: 700;">Instituto Winston</h1>
+        <p style="margin: 8px 0 0; color: rgba(255,255,255,0.9); font-size: 0.95rem;">Confirmación de recorrido programado</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="background: #ffffff; padding: 28px 24px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; border-top: none;">
+        <p style="margin: 0 0 16px; color: #334155; font-size: 1rem; line-height: 1.6;">Estimado(a) <strong>${escapeHtml(data.parentName)}</strong>,</p>
+        <p style="margin: 0 0 20px; color: #475569; font-size: 0.95rem; line-height: 1.6;">Le confirmamos que su recorrido por el plantel ha sido programado correctamente.</p>
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+          <tr>
+            <td style="padding: 20px;">
+              <p style="margin: 0 0 8px; color: #64748b; font-size: 0.8rem;">Nivel</p>
+              <p style="margin: 0; color: #1e293b; font-size: 1.05rem; font-weight: 600;">${escapeHtml(data.levelLabel)}</p>
+              <p style="margin: 16px 0 0; color: #64748b; font-size: 0.8rem;">Fecha del recorrido</p>
+              <p style="margin: 4px 0 0; color: #1e293b; font-size: 1.05rem; font-weight: 600;">${escapeHtml(dateFormatted)}</p>
+              <p style="margin: 4px 0 0; color: #475569; font-size: 0.95rem;">Hora: <strong>${escapeHtml(data.tourTime)}</strong></p>
+            </td>
+          </tr>
+        </table>
+        <p style="margin: 24px 0 0; color: #475569; font-size: 0.9rem; line-height: 1.6;">Saludos cordiales,<br><strong>Instituto Winston</strong></p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`
+  try {
+    await transporter.sendMail({
+      from: `"Instituto Winston" <${from}>`,
+      to: data.parentEmail,
+      subject: 'Confirmación de recorrido programado',
+      html,
+    })
+    return { ok: true }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Error al enviar el correo'
+    return { ok: false, error: message }
+  }
+}
+
+const RECORRIDO_DIRECTOR_BY_LEVEL: Record<string, string> = {
+  maternal: 'direccion.kinder@winston93.edu.mx',
+  kinder: 'direccion.kinder@winston93.edu.mx',
+  primaria: 'direccion.primaria@winston93.edu.mx',
+  secundaria: 'direccion.secundaria@winston93.edu.mx',
+}
+
+export type RecorridoDirectorData = {
+  parentName: string
+  parentPhone: string
+  parentEmail: string
+  levelLabel: string
+  tourDate: string
+  tourTime: string
+}
+
+export async function sendRecorridoNotificationToDirector(
+  level: 'maternal' | 'kinder' | 'primaria' | 'secundaria',
+  data: RecorridoDirectorData
+): Promise<{ ok: boolean; error?: string }> {
+  const from = 'sistemas.desarrollo@winston93.edu.mx'
+  const to = RECORRIDO_DIRECTOR_BY_LEVEL[level]
+  if (!to) return { ok: false, error: 'Nivel no válido para notificación' }
+  const dateFormatted = formatDate(data.tourDate)
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuevo recorrido programado</title>
+</head>
+<body style="margin:0; padding:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 560px; margin: 0 auto; padding: 24px 16px;">
+    <tr>
+      <td style="background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%); border-radius: 16px 16px 0 0; padding: 28px 24px; text-align: center;">
+        <h1 style="margin: 0; color: #fff; font-size: 1.5rem; font-weight: 700;">Instituto Winston</h1>
+        <p style="margin: 8px 0 0; color: rgba(255,255,255,0.9); font-size: 0.95rem;">Nuevo recorrido programado</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="background: #ffffff; padding: 28px 24px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; border-top: none;">
+        <p style="margin: 0 0 20px; color: #475569; font-size: 0.95rem; line-height: 1.6;">Se ha programado un nuevo recorrido para el siguiente papá:</p>
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+          <tr>
+            <td style="padding: 20px;">
+              <p style="margin: 0 0 4px; color: #64748b; font-size: 0.8rem;">Nombre</p>
+              <p style="margin: 0; color: #1e293b; font-size: 1.05rem; font-weight: 600;">${escapeHtml(data.parentName)}</p>
+              <p style="margin: 12px 0 0; color: #64748b; font-size: 0.8rem;">Teléfono</p>
+              <p style="margin: 4px 0 0; color: #1e293b; font-size: 0.95rem;">${escapeHtml(data.parentPhone)}</p>
+              <p style="margin: 12px 0 0; color: #64748b; font-size: 0.8rem;">Correo</p>
+              <p style="margin: 4px 0 0; color: #1e293b; font-size: 0.95rem;">${escapeHtml(data.parentEmail)}</p>
+              <p style="margin: 16px 0 0; color: #64748b; font-size: 0.8rem;">Nivel · Fecha y hora</p>
+              <p style="margin: 4px 0 0; color: #1e293b; font-size: 1rem; font-weight: 600;">${escapeHtml(data.levelLabel)} · ${escapeHtml(dateFormatted)} ${escapeHtml(data.tourTime)}</p>
+            </td>
+          </tr>
+        </table>
+        <p style="margin: 24px 0 0; color: #475569; font-size: 0.9rem; line-height: 1.6;">Saludos cordiales,<br><strong>Sistema de Admisión</strong></p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`
+  try {
+    await transporter.sendMail({
+      from: `"Instituto Winston" <${from}>`,
+      to,
+      subject: `Nuevo recorrido programado - ${data.levelLabel} - ${dateFormatted}`,
+      html,
+    })
+    return { ok: true }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Error al enviar el correo a directora'
+    return { ok: false, error: message }
+  }
+}
+
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, '&amp;')
