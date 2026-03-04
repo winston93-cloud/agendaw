@@ -422,8 +422,8 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                 <th>Nivel</th>
                 <th>Aspirante</th>
                 <th>Tutor / Contacto</th>
-                <th>Estado</th>
-                <th style={{ minWidth: '170px', width: '170px' }}>Acciones</th>
+                <th style={{ width: '120px' }}>Estado</th>
+                <th style={{ minWidth: '210px' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -447,16 +447,16 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                       {a.parent_name}<br />
                       <small>{a.parent_email} · {a.parent_phone}</small>
                     </td>
-                    <td>
+                    <td style={{ width: '120px', paddingRight: '0.25rem' }}>
                       <select value={a.status} onChange={e => updateStatus(a.id, e.target.value)}
-                        className={`admin-select-status status-pill status-${a.status}`}>
+                        className={`admin-select-status status-pill status-${a.status}`} style={{ width: '100%', minWidth: 'unset' }}>
                         <option value="pending">Pendiente</option>
                         <option value="confirmed">Confirmada</option>
                         <option value="cancelled">Cancelada</option>
                         <option value="completed">Completada</option>
                       </select>
                     </td>
-                    <td style={{ minWidth: '200px', padding: '0.5rem' }}>
+                    <td style={{ minWidth: '210px', padding: '0.5rem 0.5rem 0.5rem 0.25rem' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
 
                         {/* Botón reagendar → solo solicitar */}
