@@ -3,8 +3,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { updateAppointment, completeAdmissionAndCreateAlumno, checkExpedientesBatch } from './actions'
+import { updateAppointment, completeAdmissionAndCreateAlumno, checkExpedientesBatch, getFullyBookedDates } from './actions'
 import { createPermissionRequest, getAllRecentRequests } from './dashboard/actions'
+import ExamDateCalendar from '@/components/ExamDateCalendar'
 import type { AdmissionAppointment, PermissionRequest } from '@/types/database'
 
 const LEVEL_LABELS: Record<string, string> = {
@@ -44,6 +45,11 @@ function StatusBadge({ status, label }: { status: ReqStatus; label?: string }) {
   )
 }
 
+function toAdminLevel(level: string) {
+  if (level === 'maternal' || level === 'kinder') return 'maternal_kinder'
+  return level
+}
+
 export default function AdminCitas({ appointments }: { appointments: AdmissionAppointment[] }) {
   const router = useRouter()
 
@@ -60,6 +66,13 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
   const [expedientesMap, setExpedientesMap] = useState<Record<string, boolean>>({})
   const [statusMap,      setStatusMap]      = useState<Record<string, ReqStatus>>({})
 
+  // ── Estado para el calendario de solicitud reagendar ──────
+  const [calBlockedDates,   setCalBlockedDates]   = useState<string[]>([])
+  const [calFullyBooked,    setCalFullyBooked]    = useState<string[]>([])
+  const [calScheduleTimes,  setCalScheduleTimes]  = useState<string[]>([])
+  const [calBookedSlots,    setCalBookedSlots]    = useState<string[]>([])
+  const [calLoadingSlots,   setCalLoadingSlots]   = useState(false)
+
   const filtered = appointments.filter(a => {
     if (filterLevel  && a.level  !== filterLevel)  return false
     if (filterStatus && a.status !== filterStatus) return false
@@ -74,6 +87,43 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
       .then(m => setExpedientesMap(m))
       .catch(() => {})
   }, [appointments])
+
+  // Cargar fechas bloqueadas y horarios cuando se abre el modal de solicitar reagendar
+  useEffect(() => {
+    if (modal?.type !== 'solicitar-reagendar') {
+      setCalBlockedDates([]); setCalFullyBooked([])
+      setCalScheduleTimes([]); setCalBookedSlots([])
+      setSolicitudDate(''); setSolicitudTime('')
+      return
+    }
+    const apt   = modal.appointment
+    const level = toAdminLevel(apt.level)
+    Promise.all([
+      fetch(`/api/blocked-dates?level=${level}`).then(r => r.json()).then(d => d.dates || []).catch(() => []),
+      fetch(`/api/schedules?level=${level}`).then(r => r.json()).then(d => d.times || []).catch(() => []),
+      getFullyBookedDates(level as 'maternal_kinder' | 'primaria' | 'secundaria', apt.id),
+    ]).then(([blocked, times, fullyBooked]) => {
+      setCalBlockedDates(blocked)
+      setCalScheduleTimes(times)
+      setCalFullyBooked(fullyBooked)
+    }).catch(() => {})
+  }, [modal])
+
+  // Cargar slots ocupados cuando cambia la fecha propuesta en el modal
+  useEffect(() => {
+    if (modal?.type !== 'solicitar-reagendar' || !solicitudDate) {
+      setCalBookedSlots([])
+      return
+    }
+    const apt   = modal.appointment
+    const level = toAdminLevel(apt.level)
+    setCalLoadingSlots(true)
+    fetch(`/api/booked-slots?level=${level}&date=${solicitudDate}&exclude_id=${apt.id}`)
+      .then(r => r.json())
+      .then(d => setCalBookedSlots(d.times || []))
+      .catch(() => setCalBookedSlots([]))
+      .finally(() => setCalLoadingSlots(false))
+  }, [solicitudDate, modal])
 
   useEffect(() => {
     getAllRecentRequests().then((reqs: PermissionRequest[]) => {
@@ -143,7 +193,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
       {/* ── MODAL SOLICITAR REAGENDACIÓN ─────────────────────────── */}
       {modal?.type === 'solicitar-reagendar' && (
         <div className="modal-overlay" onClick={() => !sendingSol && setModal(null)}>
-          <div className="modal-box" onClick={e => e.stopPropagation()}>
+          <div className="modal-box" style={{ maxWidth: '520px' }} onClick={e => e.stopPropagation()}>
             <div className="modal-header" style={{ background: 'linear-gradient(135deg,#7c3aed 0%,#a78bfa 100%)' }}>
               <span className="modal-header-icon">📋</span>
               <h3>Solicitar autorización — Reagendar</h3>
@@ -161,29 +211,63 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                   <span className="modal-info-value">{modal.appointment.appointment_date} · {modal.appointment.appointment_time}</span>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
-                <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>Nueva fecha propuesta</label>
-                  <input type="date" value={solicitudDate} onChange={e => setSolicitudDate(e.target.value)}
-                    style={{ width: '100%', marginTop: '0.25rem', padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '8px', boxSizing: 'border-box' }} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>Nueva hora propuesta</label>
-                  <input type="time" value={solicitudTime} onChange={e => setSolicitudTime(e.target.value)}
-                    style={{ width: '100%', marginTop: '0.25rem', padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '8px', boxSizing: 'border-box' }} />
-                </div>
+
+              {/* Calendario con validaciones reales */}
+              <div style={{ marginTop: '1rem' }}>
+                <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600', display: 'block', marginBottom: '0.4rem' }}>
+                  Nueva fecha propuesta
+                </label>
+                <ExamDateCalendar
+                  value={solicitudDate}
+                  onChange={date => { setSolicitudDate(date); setSolicitudTime('') }}
+                  blockedDates={[...calBlockedDates, ...calFullyBooked]}
+                  isAdmin={true}
+                />
               </div>
+
+              {/* Slots de hora con validaciones reales */}
+              {solicitudDate && (
+                <div style={{ marginTop: '1rem' }}>
+                  <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600', display: 'block', marginBottom: '0.4rem' }}>
+                    Nueva hora propuesta
+                  </label>
+                  {calLoadingSlots ? (
+                    <p style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Cargando horarios…</p>
+                  ) : calScheduleTimes.length === 0 ? (
+                    <input type="time" value={solicitudTime} onChange={e => setSolicitudTime(e.target.value)}
+                      style={{ padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '8px', width: '100%', boxSizing: 'border-box' }} />
+                  ) : (
+                    <div className="time-slots time-slots-admin">
+                      {calScheduleTimes.map(t => {
+                        const isBooked = calBookedSlots.includes(t)
+                        return (
+                          <button key={t} type="button"
+                            className={`time-slot ${solicitudTime === t ? 'selected' : ''} ${isBooked ? 'time-slot-booked' : ''}`}
+                            onClick={() => !isBooked && setSolicitudTime(t)}
+                            disabled={isBooked}
+                            title={isBooked ? 'Ocupado' : undefined}
+                          >
+                            {t}{isBooked && <span className="time-slot-label"> (Ocupado)</span>}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div style={{ marginTop: '1rem' }}>
                 <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>Mensaje para la directora (opcional)</label>
-                <textarea value={solicitudMsg} onChange={e => setSolicitudMsg(e.target.value)} rows={3}
+                <textarea value={solicitudMsg} onChange={e => setSolicitudMsg(e.target.value)} rows={2}
                   placeholder="Explica el motivo de la reagendación..."
                   style={{ width: '100%', marginTop: '0.25rem', padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '8px', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
               </div>
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" onClick={() => setModal(null)} disabled={sendingSol}>Cancelar</button>
-              <button type="button" onClick={() => enviarSolicitudReagendar(modal.appointment)} disabled={sendingSol}
-                style={{ padding: '0.6rem 1.25rem', background: 'linear-gradient(135deg,#7c3aed,#a78bfa)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '700', cursor: 'pointer' }}>
+              <button type="button" onClick={() => enviarSolicitudReagendar(modal.appointment)}
+                disabled={sendingSol || !solicitudDate || (calScheduleTimes.length > 0 && !solicitudTime)}
+                style={{ padding: '0.6rem 1.25rem', background: 'linear-gradient(135deg,#7c3aed,#a78bfa)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '700', cursor: 'pointer', opacity: (!solicitudDate || (calScheduleTimes.length > 0 && !solicitudTime)) ? 0.5 : 1 }}>
                 {sendingSol ? 'Enviando…' : '📋 Enviar solicitud'}
               </button>
             </div>
