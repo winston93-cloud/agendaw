@@ -197,17 +197,28 @@ export async function completeAdmissionAndCreateAlumno(appointmentId: string): P
       }
     }
 
+    // Convertir ciclo "2025-2026" → "22", "2026-2027" → "23" (año final - 2004)
+    const rawCiclo = expediente.ciclo_escolar || appointment.school_cycle || ''
+    const parsedCiclo = (() => {
+      const parts = rawCiclo.split('-')
+      if (parts.length >= 2) {
+        const endYear = parseInt(parts[parts.length - 1].trim(), 10)
+        if (!isNaN(endYear) && endYear > 2000) return String(endYear - 2004)
+      }
+      return rawCiclo
+    })()
+
     // Crear alumno en MySQL
     const alumnoData: AlumnoData = {
-      alumno_app: appointment.grade_level || '',
-      alumno_apm: expediente.apellido_paterno_alumno || appointment.student_last_name_p || '',
+      alumno_app: expediente.apellido_paterno_alumno || appointment.student_last_name_p || '',
+      alumno_apm: expediente.apellido_materno_alumno || appointment.student_last_name_m || '',
       alumno_nombre: expediente.nombre_alumno || appointment.student_name || '',
       alumno_nivel: nivelMap[appointment.level] || '1',
       alumno_grado: expediente.grado || '',
       alumno_grupo: '',
       alumno_status: '1', // Activo
       alumno_nuevo_ingreso: '1', // Nuevo ingreso de agenda
-      alumno_ciclo_escolar: expediente.ciclo_escolar || appointment.school_cycle || '',
+      alumno_ciclo_escolar: parsedCiclo,
     }
 
     const alumno_ref = await createAlumnoInMySQL(alumnoData)
