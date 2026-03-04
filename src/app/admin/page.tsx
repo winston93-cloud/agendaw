@@ -1,4 +1,4 @@
-import { getAdmissionAppointments, getBlockedDates, getSchedules } from './actions'
+import { getAdmissionAppointments, getBlockedDates, getSchedules, getRecorridos } from './actions'
 import AdminDashboard from './AdminDashboard'
 
 export const dynamic = 'force-dynamic'
@@ -13,12 +13,14 @@ export default async function AdminPage() {
   let appointments: Awaited<ReturnType<typeof getAdmissionAppointments>> = []
   let blockedDates: Awaited<ReturnType<typeof getBlockedDates>> = []
   let schedules: Awaited<ReturnType<typeof getSchedules>> = []
+  let recorridos: Awaited<ReturnType<typeof getRecorridos>> = []
   if (hasSupabaseEnv()) {
     try {
-      ;[appointments, blockedDates, schedules] = await Promise.all([
+      ;[appointments, blockedDates, schedules, recorridos] = await Promise.all([
         getAdmissionAppointments(),
         getBlockedDates(),
         getSchedules(),
+        getRecorridos(),
       ])
     } catch (e) {
       console.error('Admin load error:', e)
@@ -39,10 +41,11 @@ export default async function AdminPage() {
       </header>
 
       <main className="admin-main">
-        <AdminDashboard
+        <        AdminDashboard
           appointments={appointments}
           blockedDates={blockedDates}
           schedules={schedules}
+          recorridos={recorridos}
         />
       </main>
     </div>

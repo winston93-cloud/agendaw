@@ -4189,6 +4189,172 @@ body {
   transform: scale(1.05);
 }
 
+/* Recorridos programados */
+.admin-recorridos-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.admin-recorridos-tab {
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.admin-recorridos-tab:hover {
+  color: #8b5cf6;
+}
+
+.admin-recorridos-tab.active {
+  color: #8b5cf6;
+  border-bottom-color: #8b5cf6;
+}
+
+.admin-recorridos-lista .admin-empty {
+  padding: 2rem;
+  text-align: center;
+  color: #64748b;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 2px dashed #e2e8f0;
+}
+
+.admin-recorridos-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-recorridos-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.75rem;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.admin-recorridos-item:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.08);
+}
+
+.admin-recorridos-item-content {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 200px;
+}
+
+.admin-recorridos-item-fecha {
+  font-weight: 700;
+  color: #1e293b;
+  white-space: nowrap;
+}
+
+.admin-recorridos-item-nivel {
+  padding: 0.25rem 0.6rem;
+  background: linear-gradient(135deg, #8b5cf6, #a855f7);
+  color: white;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.admin-recorridos-item-nombre {
+  font-weight: 600;
+  color: #334155;
+}
+
+.admin-recorridos-item-contacto {
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.admin-recorridos-item-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.admin-recorridos-edit-form {
+  width: 100%;
+}
+
+.admin-recorridos-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.admin-recorridos-edit-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.admin-recorridos-edit-grid select,
+.admin-recorridos-edit-grid input {
+  padding: 0.5rem 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.admin-recorridos-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.admin-recorridos-form {
+  max-width: 560px;
+}
+
+.admin-recorridos-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.admin-recorridos-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.admin-recorridos-form-full {
+  grid-column: 1 / -1;
+}
+
+.admin-recorridos-form input,
+.admin-recorridos-form select {
+  padding: 0.6rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.admin-recorridos-form input:focus,
+.admin-recorridos-form select:focus {
+  border-color: #8b5cf6;
+  outline: none;
+}
+
 /* ========== Expediente Inicial (rediseño UI/UX) ========== */
 @keyframes expedienteFadeUp {
   from { opacity: 0; transform: translateY(20px); }

@@ -347,3 +347,141 @@ export async function removeSchedule(id: string): Promise<{ ok: boolean; error?:
     return { ok: false, error: msg }
   }
 }
+
+// --- Recorridos programados ---
+const RECORRIDO_LEVELS = ['maternal', 'kinder', 'primaria', 'secundaria'] as const
+type TourLevel = (typeof RECORRIDO_LEVELS)[number]
+
+function plantelGroup(level: TourLevel): 'maternal_kinder' | 'primaria_secundaria' {
+  return level === 'maternal' || level === 'kinder' ? 'maternal_kinder' : 'primaria_secundaria'
+}
+
+export async function getRecorridos() {
+  let supabase
+  try {
+    supabase = createAdminClient()
+  } catch {
+    return []
+  }
+  const { data, error } = await supabase
+    .from('tour_recorridos')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) throw new Error(error.message)
+  return data ?? []
+}
+
+export async function createRecorrido(input: {
+  level: TourLevel
+  tour_date: string
+  tour_time: string
+  parent_name: string
+  parent_phone: string
+  parent_email: string
+  notes?: string
+}): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const supabase = createAdminClient()
+    const group = plantelGroup(input.level)
+    const otherLevels = group === 'maternal_kinder' ? ['maternal', 'kinder'] : ['primaria', 'secundaria']
+    const timeNorm = input.tour_time.trim().slice(0, 5)
+    if (!/^\d{1,2}:\d{2}$/.test(timeNorm)) return { ok: false, error: 'Hora inválida (usa HH:MM)' }
+    const { data: conflict } = await supabase
+      .from('tour_recorridos')
+      .select('id')
+      .eq('tour_date', input.tour_date)
+      .eq('tour_time', timeNorm)
+      .in('level', otherLevels)
+      .limit(1)
+      .maybeSingle()
+    if (conflict) {
+      return {
+        ok: false,
+        error: `Ya existe un recorrido para ese día y hora en el plantel (${group === 'maternal_kinder' ? 'Maternal/Kinder' : 'Primaria/Secundaria'}). Elige otro horario.`,
+      }
+    }
+    const row = {
+      level: input.level,
+      tour_date: input.tour_date,
+      tour_time: timeNorm,
+      parent_name: input.parent_name.trim(),
+      parent_phone: input.parent_phone.trim(),
+      parent_email: input.parent_email.trim(),
+      notes: input.notes?.trim() || null,
+    }
+    const { error } = await supabase.from('tour_recorridos').insert(row)
+    if (error) return { ok: false, error: error.message }
+    revalidatePath('/admin')
+    return { ok: true }
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : 'Error al crear recorrido.' }
+  }
+}
+
+export async function updateRecorrido(
+  id: string,
+  input: {
+    level?: TourLevel
+    tour_date?: string
+    tour_time?: string
+    parent_name?: string
+    parent_phone?: string
+    parent_email?: string
+    notes?: string
+  }
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const supabase = createAdminClient()
+    const { data: current } = await supabase.from('tour_recorridos').select('level, tour_date, tour_time').eq('id', id).single()
+    if (!current) return { ok: false, error: 'Recorrido no encontrado' }
+    const level = (input.level ?? current.level) as TourLevel
+    const tour_date = input.tour_date ?? current.tour_date
+    const tour_time = (input.tour_time ?? current.tour_time).trim().slice(0, 5)
+    if (!/^\d{1,2}:\d{2}$/.test(tour_time)) return { ok: false, error: 'Hora inválida (usa HH:MM)' }
+    const group = plantelGroup(level)
+    const otherLevels = group === 'maternal_kinder' ? ['maternal', 'kinder'] : ['primaria', 'secundaria']
+    const { data: conflict } = await supabase
+      .from('tour_recorridos')
+      .select('id')
+      .eq('tour_date', tour_date)
+      .eq('tour_time', tour_time)
+      .in('level', otherLevels)
+      .neq('id', id)
+      .limit(1)
+      .maybeSingle()
+    if (conflict) {
+      return {
+        ok: false,
+        error: `Ya existe otro recorrido para ese día y hora en el plantel (${group === 'maternal_kinder' ? 'Maternal/Kinder' : 'Primaria/Secundaria'}).`,
+      }
+    }
+    const updates: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+      ...(input.level != null && { level: input.level }),
+      ...(input.tour_date != null && { tour_date: input.tour_date }),
+      ...(input.tour_time != null && { tour_time }),
+      ...(input.parent_name != null && { parent_name: input.parent_name.trim() }),
+      ...(input.parent_phone != null && { parent_phone: input.parent_phone.trim() }),
+      ...(input.parent_email != null && { parent_email: input.parent_email.trim() }),
+      ...(input.notes !== undefined && { notes: input.notes?.trim() || null }),
+    }
+    const { error } = await supabase.from('tour_recorridos').update(updates).eq('id', id)
+    if (error) return { ok: false, error: error.message }
+    revalidatePath('/admin')
+    return { ok: true }
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : 'Error al actualizar recorrido.' }
+  }
+}
+
+export async function deleteRecorrido(id: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const supabase = createAdminClient()
+    const { error } = await supabase.from('tour_recorridos').delete().eq('id', id)
+    if (error) return { ok: false, error: error.message }
+    revalidatePath('/admin')
+    return { ok: true }
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : 'Error al eliminar recorrido.' }
+  }
+}

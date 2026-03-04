@@ -106,3 +106,18 @@ export interface AdmissionSchedule {
   sort_order: number
   created_at: string
 }
+
+export type TourRecorridoLevel = 'maternal' | 'kinder' | 'primaria' | 'secundaria'
+
+export interface TourRecorrido {
+  id: string
+  level: TourRecorridoLevel
+  tour_date: string
+  tour_time: string
+  parent_name: string
+  parent_phone: string
+  parent_email: string
+  notes?: string
+  created_at: string
+  updated_at: string
+}

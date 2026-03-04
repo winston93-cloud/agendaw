@@ -10,6 +10,7 @@ import AdminRecorridos from './AdminRecorridos'
 import type { AdmissionAppointment } from '@/types/database'
 import type { BlockedDate } from '@/types/database'
 import type { AdmissionSchedule } from '@/types/database'
+import type { TourRecorrido } from '@/types/database'
 
 type Section = 'citas' | 'horarios' | 'bloquear' | 'buscar' | 'recorridos' | null
 
@@ -55,10 +56,12 @@ export default function AdminDashboard({
   appointments,
   blockedDates,
   schedules,
+  recorridos,
 }: {
   appointments: AdmissionAppointment[]
   blockedDates: BlockedDate[]
   schedules: AdmissionSchedule[]
+  recorridos: TourRecorrido[]
 }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -128,7 +131,7 @@ export default function AdminDashboard({
         {activeSection === 'recorridos' && (
           <section className="admin-section admin-section-recorridos">
             <h2><span className="admin-section-icon">🚌</span> Recorridos programados</h2>
-            <AdminRecorridos />
+            <AdminRecorridos recorridos={recorridos} />
           </section>
         )}
       </div>
