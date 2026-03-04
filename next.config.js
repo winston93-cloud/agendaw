@@ -4,6 +4,11 @@ const nextConfig = {
   images: {
     domains: [],
   },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '15mb',
+    },
+  },
 }
 
 module.exports = nextConfig

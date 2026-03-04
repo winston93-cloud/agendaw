@@ -17,14 +17,6 @@ const LEVEL_LABELS: Record<string, string> = {
   secundaria: 'Secundaria',
 }
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'sistemas.desarrollo@winston93.edu.mx',
-    pass: 'ckxc xdfg oxqx jtmm',
-  },
-})
-
 export async function getAppointmentForDocs(appointmentId: string) {
   const supabase = createAdminClient()
   const { data } = await supabase
@@ -45,6 +37,14 @@ export async function sendDocumentacion(payload: {
   try {
     const destino = PSICOLOGIA_EMAILS[payload.level] ?? PSICOLOGIA_EMAILS.primaria
     const nivel   = LEVEL_LABELS[payload.level]   ?? payload.level
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'sistemas.desarrollo@winston93.edu.mx',
+        pass: 'ckxc xdfg oxqx jtmm',
+      },
+    })
 
     const attachments = payload.files.map(f => ({
       filename:    f.filename,
