@@ -40,17 +40,20 @@ function getInstitutionalFooter(level: string): string {
   return level === 'maternal' || level === 'kinder' ? 'Instituto Educativo Winston' : 'Instituto Winston Churchill'
 }
 
-function buildEmailHeader(subtitle: string): string {
+/** level: maternal | kinder → logo Educativo. primaria | secundaria → logo Winston. */
+function buildEmailHeader(subtitle: string, level: string): string {
+  const isEducativo = level === 'maternal' || level === 'kinder'
+  const logoSrc = isEducativo ? LOGO_EDUCATIVO : LOGO_WINSTON
+  const logoAlt = isEducativo ? 'Instituto Educativo Winston' : 'Instituto Winston Churchill'
   return `
     <tr>
       <td style="background: ${HEADER_NAVY}; border-radius: 16px 16px 0 0; padding: 24px 20px; text-align: center;">
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 400px; margin: 0 auto;">
           <tr>
-            <td style="text-align: center; width: 33%;"><img src="${LOGO_EDUCATIVO}" alt="Instituto Educativo Winston" width="80" height="80" style="display: inline-block; max-width: 80px; height: auto;" /></td>
-            <td style="text-align: center; width: 34%; vertical-align: middle;">
+            <td style="text-align: center;">
+              <img src="${logoSrc}" alt="${logoAlt}" width="100" height="100" style="display: inline-block; max-width: 100px; height: auto; margin-bottom: 12px;" />
               <p style="margin: 0; color: rgba(255,255,255,0.95); font-size: 1rem; font-weight: 600;">${subtitle}</p>
             </td>
-            <td style="text-align: center; width: 33%;"><img src="${LOGO_WINSTON}" alt="Instituto Winston Churchill" width="80" height="80" style="display: inline-block; max-width: 80px; height: auto;" /></td>
           </tr>
         </table>
       </td>
@@ -68,7 +71,8 @@ export async function sendAdmissionConfirmation(
   const from = 'sistemas.desarrollo@winston93.edu.mx'
   const dateFormatted = formatDate(data.appointmentDate)
 
-  const footerName = getInstitutionalFooter(data.level ?? (data.campusName?.includes('Educativo') ? 'maternal' : 'primaria'))
+  const level = data.level ?? (data.campusName?.includes('Educativo') ? 'maternal' : 'primaria')
+  const footerName = getInstitutionalFooter(level)
   const html = `
 <!DOCTYPE html>
 <html>
@@ -79,7 +83,7 @@ export async function sendAdmissionConfirmation(
 </head>
 <body style="margin:0; padding:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 560px; margin: 0 auto; padding: 24px 16px;">
-    ${buildEmailHeader('Confirmación de cita de admisión')}
+    ${buildEmailHeader('Confirmación de cita de admisión', level)}
     <tr>
       <td style="background: #ffffff; padding: 28px 24px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; border-top: none;">
         <p style="margin: 0 0 16px; color: #334155; font-size: 1rem; line-height: 1.6;">Estimado(a) <strong>${escapeHtml(data.parentName)}</strong>,</p>
@@ -209,7 +213,7 @@ export async function sendSecundariaTemarios(
 </head>
 <body style="margin:0; padding:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 560px; margin: 0 auto; padding: 24px 16px;">
-    ${buildEmailHeader('Temarios de Admisión')}
+    ${buildEmailHeader('Temarios de Admisión', 'secundaria')}
     <tr>
       <td style="background: #ffffff; padding: 28px 24px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; border-top: none;">
         <p style="margin: 0 0 16px; color: #334155; font-size: 1rem; line-height: 1.6;">Estimado(a) <strong>${escapeHtml(data.parentName)}</strong>,</p>
@@ -260,7 +264,8 @@ export async function sendRecorridoConfirmationToParent(
 ): Promise<{ ok: boolean; error?: string }> {
   const from = 'sistemas.desarrollo@winston93.edu.mx'
   const dateFormatted = formatDate(data.tourDate)
-  const footerName = getInstitutionalFooter(data.level ?? 'primaria')
+  const level = data.level ?? 'primaria'
+  const footerName = getInstitutionalFooter(level)
   const html = `
 <!DOCTYPE html>
 <html>
@@ -271,7 +276,7 @@ export async function sendRecorridoConfirmationToParent(
 </head>
 <body style="margin:0; padding:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 560px; margin: 0 auto; padding: 24px 16px;">
-    ${buildEmailHeader('Confirmación de recorrido programado')}
+    ${buildEmailHeader('Confirmación de recorrido programado', level)}
     <tr>
       <td style="background: #ffffff; padding: 28px 24px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; border-top: none;">
         <p style="margin: 0 0 16px; color: #334155; font-size: 1rem; line-height: 1.6;">Estimado(a) <strong>${escapeHtml(data.parentName)}</strong>,</p>
@@ -344,7 +349,7 @@ export async function sendRecorridoNotificationToDirector(
 </head>
 <body style="margin:0; padding:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 560px; margin: 0 auto; padding: 24px 16px;">
-    ${buildEmailHeader('Nuevo recorrido programado')}
+    ${buildEmailHeader('Nuevo recorrido programado', level)}
     <tr>
       <td style="background: #ffffff; padding: 28px 24px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; border-top: none;">
         <p style="margin: 0 0 20px; color: #475569; font-size: 0.95rem; line-height: 1.6;">Se ha programado un nuevo recorrido para el siguiente papá:</p>
@@ -389,7 +394,8 @@ export async function sendRecorridoReagendacionToParent(
 ): Promise<{ ok: boolean; error?: string }> {
   const from = 'sistemas.desarrollo@winston93.edu.mx'
   const dateFormatted = formatDate(data.tourDate)
-  const footerName = getInstitutionalFooter(data.level ?? 'primaria')
+  const level = data.level ?? 'primaria'
+  const footerName = getInstitutionalFooter(level)
   const html = `
 <!DOCTYPE html>
 <html>
@@ -400,7 +406,7 @@ export async function sendRecorridoReagendacionToParent(
 </head>
 <body style="margin:0; padding:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 560px; margin: 0 auto; padding: 24px 16px;">
-    ${buildEmailHeader('Reagendación de cita de recorrido')}
+    ${buildEmailHeader('Reagendación de cita de recorrido', level)}
     <tr>
       <td style="background: #ffffff; padding: 28px 24px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; border-top: none;">
         <p style="margin: 0 0 16px; color: #334155; font-size: 1rem; line-height: 1.6;">Estimado(a) <strong>${escapeHtml(data.parentName)}</strong>,</p>
@@ -456,7 +462,7 @@ export async function sendRecorridoReagendacionToDirector(
 </head>
 <body style="margin:0; padding:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 560px; margin: 0 auto; padding: 24px 16px;">
-    ${buildEmailHeader('Reagendación de cita de recorrido')}
+    ${buildEmailHeader('Reagendación de cita de recorrido', level)}
     <tr>
       <td style="background: #ffffff; padding: 28px 24px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; border-top: none;">
         <p style="margin: 0 0 20px; color: #475569; font-size: 0.95rem; line-height: 1.6;">Se ha <strong>reagendado</strong> una cita de recorrido. Datos actualizados del papá:</p>
