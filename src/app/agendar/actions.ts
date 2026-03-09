@@ -3,6 +3,11 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { sendAdmissionConfirmation, sendSecundariaTemarios } from '@/lib/email'
 import { sendAdmissionSms } from '@/lib/sms'
+import {
+  createCalendarEvent,
+  getPsicologaCalendarId,
+  buildAdmisionEventDescription,
+} from '@/lib/googleCalendar'
 
 const LEVEL_LABELS: Record<string, string> = {
   maternal: 'Maternal',
@@ -137,6 +142,37 @@ export async function createAdmissionAppointment(data: {
       if (!temariosResult.ok) console.warn('[email temarios]', temariosResult.error)
     } catch (e) {
       console.warn('[email temarios]', e)
+    }
+  }
+
+  // Crear evento en Google Calendar de la psicóloga correspondiente
+  const calendarId = getPsicologaCalendarId(data.level)
+  if (calendarId && appointmentId && data.appointment_time !== 'Por confirmar') {
+    try {
+      const calResult = await createCalendarEvent(calendarId, {
+        summary: `Examen admisión: ${studentName || data.student_name} (${LEVEL_LABELS[data.level] ?? data.level})`,
+        description: buildAdmisionEventDescription({
+          studentName: studentName || data.student_name,
+          level: data.level,
+          gradeLevel: data.grade_level,
+          parentName: data.parent_name,
+          parentPhone: data.parent_phone,
+          parentEmail: data.parent_email,
+          campus: campusName,
+        }),
+        date: data.appointment_date,
+        time: data.appointment_time,
+      })
+      if (calResult.ok && calResult.eventId) {
+        await createAdminClient()
+          .from('admission_appointments')
+          .update({ google_event_id: calResult.eventId })
+          .eq('id', appointmentId)
+      } else {
+        console.warn('[googleCalendar] No se pudo crear el evento:', calResult.error)
+      }
+    } catch (e) {
+      console.warn('[googleCalendar]', e)
     }
   }
 

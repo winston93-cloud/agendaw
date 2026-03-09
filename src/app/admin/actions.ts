@@ -5,6 +5,13 @@ import { revalidatePath } from 'next/cache'
 import type { AdmissionLevel } from '@/types/database'
 import { createAlumnoInMySQL, checkAlumnoExists as checkAlumnoExistsInMySQL, type AlumnoData } from '@/lib/mysql'
 import { sendRecorridoConfirmationToParent, sendRecorridoNotificationToDirector, sendRecorridoReagendacionToParent, sendRecorridoReagendacionToDirector } from '@/lib/email'
+import {
+  createCalendarEvent,
+  updateCalendarEvent,
+  deleteCalendarEvent,
+  getVinculacionCalendarId,
+  buildRecorridoEventDescription,
+} from '@/lib/googleCalendar'
 
 // Verificar disponibilidad completa
 export async function getFullyBookedDates(level: AdmissionLevel, excludeAppointmentId?: string): Promise<string[]> {
@@ -438,14 +445,40 @@ export async function createRecorrido(input: {
       sendRecorridoConfirmationToParent(parentData),
       sendRecorridoNotificationToDirector(input.level, parentData),
     ])
-    await supabase
-      .from('tour_recorridos')
-      .update({
-        email_parent_sent: parentResult.ok,
-        email_director_sent: directorResult.ok,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', inserted.id)
+    const calendarUpdates: Record<string, unknown> = {
+      email_parent_sent: parentResult.ok,
+      email_director_sent: directorResult.ok,
+      updated_at: new Date().toISOString(),
+    }
+
+    // Crear evento en Google Calendar de vinculación
+    const calendarId = getVinculacionCalendarId(input.level)
+    if (calendarId) {
+      try {
+        const calResult = await createCalendarEvent(calendarId, {
+          summary: `Recorrido ${levelLabel}: ${row.parent_name}`,
+          description: buildRecorridoEventDescription({
+            level: input.level,
+            parentName: row.parent_name,
+            parentPhone: row.parent_phone,
+            parentEmail: row.parent_email,
+            notes: row.notes ?? undefined,
+          }),
+          date: row.tour_date,
+          time: row.tour_time,
+          durationMinutes: 30,
+        })
+        if (calResult.ok && calResult.eventId) {
+          calendarUpdates.google_event_id = calResult.eventId
+        } else {
+          console.warn('[createRecorrido] Google Calendar error:', calResult.error)
+        }
+      } catch (e) {
+        console.warn('[createRecorrido] Google Calendar excepción:', e)
+      }
+    }
+
+    await supabase.from('tour_recorridos').update(calendarUpdates).eq('id', inserted.id)
     if (!parentResult.ok) console.error('[createRecorrido] Error email al papá:', parentResult.error)
     if (!directorResult.ok) console.error('[createRecorrido] Error email a directora:', directorResult.error)
 
@@ -514,6 +547,36 @@ export async function updateRecorrido(
     const { error } = await supabase.from('tour_recorridos').update(updates).eq('id', id)
     if (error) return { ok: false, error: error.message }
 
+    // Actualizar evento en Google Calendar si cambió fecha/hora
+    if (dateOrTimeChanged) {
+      const { data: recorridoRow } = await supabase
+        .from('tour_recorridos')
+        .select('google_event_id')
+        .eq('id', id)
+        .single()
+      const existingEventId = recorridoRow?.google_event_id
+      const calendarId = getVinculacionCalendarId(level)
+      if (calendarId && existingEventId) {
+        try {
+          const levelLabel = { maternal: 'Maternal', kinder: 'Kinder', primaria: 'Primaria', secundaria: 'Secundaria' }[level]
+          await updateCalendarEvent(calendarId, existingEventId, {
+            summary: `Recorrido ${levelLabel}: ${finalParentName}`,
+            description: buildRecorridoEventDescription({
+              level,
+              parentName: finalParentName,
+              parentPhone: finalParentPhone,
+              parentEmail: finalParentEmail,
+            }),
+            date: tour_date,
+            time: tour_time,
+            durationMinutes: 30,
+          })
+        } catch (e) {
+          console.warn('[updateRecorrido] Google Calendar error:', e)
+        }
+      }
+    }
+
     if (dateOrTimeChanged) {
       const levelLabel = { maternal: 'Maternal', kinder: 'Kinder', primaria: 'Primaria', secundaria: 'Secundaria' }[level]
       const parentData = {
@@ -551,8 +614,29 @@ export async function updateRecorrido(
 export async function deleteRecorrido(id: string): Promise<{ ok: boolean; error?: string }> {
   try {
     const supabase = createAdminClient()
+
+    // Obtener google_event_id antes de eliminar
+    const { data: recorridoRow } = await supabase
+      .from('tour_recorridos')
+      .select('google_event_id, level')
+      .eq('id', id)
+      .single()
+
     const { error } = await supabase.from('tour_recorridos').delete().eq('id', id)
     if (error) return { ok: false, error: error.message }
+
+    // Eliminar evento de Google Calendar
+    if (recorridoRow?.google_event_id && recorridoRow?.level) {
+      const calendarId = getVinculacionCalendarId(recorridoRow.level)
+      if (calendarId) {
+        try {
+          await deleteCalendarEvent(calendarId, recorridoRow.google_event_id)
+        } catch (e) {
+          console.warn('[deleteRecorrido] Google Calendar error:', e)
+        }
+      }
+    }
+
     revalidatePath('/admin')
     return { ok: true }
   } catch (e) {

@@ -25,6 +25,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Google Service Account credentials
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+
 # local env files
 .env*.local
 .env
