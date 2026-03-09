@@ -19,6 +19,7 @@ const emptyForm = {
   level: 'primaria' as TourRecorridoLevel,
   tour_date: '',
   tour_time: '',
+  student_name: '',
   parent_name: '',
   parent_phone: '',
   parent_email: '',
@@ -39,6 +40,7 @@ export default function AdminRecorridos({ recorridos }: { recorridos: TourRecorr
       level: r.level as TourRecorridoLevel,
       tour_date: r.tour_date,
       tour_time: r.tour_time,
+      student_name: (r as TourRecorrido & { student_name?: string }).student_name ?? '',
       parent_name: r.parent_name,
       parent_phone: r.parent_phone,
       parent_email: r.parent_email,
@@ -59,6 +61,7 @@ export default function AdminRecorridos({ recorridos }: { recorridos: TourRecorr
       level: form.level,
       tour_date: form.tour_date,
       tour_time: form.tour_time,
+      student_name: form.student_name || undefined,
     })
     setLoading(false)
     if (result.ok) {
@@ -78,6 +81,7 @@ export default function AdminRecorridos({ recorridos }: { recorridos: TourRecorr
       level: editForm.level,
       tour_date: editForm.tour_date,
       tour_time: editForm.tour_time,
+      student_name: editForm.student_name || undefined,
       parent_name: editForm.parent_name,
       parent_phone: editForm.parent_phone,
       parent_email: editForm.parent_email,
@@ -166,6 +170,15 @@ export default function AdminRecorridos({ recorridos }: { recorridos: TourRecorr
                             value={editForm.tour_time}
                             onChange={(e) => setEditForm((prev) => ({ ...prev, tour_time: e.target.value }))}
                             required
+                          />
+                        </label>
+                        <label>
+                          Nombre del alumno
+                          <input
+                            type="text"
+                            value={editForm.student_name}
+                            onChange={(e) => setEditForm((prev) => ({ ...prev, student_name: e.target.value }))}
+                            placeholder="Nombre del prospecto"
                           />
                         </label>
                         <label>
@@ -287,6 +300,15 @@ export default function AdminRecorridos({ recorridos }: { recorridos: TourRecorr
                 value={form.tour_time}
                 onChange={(e) => setForm((prev) => ({ ...prev, tour_time: e.target.value }))}
                 required
+              />
+            </label>
+            <label className="admin-recorridos-form-full">
+              Nombre del alumno
+              <input
+                type="text"
+                value={form.student_name}
+                onChange={(e) => setForm((prev) => ({ ...prev, student_name: e.target.value }))}
+                placeholder="Nombre del prospecto"
               />
             </label>
             <label className="admin-recorridos-form-full">

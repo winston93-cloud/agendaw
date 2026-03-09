@@ -395,6 +395,7 @@ export async function createRecorrido(input: {
   level: TourLevel
   tour_date: string
   tour_time: string
+  student_name?: string
   parent_name: string
   parent_phone: string
   parent_email: string
@@ -424,6 +425,7 @@ export async function createRecorrido(input: {
       level: input.level,
       tour_date: input.tour_date,
       tour_time: timeNorm,
+      student_name: input.student_name?.trim() || null,
       parent_name: input.parent_name.trim(),
       parent_phone: input.parent_phone.trim(),
       parent_email: input.parent_email.trim(),
@@ -489,6 +491,7 @@ export async function createRecorrido(input: {
         level: input.level,
         tour_date: row.tour_date,
         tour_time: row.tour_time,
+        student_name: row.student_name,
         parent_name: row.parent_name,
         parent_phone: row.parent_phone,
         parent_email: row.parent_email,
@@ -512,6 +515,7 @@ export async function updateRecorrido(
     level?: TourLevel
     tour_date?: string
     tour_time?: string
+    student_name?: string
     parent_name?: string
     parent_phone?: string
     parent_email?: string
@@ -556,6 +560,7 @@ export async function updateRecorrido(
       ...(input.level != null && { level: input.level }),
       ...(input.tour_date != null && { tour_date: input.tour_date }),
       ...(input.tour_time != null && { tour_time }),
+      ...(input.student_name !== undefined && { student_name: input.student_name?.trim() || null }),
       ...(input.parent_name != null && { parent_name: input.parent_name.trim() }),
       ...(input.parent_phone != null && { parent_phone: input.parent_phone.trim() }),
       ...(input.parent_email != null && { parent_email: input.parent_email.trim() }),
