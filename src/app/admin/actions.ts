@@ -12,7 +12,6 @@ import {
   getVinculacionCalendarId,
   buildRecorridoEventDescription,
 } from '@/lib/googleCalendar'
-import { sendSlackRecorrido } from '@/lib/slack'
 
 // Verificar disponibilidad completa
 export async function getFullyBookedDates(level: AdmissionLevel, excludeAppointmentId?: string): Promise<string[]> {
@@ -484,23 +483,6 @@ export async function createRecorrido(input: {
     await supabase.from('tour_recorridos').update(calendarUpdates).eq('id', inserted.id)
     if (!parentResult.ok) console.error('[createRecorrido] Error email al papá:', parentResult.error)
     if (!directorResult.ok) console.error('[createRecorrido] Error email a directora:', directorResult.error)
-
-    // Notificación a Slack #recorridos
-    try {
-      const slackResult = await sendSlackRecorrido({
-        level: input.level,
-        tour_date: row.tour_date,
-        tour_time: row.tour_time,
-        student_name: row.student_name,
-        parent_name: row.parent_name,
-        parent_phone: row.parent_phone,
-        parent_email: row.parent_email,
-        notes: row.notes,
-      })
-      if (!slackResult.ok) console.warn('[createRecorrido] Slack error:', slackResult.error)
-    } catch (e) {
-      console.warn('[createRecorrido] Slack excepción:', e)
-    }
 
     revalidatePath('/admin')
     return { ok: true }
