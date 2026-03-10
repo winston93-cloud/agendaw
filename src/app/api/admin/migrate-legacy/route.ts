@@ -82,7 +82,7 @@ export async function GET() {
   try {
     const pool = getMySQLPool()
     const [rows] = await pool.query<AgAlumnoRow[]>(
-      `SELECT COUNT(*) as total FROM ag_alumno WHERE ciclo IN (22, 23) AND alumno_status = 0`
+      `SELECT COUNT(*) as total FROM ag_alumno WHERE ciclo IN (22, 23) AND (npase IS NULL OR npase = '' OR npase = '0')`
     )
     const totalMySQL = (rows[0] as unknown as { total: number }).total
 
@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
   try {
     const pool = getMySQLPool()
     const [legacyRows] = await pool.query<AgAlumnoRow[]>(
-      `SELECT * FROM ag_alumno WHERE ciclo IN (22, 23) AND alumno_status = 0`
+      `SELECT * FROM ag_alumno WHERE ciclo IN (22, 23) AND (npase IS NULL OR npase = '' OR npase = '0')`
     )
 
     const supabase = createAdminClient()
