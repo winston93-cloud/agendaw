@@ -128,7 +128,7 @@ export async function sendAdmissionConfirmation(
 
   try {
     await transporter.sendMail({
-      from: `"Instituto Winston" <${from}>`,
+      from: `"${footerName}" <${from}>`,
       to,
       subject: 'Confirmación de cita de admisión',
       html,
@@ -160,6 +160,7 @@ export async function sendSecundariaTemarios(
   data: SecundariaTemariosData
 ): Promise<{ ok: boolean; error?: string }> {
   const from = process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx'
+  const footerName = 'Instituto Winston Churchill'
   const dateFormatted = formatDate(data.appointmentDate)
   const temarioFile = SECUNDARIA_TEMARIO_BY_GRADE[data.gradeLevel]
   if (!temarioFile) {
@@ -237,7 +238,7 @@ export async function sendSecundariaTemarios(
 
   try {
     await transporter.sendMail({
-      from: `"Instituto Winston" <${from}>`,
+      from: `"${footerName}" <${from}>`,
       to,
       subject: `Temarios de Admisión - Examen de admisión ${dateFormatted}`,
       html,
@@ -301,7 +302,7 @@ export async function sendRecorridoConfirmationToParent(
 `
   try {
     await transporter.sendMail({
-      from: `"Instituto Winston" <${from}>`,
+      from: `"${footerName}" <${from}>`,
       to: data.parentEmail,
       subject: 'Confirmación de recorrido programado',
       html,
@@ -376,7 +377,7 @@ export async function sendRecorridoNotificationToDirector(
 `
   try {
     await transporter.sendMail({
-      from: `"Instituto Winston" <${from}>`,
+      from: `"${footerName}" <${from}>`,
       to,
       subject: `Nuevo recorrido programado - ${data.levelLabel} - ${dateFormatted}`,
       html,
@@ -430,7 +431,7 @@ export async function sendRecorridoReagendacionToParent(
 `
   try {
     await transporter.sendMail({
-      from: `"Instituto Winston" <${from}>`,
+      from: `"${footerName}" <${from}>`,
       to: data.parentEmail,
       subject: 'Reagendación de cita de recorrido',
       html,
@@ -489,7 +490,7 @@ export async function sendRecorridoReagendacionToDirector(
 `
   try {
     await transporter.sendMail({
-      from: `"Instituto Winston" <${from}>`,
+      from: `"${footerName}" <${from}>`,
       to,
       subject: `Reagendación de cita de recorrido - ${data.levelLabel} - ${dateFormatted}`,
       html,
