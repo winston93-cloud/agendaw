@@ -254,6 +254,82 @@ export async function completeAdmissionAndCreateAlumno(appointmentId: string): P
 }
 
 /**
+ * Aprueba directamente el ingreso de un alumno migrado del sistema anterior
+ * (sin requerir expediente inicial)
+ */
+export async function completeAdmissionLegacy(appointmentId: string): Promise<{
+  success: boolean
+  alumno_ref?: number
+  message: string
+}> {
+  try {
+    const supabase = createAdminClient()
+
+    const { data: appointment } = await supabase
+      .from('admission_appointments')
+      .select('*')
+      .eq('id', appointmentId)
+      .single()
+
+    if (!appointment) return { success: false, message: 'No se encontró la cita' }
+    if (appointment.origin !== 'legacy') return { success: false, message: 'Esta función solo aplica para alumnos del sistema anterior' }
+
+    const nivelMap: Record<string, string> = {
+      maternal: '1', kinder: '2', primaria: '3', secundaria: '4',
+    }
+
+    // Extraer grado numérico de grade_level (ej. 'primaria_3' → '3', 'maternal_a' → '1')
+    const gradeRaw = appointment.grade_level ?? ''
+    const gradeMatch = gradeRaw.match(/(\d+)$/)
+    const gradeLetter = gradeRaw.match(/_([ab])$/i)
+    const alumno_grado = gradeMatch ? gradeMatch[1] : (gradeLetter ? (gradeLetter[1].toUpperCase() === 'A' ? '1' : '2') : '1')
+
+    // Convertir ciclo "2025-2026" → "22"
+    const rawCiclo = appointment.school_cycle || ''
+    const parsedCiclo = (() => {
+      const parts = rawCiclo.split('-')
+      if (parts.length >= 2) {
+        const endYear = parseInt(parts[parts.length - 1].trim(), 10)
+        if (!isNaN(endYear) && endYear > 2000) return String(endYear - 2004)
+      }
+      return rawCiclo
+    })()
+
+    const existingRef = await checkAlumnoExistsInMySQL(
+      appointment.student_name,
+      appointment.student_last_name_p || ''
+    )
+    if (existingRef) {
+      return { success: false, message: `El alumno ya existe con referencia ${existingRef}` }
+    }
+
+    const alumnoData: AlumnoData = {
+      alumno_app: appointment.student_last_name_p || '',
+      alumno_apm: appointment.student_last_name_m || '',
+      alumno_nombre: appointment.student_name || '',
+      alumno_nivel: nivelMap[appointment.level] || '1',
+      alumno_grado,
+      alumno_grupo: '',
+      alumno_status: '2',
+      alumno_nuevo_ingreso: '1',
+      alumno_ciclo_escolar: parsedCiclo,
+    }
+
+    const alumno_ref = await createAlumnoInMySQL(alumnoData)
+
+    await supabase
+      .from('admission_appointments')
+      .update({ status: 'completed', updated_at: new Date().toISOString() })
+      .eq('id', appointmentId)
+
+    return { success: true, alumno_ref, message: `✓ Alta exitosa. Alumno creado con referencia: ${alumno_ref}` }
+  } catch (error) {
+    console.error('[completeAdmissionLegacy]', error)
+    return { success: false, message: error instanceof Error ? error.message : 'Error al crear alumno en MySQL' }
+  }
+}
+
+/**
  * Verifica si existen expedientes para múltiples citas en una sola consulta
  */
 export async function checkExpedientesBatch(appointmentIds: string[]): Promise<Record<string, boolean>> {

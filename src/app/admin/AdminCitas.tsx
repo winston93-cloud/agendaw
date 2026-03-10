@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { updateAppointment, completeAdmissionAndCreateAlumno, checkExpedientesBatch, getFullyBookedDates } from './actions'
+import { updateAppointment, completeAdmissionAndCreateAlumno, completeAdmissionLegacy, checkExpedientesBatch, getFullyBookedDates } from './actions'
 import { createPermissionRequest, getAllRecentRequests } from './dashboard/actions'
 import ExamDateCalendar from '@/components/ExamDateCalendar'
 import type { AdmissionAppointment, PermissionRequest } from '@/types/database'
@@ -494,13 +494,31 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                           </span>
                         )}
 
+                        {/* Botón aprobar directo para alumnos del sistema anterior */}
+                        {a.origin === 'legacy' && a.status !== 'completed' && (
+                          <button type="button"
+                            onClick={async () => {
+                              if (!confirm(`¿Aprobar ingreso de ${a.student_name}? Se creará el alumno en el sistema.`)) return
+                              const res = await completeAdmissionLegacy(a.id)
+                              if (res.success) {
+                                alert(res.message)
+                                router.refresh()
+                              } else {
+                                alert('Error: ' + res.message)
+                              }
+                            }}
+                            style={{ padding: '0.3rem 0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', background: '#10b981', border: 'none', color: 'white', whiteSpace: 'nowrap', borderRadius: '6px', cursor: 'pointer', fontSize: '0.72rem', fontWeight: '600', width: 'fit-content' }}>
+                            ✅ Aprobar ingreso
+                          </button>
+                        )}
+
                         {expedientesMap[a.id] && (<>
                           <button type="button"
                             onClick={() => window.open(`/expediente_inicial/ver?cita=${a.id}`, '_blank')}
                             style={{ padding: '0.3rem 0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', background: '#3b82f6', border: 'none', color: 'white', whiteSpace: 'nowrap', borderRadius: '6px', cursor: 'pointer', fontSize: '0.72rem', fontWeight: '600' }}>
                             👁️ Ver Expediente
                           </button>
-                          {a.status !== 'completed' && (
+                          {a.status !== 'completed' && a.origin !== 'legacy' && (
                             <button type="button"
                               onClick={() => setModal({ type: 'confirm-aprobar', appointment: a })}
                               style={{ padding: '0.3rem 0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', background: '#10b981', border: 'none', color: 'white', whiteSpace: 'nowrap', borderRadius: '6px', cursor: 'pointer', fontSize: '0.72rem', fontWeight: '600' }}>
