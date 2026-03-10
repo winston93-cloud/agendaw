@@ -5,8 +5,8 @@ import fs from 'fs'
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'sistemas.desarrollo@winston93.edu.mx',
-    pass: 'ckxc xdfg oxqx jtmm', // App Password de Gmail
+    user: process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx',
+    pass: process.env.MAIL_PASS,
   },
 })
 
@@ -68,7 +68,7 @@ export async function sendAdmissionConfirmation(
   to: string,
   data: AdmissionConfirmationData
 ): Promise<{ ok: boolean; error?: string }> {
-  const from = 'sistemas.desarrollo@winston93.edu.mx'
+  const from = process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx'
   const dateFormatted = formatDate(data.appointmentDate)
 
   const level = data.level ?? (data.campusName?.includes('Educativo') ? 'maternal' : 'primaria')
@@ -159,7 +159,7 @@ export async function sendSecundariaTemarios(
   to: string,
   data: SecundariaTemariosData
 ): Promise<{ ok: boolean; error?: string }> {
-  const from = 'sistemas.desarrollo@winston93.edu.mx'
+  const from = process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx'
   const dateFormatted = formatDate(data.appointmentDate)
   const temarioFile = SECUNDARIA_TEMARIO_BY_GRADE[data.gradeLevel]
   if (!temarioFile) {
@@ -262,7 +262,7 @@ export type RecorridoConfirmationData = {
 export async function sendRecorridoConfirmationToParent(
   data: RecorridoConfirmationData
 ): Promise<{ ok: boolean; error?: string }> {
-  const from = 'sistemas.desarrollo@winston93.edu.mx'
+  const from = process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx'
   const dateFormatted = formatDate(data.tourDate)
   const level = data.level ?? 'primaria'
   const footerName = getInstitutionalFooter(level)
@@ -334,7 +334,7 @@ export async function sendRecorridoNotificationToDirector(
   level: 'maternal' | 'kinder' | 'primaria' | 'secundaria',
   data: RecorridoDirectorData
 ): Promise<{ ok: boolean; error?: string }> {
-  const from = 'sistemas.desarrollo@winston93.edu.mx'
+  const from = process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx'
   const to = RECORRIDO_DIRECTOR_BY_LEVEL[level]
   if (!to) return { ok: false, error: 'Nivel no válido para notificación' }
   const dateFormatted = formatDate(data.tourDate)
@@ -392,7 +392,7 @@ export async function sendRecorridoNotificationToDirector(
 export async function sendRecorridoReagendacionToParent(
   data: RecorridoConfirmationData
 ): Promise<{ ok: boolean; error?: string }> {
-  const from = 'sistemas.desarrollo@winston93.edu.mx'
+  const from = process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx'
   const dateFormatted = formatDate(data.tourDate)
   const level = data.level ?? 'primaria'
   const footerName = getInstitutionalFooter(level)
@@ -447,7 +447,7 @@ export async function sendRecorridoReagendacionToDirector(
   level: 'maternal' | 'kinder' | 'primaria' | 'secundaria',
   data: RecorridoDirectorData
 ): Promise<{ ok: boolean; error?: string }> {
-  const from = 'sistemas.desarrollo@winston93.edu.mx'
+  const from = process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx'
   const to = RECORRIDO_DIRECTOR_BY_LEVEL[level]
   if (!to) return { ok: false, error: 'Nivel no válido para notificación' }
   const dateFormatted = formatDate(data.tourDate)

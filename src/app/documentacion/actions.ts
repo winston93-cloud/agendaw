@@ -41,8 +41,8 @@ export async function sendDocumentacion(payload: {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'sistemas.desarrollo@winston93.edu.mx',
-        pass: 'ckxc xdfg oxqx jtmm',
+        user: process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx',
+        pass: process.env.MAIL_PASS,
       },
     })
 
@@ -81,9 +81,9 @@ export async function sendDocumentacion(payload: {
 </html>`
 
     await transporter.sendMail({
-      from:        '"Sistema de Admisión" <sistemas.desarrollo@winston93.edu.mx>',
+      from:        `"Sistema de Admisión" <${process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx'}>`,
       to:          destino,
-      cc:          'sistemas.desarrollo@winston93.edu.mx',
+      cc:          process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx',
       subject:     `Documentación de Admisión - ${payload.studentName} (${nivel})`,
       html,
       attachments,

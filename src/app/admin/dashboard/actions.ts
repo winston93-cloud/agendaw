@@ -27,8 +27,8 @@ function makeTransporter() {
   return nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'sistemas.desarrollo@winston93.edu.mx',
-      pass: 'ckxc xdfg oxqx jtmm',
+      user: process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx',
+      pass: process.env.MAIL_PASS,
     },
   })
 }
@@ -135,9 +135,9 @@ export async function createPermissionRequest(data: {
 </html>`
 
     await trans.sendMail({
-      from:    '"Sistema de Admisión" <sistemas.desarrollo@winston93.edu.mx>',
+      from:    `"Sistema de Admisión" <${process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx'}>`,
       to:      destino,
-      cc:      'sistemas.desarrollo@winston93.edu.mx',
+      cc:      process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx',
       subject: `[Solicitud de Autorización] ${tipo} — ${nivel}`,
       html,
     })
@@ -277,8 +277,8 @@ export async function respondPermissionRequest(
 </html>`
 
     await trans.sendMail({
-      from:    '"Sistema de Admisión" <sistemas.desarrollo@winston93.edu.mx>',
-      to:      'sistemas.desarrollo@winston93.edu.mx',
+      from:    `"Sistema de Admisión" <${process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx'}>`,
+      to:      process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx',
       subject: `[Solicitud ${decision === 'aprobada' ? 'Aprobada' : 'Rechazada'}] ${tipo} — ${nivel}`,
       html,
     })
