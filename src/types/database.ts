@@ -87,6 +87,9 @@ export interface AdmissionAppointment {
   appointment_time: string
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed'
   notes?: string
+  origin?: string
+  legacy_id?: number
+  google_event_id?: string
   created_at: string
   updated_at: string
 }

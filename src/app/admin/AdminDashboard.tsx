@@ -7,12 +7,13 @@ import AdminBloquear from './AdminBloquear'
 import AdminHorarios from './AdminHorarios'
 import AdminBuscar from './AdminBuscar'
 import AdminRecorridos from './AdminRecorridos'
+import AdminMigracion from './AdminMigracion'
 import type { AdmissionAppointment } from '@/types/database'
 import type { BlockedDate } from '@/types/database'
 import type { AdmissionSchedule } from '@/types/database'
 import type { TourRecorrido } from '@/types/database'
 
-type Section = 'citas' | 'horarios' | 'bloquear' | 'buscar' | 'recorridos' | null
+type Section = 'citas' | 'horarios' | 'bloquear' | 'buscar' | 'recorridos' | 'migracion' | null
 
 const CARDS: { id: Section; icon: string; title: string; description: string; accent: string }[] = [
   {
@@ -49,6 +50,13 @@ const CARDS: { id: Section; icon: string; title: string; description: string; ac
     title: 'Recorridos programados',
     description: 'Ver y gestionar recorridos programados',
     accent: 'recorridos',
+  },
+  {
+    id: 'migracion',
+    icon: '🗃️',
+    title: 'Migración sistema anterior',
+    description: 'Importar alumnos pendientes del ciclo 2025-2026 y 2026-2027',
+    accent: 'migracion',
   },
 ]
 
@@ -132,6 +140,12 @@ export default function AdminDashboard({
           <section className="admin-section admin-section-recorridos">
             <h2><span className="admin-section-icon">🚌</span> Recorridos programados</h2>
             <AdminRecorridos recorridos={recorridos} />
+          </section>
+        )}
+        {activeSection === 'migracion' && (
+          <section className="admin-section admin-section-migracion">
+            <h2><span className="admin-section-icon">🗃️</span> Migración sistema anterior</h2>
+            <AdminMigracion />
           </section>
         )}
       </div>
