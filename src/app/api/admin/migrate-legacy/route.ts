@@ -162,7 +162,7 @@ export async function POST(req: NextRequest) {
         notes: buildNotes(row),
         origin: 'legacy',
         legacy_id: row.idalum,
-        created_at: row.alumno_registro ? new Date(row.alumno_registro).toISOString() : undefined,
+        created_at: row.alumno_registro ? (formatDate(row.alumno_registro) + 'T12:00:00.000Z') : undefined,
       }
 
       const { error } = await supabase.from('admission_appointments').insert(record)
