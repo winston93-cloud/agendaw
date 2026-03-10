@@ -422,14 +422,15 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Fecha Agendación</th>
-                <th>Fecha Examen</th>
+                <th style={{ whiteSpace: 'nowrap' }}>Fecha Agendación</th>
+                <th style={{ whiteSpace: 'nowrap' }}>Fecha Examen</th>
                 <th>Hora</th>
                 <th>Nivel</th>
+                <th>Ciclo</th>
                 <th>Aspirante</th>
                 <th>Tutor / Contacto</th>
-                <th style={{ width: '120px' }}>Estado</th>
-                <th style={{ minWidth: '210px' }}>Acciones</th>
+                <th style={{ minWidth: '150px' }}>Estado</th>
+                <th style={{ minWidth: '150px' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -437,14 +438,15 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                 const reqStatus = statusMap[`reagendar:${a.id}`]
                 return (
                   <tr key={a.id}>
-                    <td style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                      {new Date(a.created_at).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                    <td style={{ fontSize: '0.85rem', color: '#64748b', whiteSpace: 'nowrap' }}>
+                      {new Date(a.created_at).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: '2-digit' })}
                     </td>
-                    <td>
+                    <td style={{ whiteSpace: 'nowrap' }}>
                       {new Date(a.appointment_date + 'T12:00:00').toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
                     </td>
-                    <td>{a.appointment_time}</td>
-                    <td>{LEVEL_LABELS[a.level] || a.level}</td>
+                    <td style={{ whiteSpace: 'nowrap' }}>{a.appointment_time}</td>
+                    <td style={{ whiteSpace: 'nowrap' }}>{LEVEL_LABELS[a.level] || a.level}</td>
+                    <td style={{ whiteSpace: 'nowrap', fontSize: '0.82rem' }}>{a.school_cycle || '—'}</td>
                     <td>
                       <strong>{`${a.student_name} ${a.student_last_name_p || ''} ${a.student_last_name_m || ''}`.trim()}</strong>
                       {a.origin === 'legacy' && (
@@ -453,10 +455,10 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                       <br /><small>{a.grade_level} · {a.student_age}</small>
                     </td>
                     <td>
-                      {a.parent_name}<br />
+                      {a.parent_name === 'PSICOLOGIAS' ? 'N/A' : a.parent_name}<br />
                       <small>{a.parent_email} · {a.parent_phone}</small>
                     </td>
-                    <td style={{ width: '120px', paddingRight: '0.25rem' }}>
+                    <td style={{ minWidth: '150px', paddingRight: '0.25rem' }}>
                       <select value={a.status} onChange={e => updateStatus(a.id, e.target.value)}
                         className={`admin-select-status status-pill status-${a.status}`} style={{ width: '100%', minWidth: 'unset' }}>
                         <option value="pending">Pendiente</option>
@@ -465,15 +467,15 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                         <option value="completed">Completada</option>
                       </select>
                     </td>
-                    <td style={{ minWidth: '210px', padding: '0.5rem 0.5rem 0.5rem 0.25rem' }}>
+                    <td style={{ minWidth: '150px', padding: '0.5rem 0.5rem 0.5rem 0.25rem' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
 
-                        {/* Botón reagendar: siempre disponible */}
+                        {/* Botón reagendar */}
                         <button type="button"
                           onClick={() => { setSolicitudDate(''); setSolicitudTime(''); setSolicitudMsg(''); setModal({ type: 'solicitar-reagendar', appointment: a }) }}
-                          style={{ padding: '0.3rem 0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', background: '#f5f3ff', border: '1px solid #c4b5fd', color: '#7c3aed', whiteSpace: 'nowrap', borderRadius: '6px', cursor: 'pointer', fontSize: '0.72rem', fontWeight: '600' }}
+                          style={{ padding: '0.3rem 0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', background: '#f5f3ff', border: '1px solid #c4b5fd', color: '#7c3aed', whiteSpace: 'nowrap', borderRadius: '6px', cursor: 'pointer', fontSize: '0.72rem', fontWeight: '600', width: 'fit-content' }}
                         >
-                          📋 Reagendación
+                          📋 Reagendar
                         </button>
                         {/* Indicador del estado de la última solicitud */}
                         {reqStatus === 'aprobada' && (

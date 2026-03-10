@@ -151,7 +151,7 @@ export async function POST(req: NextRequest) {
         student_last_name_m: row.ap_mat?.trim() ?? '',
         student_birth_date: formatDate(row.fecna),
         student_age: calcAge(row.fecna),
-        parent_name: row.contacto?.trim() ?? 'N/D',
+        parent_name: (!row.contacto?.trim() || row.contacto.trim().toUpperCase() === 'PSICOLOGIAS') ? 'N/A' : row.contacto.trim(),
         parent_email: row.email?.trim() ?? 'sin-email@legacy.local',
         parent_phone: row.telefono?.trim() ?? 'N/D',
         relationship: 'Padre/Madre',
@@ -162,6 +162,7 @@ export async function POST(req: NextRequest) {
         notes: buildNotes(row),
         origin: 'legacy',
         legacy_id: row.idalum,
+        created_at: row.alumno_registro ? new Date(row.alumno_registro).toISOString() : undefined,
       }
 
       const { error } = await supabase.from('admission_appointments').insert(record)
