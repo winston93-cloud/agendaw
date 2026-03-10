@@ -419,18 +419,29 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
         <p className="admin-empty">No hay citas con esos filtros.</p>
       ) : (
         <div className="admin-table-wrap" style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}>
-          <table className="admin-table">
+          <table className="admin-table" style={{ tableLayout: 'fixed', minWidth: '1100px' }}>
+            <colgroup>
+              <col style={{ width: '90px' }} />   {/* Fecha agendación */}
+              <col style={{ width: '140px' }} />  {/* Fecha examen */}
+              <col style={{ width: '65px' }} />   {/* Hora */}
+              <col style={{ width: '80px' }} />   {/* Nivel */}
+              <col style={{ width: '90px' }} />   {/* Ciclo */}
+              <col style={{ width: '170px' }} />  {/* Aspirante */}
+              <col style={{ width: '175px' }} />  {/* Tutor */}
+              <col style={{ width: '145px' }} />  {/* Estado */}
+              <col style={{ width: '155px' }} />  {/* Acciones */}
+            </colgroup>
             <thead>
               <tr>
-                <th style={{ whiteSpace: 'nowrap' }}>Fecha Agendación</th>
+                <th style={{ whiteSpace: 'nowrap' }}>Fecha Agend.</th>
                 <th style={{ whiteSpace: 'nowrap' }}>Fecha Examen</th>
                 <th>Hora</th>
                 <th>Nivel</th>
                 <th>Ciclo</th>
                 <th>Aspirante</th>
                 <th>Tutor / Contacto</th>
-                <th style={{ minWidth: '150px' }}>Estado</th>
-                <th style={{ minWidth: '150px' }}>Acciones</th>
+                <th>Estado</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -454,11 +465,16 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                       )}
                       <br /><small>{a.grade_level} · {a.student_age}</small>
                     </td>
-                    <td>
-                      {a.parent_name === 'PSICOLOGIAS' ? 'N/A' : a.parent_name}<br />
-                      <small>{a.parent_email} · {a.parent_phone}</small>
+                    <td style={{ overflow: 'hidden' }}>
+                      <span style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {a.parent_name === 'PSICOLOGIAS' ? 'N/A' : a.parent_name}
+                      </span>
+                      <small style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {a.parent_email}
+                      </small>
+                      <small>{a.parent_phone}</small>
                     </td>
-                    <td style={{ minWidth: '150px', paddingRight: '0.25rem' }}>
+                    <td style={{ paddingRight: '0.25rem' }}>
                       <select value={a.status} onChange={e => updateStatus(a.id, e.target.value)}
                         className={`admin-select-status status-pill status-${a.status}`} style={{ width: '100%', minWidth: 'unset' }}>
                         <option value="pending">Pendiente</option>
@@ -467,7 +483,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                         <option value="completed">Completada</option>
                       </select>
                     </td>
-                    <td style={{ minWidth: '150px', padding: '0.5rem 0.5rem 0.5rem 0.25rem' }}>
+                    <td style={{ padding: '0.5rem 0.5rem 0.5rem 0.25rem' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
 
                         {/* Botón reagendar */}
