@@ -3,20 +3,22 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { getAppointmentForDocs, sendDocumentacion } from './actions'
 
 const MAX_FILE_MB   = 5
 const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024
 const MAX_TOTAL_MB  = 20  // margen conservador vs límite de 25MB del servidor
 
-const DOC_LIST = [
-  { label: 'Constancia del nivel actual', icon: '📝', note: '(Solo Maternal/Kinder)' },
-  { label: 'Última boleta interna del año en curso', icon: '📊', note: '' },
-  { label: 'Boleta oficial del ciclo escolar anterior', icon: '📜', note: '' },
-  { label: 'Carta de Buena Conducta del ciclo actual', icon: '🤝', note: '' },
-]
-
 function DocumentacionContent() {
+  const t = useTranslations('documentacion')
+
+  const DOC_LIST = [
+    { label: t('docs.doc0'), icon: '📝', note: t('docs.doc0note') },
+    { label: t('docs.doc1'), icon: '📊', note: '' },
+    { label: t('docs.doc2'), icon: '📜', note: '' },
+    { label: t('docs.doc3'), icon: '🤝', note: '' },
+  ]
   const searchParams = useSearchParams()
   const citaId = searchParams.get('cita')
 
@@ -29,16 +31,16 @@ function DocumentacionContent() {
 
   useEffect(() => {
     if (!citaId) {
-      setError('No se especificó el ID de la cita')
+      setError(t('errorNoCita'))
       setLoading(false)
       return
     }
     getAppointmentForDocs(citaId)
       .then(app => {
         if (app) setAppointment(app)
-        else      setError('No se encontró la cita')
+        else      setError(t('errorNotFound'))
       })
-      .catch(() => setError('Error al cargar la cita'))
+      .catch(() => setError(t('errorLoad')))
       .finally(() => setLoading(false))
   }, [citaId])
 
@@ -57,7 +59,7 @@ function DocumentacionContent() {
 
   const handleSubmit = async () => {
     if (Object.keys(files).length === 0) {
-      alert('Debes subir al menos un documento.')
+      alert(t('atLeastOne'))
       return
     }
     setSending(true)
@@ -101,15 +103,15 @@ function DocumentacionContent() {
 
   if (loading) return (
     <div className="expediente-page">
-      <p style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255,255,255,0.9)' }}>Cargando...</p>
+      <p style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255,255,255,0.9)' }}>{t('loading')}</p>
     </div>
   )
 
   if (!appointment) return (
     <div className="expediente-page">
       <div style={{ textAlign: 'center', padding: '2rem' }}>
-        <p style={{ color: '#ef4444', marginBottom: '1rem' }}>{error ?? 'No se encontró la cita'}</p>
-        <Link href="/" className="btn btn-secondary">Volver al inicio</Link>
+        <p style={{ color: '#ef4444', marginBottom: '1rem' }}>{error ?? t('errorNotFound')}</p>
+        <Link href="/" className="btn btn-secondary">{t('backHome')}</Link>
       </div>
     </div>
   )
@@ -117,12 +119,12 @@ function DocumentacionContent() {
   if (success) return (
     <div className="expediente-page">
       <div className="expediente-success">
-        <h1>✅ Documentación enviada</h1>
-        <p>Hemos recibido tus documentos y los hemos enviado a la psicología del plantel.</p>
+        <h1>{t('successTitle')}</h1>
+        <p>{t('successText')}</p>
         <p style={{ marginTop: '1rem' }}>
-          Recibirás una copia de confirmación en: <strong>{appointment.parent_email}</strong>
+          {t('successEmail')} <strong>{appointment.parent_email}</strong>
         </p>
-        <Link href="/" className="expediente-success-btn">Volver al inicio</Link>
+        <Link href="/" className="expediente-success-btn">{t('backHome')}</Link>
       </div>
     </div>
   )
@@ -136,20 +138,19 @@ function DocumentacionContent() {
     <div className="expediente-page">
       <header className="expediente-hero">
         <h1 className="expediente-hero-title">
-          <span className="expediente-hero-title-line">📤 Subir Documentación</span>
+          <span className="expediente-hero-title-line">{t('title')}</span>
           <span className="expediente-hero-title-line" style={{ fontSize: '1.2rem', opacity: 0.9 }}>
-            Requisito para entregar resultados
+            {t('subtitle')}
           </span>
         </h1>
       </header>
 
       <div className="expediente-form-container" style={{ maxWidth: '600px', margin: '0 auto' }}>
         <div className="expediente-section">
-          <h2 className="expediente-section-title">📄 Documentos requeridos</h2>
+          <h2 className="expediente-section-title">{t('docsHeading')}</h2>
 
           <p style={{ color: '#1e293b', marginBottom: '1rem', lineHeight: '1.6' }}>
-            Por favor, sube los siguientes documentos. Es necesario completar este trámite para que la psicología
-            entregue los resultados del examen de admisión.
+            {t('docsIntro')}
           </p>
           <ul style={{ color: '#475569', paddingLeft: '1.5rem', lineHeight: '1.8', marginBottom: '1.5rem' }}>
             {DOC_LIST.map((d, i) => (
@@ -187,16 +188,16 @@ function DocumentacionContent() {
                   <div style={{ fontSize: '2.5rem' }}>{files[index] ? '✅' : '📤'}</div>
                   {files[index] ? (
                     <>
-                      <p style={{ color: '#166534', fontWeight: '700', margin: 0 }}>¡Archivo listo!</p>
+                      <p style={{ color: '#166534', fontWeight: '700', margin: 0 }}>{t('fileReady')}</p>
                       <p style={{ color: '#15803d', fontSize: '0.9rem', margin: 0, background: 'rgba(34,197,94,0.1)', padding: '0.4rem 0.75rem', borderRadius: '8px', wordBreak: 'break-all' }}>
                         {files[index].name}
                       </p>
-                      <p style={{ color: '#16a34a', fontSize: '0.8rem', margin: 0 }}>Toca para cambiar</p>
+                      <p style={{ color: '#16a34a', fontSize: '0.8rem', margin: 0 }}>{t('fileTap')}</p>
                     </>
                   ) : (
                     <>
-                      <p style={{ color: '#334155', fontWeight: '600', margin: 0 }}>Seleccionar archivo</p>
-                      <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>PDF, foto o imagen · Máx. {MAX_FILE_MB}MB</p>
+                      <p style={{ color: '#334155', fontWeight: '600', margin: 0 }}>{t('fileSelect')}</p>
+                      <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>{t('fileHint', { max: MAX_FILE_MB })}</p>
                     </>
                   )}
                 </div>
@@ -216,7 +217,7 @@ function DocumentacionContent() {
               transition: 'all 0.3s ease',
             }}>
               <span style={{ fontSize: '0.9rem', color: '#475569', fontWeight: '600' }}>
-                📦 Peso total de archivos
+                {t('weightLabel')}
               </span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 {/* barra de progreso */}
@@ -250,7 +251,7 @@ function DocumentacionContent() {
               borderRadius: '10px', color: '#991b1b', fontSize: '0.9rem',
               display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem',
             }}>
-              <span>⚠️</span> El peso total supera el límite. Reduce el tamaño de algún archivo antes de enviar.
+              {t('overLimit')}
             </div>
           )}
 
@@ -276,17 +277,17 @@ function DocumentacionContent() {
               boxShadow: (fileCount > 0 && !overLimit) ? '0 4px 12px rgba(79,70,229,0.3)' : 'none',
             }}
           >
-            {sending ? 'Enviando...' : `📤 ENVIAR DOCUMENTACIÓN (${fileCount} ARCHIVO${fileCount !== 1 ? 'S' : ''})`}
+            {sending ? t('sendingBtn') : t('sendBtn', { count: fileCount, plural: fileCount !== 1 ? 'S' : '' })}
           </button>
 
           <p style={{ marginTop: '1rem', fontSize: '0.85rem', color: '#64748b', textAlign: 'center' }}>
-            * Los documentos se enviarán a la psicología del nivel correspondiente. Recibirás una copia en tu correo.
+            {t('footerNote')}
           </p>
         </div>
 
         <div style={{ textAlign: 'center', marginTop: '2rem' }}>
           <Link href={`/menu-admision?cita=${citaId}`} className="btn btn-secondary">
-            ← Volver al menú
+            {t('backMenu')}
           </Link>
         </div>
       </div>
@@ -294,13 +295,18 @@ function DocumentacionContent() {
   )
 }
 
+function DocumentacionFallback() {
+  const t = useTranslations('documentacion')
+  return (
+    <div className="expediente-page">
+      <p style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255,255,255,0.9)' }}>{t('loading')}</p>
+    </div>
+  )
+}
+
 export default function DocumentacionPage() {
   return (
-    <Suspense fallback={
-      <div className="expediente-page">
-        <p style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255,255,255,0.9)' }}>Cargando…</p>
-      </div>
-    }>
+    <Suspense fallback={<DocumentacionFallback />}>
       <DocumentacionContent />
     </Suspense>
   )

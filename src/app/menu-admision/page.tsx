@@ -3,17 +3,19 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 
 function MenuContent() {
+  const t = useTranslations('menu')
   const searchParams = useSearchParams()
   const citaId = searchParams.get('cita')
 
   if (!citaId) {
     return (
       <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <p style={{ color: '#ef4444' }}>Enlace inválido. Falta el ID de la cita.</p>
+        <p style={{ color: '#ef4444' }}>{t('invalidLink')}</p>
         <Link href="/" style={{ color: '#60a5fa', textDecoration: 'underline', marginTop: '1rem', display: 'inline-block' }}>
-          Volver al inicio
+          {t('backHome')}
         </Link>
       </div>
     )
@@ -23,9 +25,9 @@ function MenuContent() {
     <div className="expediente-page">
       <header className="expediente-hero">
         <h1 className="expediente-hero-title">
-          <span className="expediente-hero-title-line">¡Bienvenido!</span>
+          <span className="expediente-hero-title-line">{t('welcomeTitle')}</span>
           <span className="expediente-hero-title-line" style={{ fontSize: '1.2rem', opacity: 0.9 }}>
-            Selecciona una opción para continuar
+            {t('welcomeSubtitle')}
           </span>
         </h1>
         <div style={{ 
@@ -48,7 +50,7 @@ function MenuContent() {
             textShadow: '0 1px 2px rgba(0,0,0,0.1)',
             lineHeight: '1.6'
           }}>
-            ⚠️ <strong>Importante:</strong> Para recibir los resultados del examen de admisión, es obligatorio completar <span style={{ color: '#fbbf24', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em' }}>AMBOS REQUISITOS</span> antes de la fecha de su cita.
+            ⚠️ <strong>Importante:</strong> {t('importantText')} <span style={{ color: '#fbbf24', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('importantHighlight')}</span> {t('importantSuffix')}
           </p>
         </div>
       </header>
@@ -81,15 +83,15 @@ function MenuContent() {
               boxShadow: '0 4px 6px rgba(99, 102, 241, 0.3)',
               zIndex: 10
             }}>
-              PASO 1 DE 2
+              {t('step1Badge')}
             </div>
             <div className="menu-card-inner">
               <div className="menu-card-icon">📋</div>
-              <h3 className="menu-card-title">Llenar Expediente Inicial</h3>
+              <h3 className="menu-card-title">{t('card1Title')}</h3>
               <p className="menu-card-description">
-                Formulario con información del aspirante y su familia. Los primeros campos ya están precargados.
+                {t('card1Desc')}
               </p>
-              <span className="menu-card-cta">Ir al expediente →</span>
+              <span className="menu-card-cta">{t('card1Cta')}</span>
             </div>
           </Link>
 
@@ -113,15 +115,15 @@ function MenuContent() {
               boxShadow: '0 4px 6px rgba(5, 150, 105, 0.3)',
               zIndex: 10
             }}>
-              PASO 2 DE 2
+              {t('step2Badge')}
             </div>
             <div className="menu-card-inner">
               <div className="menu-card-icon">📤</div>
-              <h3 className="menu-card-title">Subir Documentación</h3>
+              <h3 className="menu-card-title">{t('card2Title')}</h3>
               <p className="menu-card-description">
-                Carga los documentos requeridos (constancia, boletas, carta de buena conducta).
+                {t('card2Desc')}
               </p>
-              <span className="menu-card-cta">Subir documentos →</span>
+              <span className="menu-card-cta">{t('card2Cta')}</span>
             </div>
           </Link>
           
@@ -131,13 +133,18 @@ function MenuContent() {
   )
 }
 
+function MenuFallback() {
+  const t = useTranslations('menu')
+  return (
+    <div className="expediente-page">
+      <p style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255,255,255,0.9)' }}>{t('loading')}</p>
+    </div>
+  )
+}
+
 export default function MenuPage() {
   return (
-    <Suspense fallback={
-      <div className="expediente-page">
-        <p style={{ textAlign: 'center', padding: '2rem', color: 'rgba(255,255,255,0.9)' }}>Cargando…</p>
-      </div>
-    }>
+    <Suspense fallback={<MenuFallback />}>
       <MenuContent />
     </Suspense>
   )

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import ExamDateCalendar from '@/components/ExamDateCalendar'
 import { createAdmissionAppointment } from './actions'
 
@@ -26,16 +27,6 @@ const SCHOOL_CYCLES = [
   { value: '2026-2027', label: '2026-2027' },
 ] as const
 
-const HOW_DID_YOU_HEAR_OPTIONS = [
-  { value: '', label: 'Seleccione una opción' },
-  { value: 'medios_impresos', label: 'Medios Impresos' },
-  { value: 'facebook', label: 'Facebook' },
-  { value: 'instagram', label: 'Instagram' },
-  { value: 'tiktok', label: 'TikTok' },
-  { value: 'familiar_conocido', label: 'Familiar o Conocido' },
-  { value: 'programa_familia_winston', label: 'Programa Familia Winston' },
-  { value: 'otra', label: 'Otra' },
-] as const
 
 interface FormData {
   // Paso 1: Selección de plantel y nivel
@@ -61,6 +52,19 @@ interface FormData {
 }
 
 export default function AgendarPage() {
+  const t = useTranslations('agendar')
+
+  const HOW_DID_YOU_HEAR_OPTIONS = [
+    { value: '', label: t('aspirante.howPlaceholder') },
+    { value: 'medios_impresos', label: t('aspirante.howOptions.impreso') },
+    { value: 'facebook', label: 'Facebook' },
+    { value: 'instagram', label: 'Instagram' },
+    { value: 'tiktok', label: 'TikTok' },
+    { value: 'familiar_conocido', label: t('aspirante.howOptions.familiar') },
+    { value: 'programa_familia_winston', label: t('aspirante.howOptions.familia_winston') },
+    { value: 'otra', label: t('aspirante.howOptions.otra') },
+  ]
+
   const [currentStep, setCurrentStep] = useState<Step>(1)
   const [blockedDates, setBlockedDates] = useState<string[]>([])
   const [scheduleTimes, setScheduleTimes] = useState<string[]>([])
@@ -144,15 +148,15 @@ export default function AgendarPage() {
     if (formData.campus === 'winston') {
       if (formData.level === 'maternal') {
         return [
-          { value: 'maternal_a', label: 'Maternal A', campus: 'winston' },
-          { value: 'maternal_b', label: 'Maternal B', campus: 'winston' },
+          { value: 'maternal_a', label: t('grades.maternalA'), campus: 'winston' },
+          { value: 'maternal_b', label: t('grades.maternalB'), campus: 'winston' },
         ]
       }
       if (formData.level === 'kinder') {
         return [
-          { value: 'kinder_1', label: 'Kinder-1', campus: 'winston' },
-          { value: 'kinder_2', label: 'Kinder-2', campus: 'winston' },
-          { value: 'kinder_3', label: 'Kinder-3', campus: 'winston' },
+          { value: 'kinder_1', label: t('grades.kinder1'), campus: 'winston' },
+          { value: 'kinder_2', label: t('grades.kinder2'), campus: 'winston' },
+          { value: 'kinder_3', label: t('grades.kinder3'), campus: 'winston' },
         ]
       }
       return []
@@ -160,19 +164,19 @@ export default function AgendarPage() {
     // Churchill
     if (formData.level === 'primaria') {
       return [
-        { value: 'primaria_1', label: '1° de Primaria', campus: 'churchill' },
-        { value: 'primaria_2', label: '2° de Primaria', campus: 'churchill' },
-        { value: 'primaria_3', label: '3° de Primaria', campus: 'churchill' },
-        { value: 'primaria_4', label: '4° de Primaria', campus: 'churchill' },
-        { value: 'primaria_5', label: '5° de Primaria', campus: 'churchill' },
-        { value: 'primaria_6', label: '6° de Primaria', campus: 'churchill' },
+        { value: 'primaria_1', label: t('grades.primaria1'), campus: 'churchill' },
+        { value: 'primaria_2', label: t('grades.primaria2'), campus: 'churchill' },
+        { value: 'primaria_3', label: t('grades.primaria3'), campus: 'churchill' },
+        { value: 'primaria_4', label: t('grades.primaria4'), campus: 'churchill' },
+        { value: 'primaria_5', label: t('grades.primaria5'), campus: 'churchill' },
+        { value: 'primaria_6', label: t('grades.primaria6'), campus: 'churchill' },
       ]
     }
     if (formData.level === 'secundaria') {
       return [
-        { value: 'secundaria_7', label: '7mo', campus: 'churchill' },
-        { value: 'secundaria_8', label: '8vo', campus: 'churchill' },
-        { value: 'secundaria_9', label: '9no', campus: 'churchill' },
+        { value: 'secundaria_7', label: t('grades.secundaria7'), campus: 'churchill' },
+        { value: 'secundaria_8', label: t('grades.secundaria8'), campus: 'churchill' },
+        { value: 'secundaria_9', label: t('grades.secundaria9'), campus: 'churchill' },
       ]
     }
     return []
@@ -511,7 +515,7 @@ export default function AgendarPage() {
       setSmsSent(result?.smsSent ?? false)
       setShowSuccessModal(true)
     } catch (e) {
-      setSubmitError('No se pudo guardar la cita. Intenta de nuevo o contacta al plantel.')
+      setSubmitError(t('errorMsg'))
     }
   }
 
@@ -522,26 +526,26 @@ export default function AgendarPage() {
       {showSuccessModal && (
         <div className="success-modal-overlay" onClick={() => setShowSuccessModal(false)}>
           <div className="success-modal success-modal-with-expediente" onClick={(e) => e.stopPropagation()}>
-            <div className="success-modal-icon">✓</div>
-            <h3 className="success-modal-title">Cita agendada exitosamente</h3>
+            <div className="success-modal-icon">{t('success.icon')}</div>
+            <h3 className="success-modal-title">{t('success.title')}</h3>
             <p className="success-modal-text">
-              Hemos registrado tu solicitud. Recibirás un correo de confirmación en <strong>{formData.parentEmail}</strong> con los detalles de tu cita.
+              {t('success.emailText', { email: formData.parentEmail })}
             </p>
             <div className="success-modal-status">
               <p className={`status-item ${emailSent ? 'status-ok' : 'status-fail'}`}>
                 <span className="status-icon">{emailSent ? '✓' : '✗'}</span>
-                <span>{emailSent ? 'Correo enviado' : 'Correo no se pudo enviar'}</span>
+                <span>{emailSent ? t('success.emailOk') : t('success.emailFail')}</span>
               </p>
               <p className={`status-item ${smsSent ? 'status-ok' : 'status-fail'}`}>
                 <span className="status-icon">{smsSent ? '✓' : '✗'}</span>
-                <span>{smsSent ? 'SMS enviado' : 'SMS no se pudo enviar'}</span>
+                <span>{smsSent ? t('success.smsOk') : t('success.smsFail')}</span>
               </p>
             </div>
             {lastAppointmentId && (
               <div className="success-modal-expediente">
-                <p className="success-modal-expediente-title">Requisitos importantes</p>
+                <p className="success-modal-expediente-title">{t('success.reqTitle')}</p>
                 <p className="success-modal-expediente-text">
-                  Para que la psicología le entregue los resultados de admisión, debe completar antes de su cita:
+                  {t('success.reqText')}
                 </p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: '1rem' }}>
                   <Link 
@@ -550,7 +554,7 @@ export default function AgendarPage() {
                     onClick={() => setShowSuccessModal(false)}
                     style={{ fontSize: '0.85rem', padding: '0.65rem 1rem' }}
                   >
-                    📋 Expediente Inicial
+                    {t('success.btnExpediente')}
                   </Link>
                   <Link 
                     href={`/documentacion?cita=${lastAppointmentId}`} 
@@ -558,13 +562,13 @@ export default function AgendarPage() {
                     onClick={() => setShowSuccessModal(false)}
                     style={{ fontSize: '0.85rem', padding: '0.65rem 1rem', background: 'linear-gradient(135deg, #059669 0%, #047857 100%)' }}
                   >
-                    📤 Subir Documentación
+                    {t('success.btnDocs')}
                   </Link>
                 </div>
               </div>
             )}
             <Link href="/" className="success-modal-btn" onClick={() => setShowSuccessModal(false)}>
-              Volver al inicio
+              {t('success.btnClose')}
             </Link>
           </div>
         </div>
@@ -574,20 +578,20 @@ export default function AgendarPage() {
       {showLeaveConfirmModal && (
         <div className="leave-confirm-modal-overlay" onClick={closeLeaveConfirmModal}>
           <div className="leave-confirm-modal" onClick={(e) => e.stopPropagation()}>
-            <h3 className="leave-confirm-modal-title">¿Desea enviar su solicitud?</h3>
+            <h3 className="leave-confirm-modal-title">{t('exitModal.title')}</h3>
             <p className="leave-confirm-modal-text">
-              Si sale sin enviar, deberá volver a llenar el formulario. Revise que haya confirmado:
+              {t('exitModal.text')}
             </p>
             <ul className="leave-confirm-modal-list">
-              <li>Envío de la documentación requerida por correo electrónico</li>
-              <li>Pago de $200 MXN en recepción el día de la cita</li>
+              <li>{t('exitModal.item1')}</li>
+              <li>{t('exitModal.item2')}</li>
             </ul>
             <div className="leave-confirm-modal-actions">
               <button type="button" className="leave-confirm-btn leave-confirm-btn-primary" onClick={confirmSendFromModal}>
-                Sí, enviar solicitud
+                {t('exitModal.confirmBtn')}
               </button>
               <button type="button" className="leave-confirm-btn leave-confirm-btn-secondary" onClick={declineSendAndLeave}>
-                No, no deseo enviar
+                {t('exitModal.cancelBtn')}
               </button>
             </div>
           </div>
@@ -604,13 +608,13 @@ export default function AgendarPage() {
       <div className="agendar-header">
         {currentStep === 2 && !showSuccessModal ? (
           <button type="button" className="back-link" onClick={() => openLeaveConfirmModal('goHome')}>
-            ← Volver al inicio
+            {t('back')}
           </button>
         ) : (
-          <Link href="/" className="back-link">← Volver al inicio</Link>
+          <Link href="/" className="back-link">{t('back')}</Link>
         )}
-        <h1>Solicitud de cita de admisión</h1>
-        <p className="agendar-header-desc">Complete los datos para agendar el examen de admisión.</p>
+        <h1>{t('title')}</h1>
+        <p className="agendar-header-desc">{t('subtitle')}</p>
       </div>
 
       {/* Progress Bar */}
@@ -621,8 +625,8 @@ export default function AgendarPage() {
               key={step}
               className={`progress-step ${currentStep >= step ? 'active' : ''} ${currentStep > step ? 'completed' : ''}`}
             >
-              <div className="progress-circle">{currentStep > step ? '✓' : step}</div>
-              <span className="progress-label">{step === 1 ? 'Solicitud' : 'Confirmar'}</span>
+              <div className="progress-circle">{currentStep > step ? t('progress.done') : step}</div>
+              <span className="progress-label">{step === 1 ? t('progress.step1') : t('progress.step2')}</span>
             </div>
           ))}
         </div>
@@ -633,9 +637,9 @@ export default function AgendarPage() {
         {/* Step 1: Información del Aspirante */}
         {currentStep === 1 && (
           <div ref={plantelNivelRef} className="form-step">
-            <h2 className="step-heading">Plantel y nivel</h2>
+            <h2 className="step-heading">{t('campus.heading')}</h2>
             <p className="step-description">
-              Seleccione el campus y el nivel educativo de interés.
+              {t('campus.desc')}
             </p>
 
             <div className="campus-selection">
@@ -652,7 +656,7 @@ export default function AgendarPage() {
                     priority
                   />
                 </div>
-                <h3>Instituto Educativo Winston</h3>
+                <h3>{t('campus.campus1')}</h3>
                 <p className="campus-website">{campusInfo.winston.website}</p>
                 <div className="campus-levels">
                   <button
@@ -660,14 +664,14 @@ export default function AgendarPage() {
                     className={`level-badge ${formData.campus === 'winston' && formData.level === 'maternal' ? 'selected' : ''}`}
                     onClick={(e) => { e.stopPropagation(); setCampusAndLevel('winston', 'maternal'); }}
                   >
-                    Maternal
+                    {t('levels.maternal')}
                   </button>
                   <button
                     type="button"
                     className={`level-badge ${formData.campus === 'winston' && formData.level === 'kinder' ? 'selected' : ''}`}
                     onClick={(e) => { e.stopPropagation(); setCampusAndLevel('winston', 'kinder'); }}
                   >
-                    Kinder
+                    {t('levels.kinder')}
                   </button>
                 </div>
               </div>
@@ -685,7 +689,7 @@ export default function AgendarPage() {
                     priority
                   />
                 </div>
-                <h3>Instituto Winston Churchill</h3>
+                <h3>{t('campus.campus2')}</h3>
                 <p className="campus-website">{campusInfo.churchill.website}</p>
                 <div className="campus-levels">
                   <button
@@ -693,14 +697,14 @@ export default function AgendarPage() {
                     className={`level-badge ${formData.campus === 'churchill' && formData.level === 'primaria' ? 'selected' : ''}`}
                     onClick={(e) => { e.stopPropagation(); setCampusAndLevel('churchill', 'primaria'); }}
                   >
-                    Primaria
+                    {t('levels.primaria')}
                   </button>
                   <button
                     type="button"
                     className={`level-badge ${formData.campus === 'churchill' && formData.level === 'secundaria' ? 'selected' : ''}`}
                     onClick={(e) => { e.stopPropagation(); setCampusAndLevel('churchill', 'secundaria'); }}
                   >
-                    Secundaria
+                    {t('levels.secundaria')}
                   </button>
                 </div>
               </div>
@@ -708,18 +712,18 @@ export default function AgendarPage() {
 
             {formData.campus && formData.level && (
               <div className="student-info-section" ref={studentInfoRef}>
-                <h3 className="section-subtitle">📚 Información del Aspirante</h3>
+                <h3 className="section-subtitle">📚 {t('aspirante.heading')}</h3>
                 
                 <div className="form-grid">
                   <div className="form-group full-width">
-                    <label className="form-label">Grado al que desea ingresar *</label>
+                    <label className="form-label">{t('aspirante.gradeLabel')}</label>
                     <select
                       className="form-select"
                       value={formData.gradeLevel}
                       onChange={(e) => updateFormData('gradeLevel', e.target.value)}
                       required
                     >
-                      <option value="">Selecciona un grado</option>
+                      <option value="">{t('aspirante.gradePlaceholder')}</option>
                       {getGradeLevels().map((grade) => (
                         <option key={grade.value} value={grade.value}>
                           {grade.label}
@@ -730,7 +734,7 @@ export default function AgendarPage() {
 
                   {formData.gradeLevel && (
                     <div ref={calendarRef} className="form-group full-width">
-                      <label className="form-label">Fecha del examen de admisión *</label>
+                      <label className="form-label">{t('aspirante.examDateLabel')}</label>
                       <ExamDateCalendar
                         value={formData.appointmentDate}
                         onChange={(date) => updateFormData('appointmentDate', date)}
@@ -741,9 +745,9 @@ export default function AgendarPage() {
 
                   {formData.gradeLevel && formData.appointmentDate && (
                     <div className="form-group full-width">
-                      <label className="form-label">Horario al que asistiría *</label>
+                      <label className="form-label">{t('aspirante.scheduleLabel')}</label>
                       {scheduleTimes.length === 0 ? (
-                        <p className="form-hint text-soft">No hay horarios configurados para este nivel. La escuela te contactará para confirmar.</p>
+                        <p className="form-hint text-soft">{t('aspirante.noSchedules')}</p>
                       ) : (
                         <div className="time-slots">
                           {scheduleTimes.map((time) => {
@@ -755,10 +759,10 @@ export default function AgendarPage() {
                                 className={`time-slot ${formData.appointmentTime === time ? 'selected' : ''} ${isBooked ? 'time-slot-booked' : ''}`}
                                 onClick={() => !isBooked && updateFormData('appointmentTime', time)}
                                 disabled={isBooked}
-                                title={isBooked ? 'Horario ocupado' : undefined}
+                                title={isBooked ? t('aspirante.slotOccupiedTitle') : undefined}
                               >
                                 {time}
-                                {isBooked && <span className="time-slot-label"> (Ocupado)</span>}
+                                {isBooked && <span className="time-slot-label"> {t('aspirante.slotOccupied')}</span>}
                               </button>
                             )
                           })}
@@ -772,40 +776,40 @@ export default function AgendarPage() {
                       <h3 className="section-subtitle">Datos del alumno</h3>
                       <div className="form-grid">
                         <div className="form-group">
-                          <label className="form-label">Nombre del alumno *</label>
+                          <label className="form-label">{t('aspirante.nameLabel')}</label>
                           <input
                             type="text"
                             className="form-input"
-                            placeholder="Nombre del alumno"
+                            placeholder={t('aspirante.namePlaceholder')}
                             value={formData.studentName}
                             onChange={(e) => updateFormData('studentName', e.target.value)}
                             required
                           />
                         </div>
                         <div className="form-group">
-                          <label className="form-label">Apellido paterno *</label>
+                          <label className="form-label">{t('aspirante.lastNamePLabel')}</label>
                           <input
                             type="text"
                             className="form-input"
-                            placeholder="Apellido paterno"
+                            placeholder={t('aspirante.lastNamePPlaceholder')}
                             value={formData.studentLastNameP}
                             onChange={(e) => updateFormData('studentLastNameP', e.target.value)}
                             required
                           />
                         </div>
                         <div className="form-group">
-                          <label className="form-label">Apellido materno *</label>
+                          <label className="form-label">{t('aspirante.lastNameMLabel')}</label>
                           <input
                             type="text"
                             className="form-input"
-                            placeholder="Apellido materno"
+                            placeholder={t('aspirante.lastNameMPlaceholder')}
                             value={formData.studentLastNameM}
                             onChange={(e) => updateFormData('studentLastNameM', e.target.value)}
                             required
                           />
                         </div>
                         <div className="form-group">
-                          <label className="form-label">Fecha de nacimiento *</label>
+                          <label className="form-label">{t('aspirante.dobLabel')}</label>
                           <input
                             type="date"
                             className="form-input"
@@ -815,11 +819,11 @@ export default function AgendarPage() {
                           />
                         </div>
                         <div className="form-group">
-                          <label className="form-label">Teléfono *</label>
+                          <label className="form-label">{t('aspirante.phoneLabel')}</label>
                           <input
                             type="tel"
                             className="form-input"
-                            placeholder="10 dígitos"
+                            placeholder={t('aspirante.phonePlaceholder')}
                             value={formData.parentPhone}
                             onChange={(e) => updateFormData('parentPhone', e.target.value.replace(/\D/g, '').slice(0, 10))}
                             inputMode="numeric"
@@ -830,11 +834,11 @@ export default function AgendarPage() {
                           />
                         </div>
                         <div className="form-group">
-                          <label className="form-label">Email *</label>
+                          <label className="form-label">{t('aspirante.emailLabel')}</label>
                           <input
                             type="email"
                             className="form-input"
-                            placeholder="correo@ejemplo.com"
+                            placeholder={t('aspirante.emailPlaceholder')}
                             value={formData.parentEmail}
                             onChange={(e) => updateFormData('parentEmail', e.target.value)}
                             required
@@ -842,21 +846,21 @@ export default function AgendarPage() {
                           />
                         </div>
                         <div className="form-group">
-                          <label className="form-label">Ciclo escolar al que desea ingresar *</label>
+                          <label className="form-label">{t('aspirante.cycleLabel')}</label>
                           <select
                             className="form-select"
                             value={formData.schoolCycle}
                             onChange={(e) => updateFormData('schoolCycle', e.target.value)}
                             required
                           >
-                            <option value="">Seleccione una opción</option>
+                            <option value="">{t('aspirante.cyclePlaceholder')}</option>
                             {SCHOOL_CYCLES.map((c) => (
                               <option key={c.value} value={c.value}>{c.label}</option>
                             ))}
                           </select>
                         </div>
                         <div className="form-group full-width">
-                          <label className="form-label">¿Cómo se enteró de nuestra institución? *</label>
+                          <label className="form-label">{t('aspirante.howLabel')}</label>
                           <select
                             className="form-select"
                             value={formData.howDidYouHear}
@@ -871,7 +875,7 @@ export default function AgendarPage() {
                             <input
                               type="text"
                               className="form-input mt-2"
-                              placeholder="Especifique cómo se enteró"
+                              placeholder={t('aspirante.howOtherPlaceholder')}
                               value={formData.howDidYouHearOther}
                               onChange={(e) => updateFormData('howDidYouHearOther', e.target.value)}
                               required={formData.howDidYouHear === 'otra'}
@@ -880,36 +884,36 @@ export default function AgendarPage() {
                         </div>
 
                         <div className="form-section-divider" />
-                        <h3 className="section-subtitle">Responsable del aspirante</h3>
+                        <h3 className="section-subtitle">{t('tutor.heading')}</h3>
                         <div className="form-group">
-                          <label className="form-label">Nombre completo del padre o tutor *</label>
+                          <label className="form-label">{t('tutor.nameLabel')}</label>
                           <input
                             type="text"
                             className="form-input"
-                            placeholder="Ej: María García López"
+                            placeholder={t('tutor.namePlaceholder')}
                             value={formData.parentName}
                             onChange={(e) => updateFormData('parentName', e.target.value)}
                             required
                           />
                         </div>
                         <div className="form-group">
-                          <label className="form-label">Parentesco *</label>
+                          <label className="form-label">{t('tutor.relationLabel')}</label>
                           <select
                             className="form-select"
                             value={formData.relationship}
                             onChange={(e) => updateFormData('relationship', e.target.value)}
                             required
                           >
-                            <option value="Padre">Padre</option>
-                            <option value="Madre">Madre</option>
-                            <option value="Tutor">Tutor</option>
-                            <option value="Otro">Otro</option>
+                            <option value="Padre">{t('tutor.relationOptions.padre')}</option>
+                            <option value="Madre">{t('tutor.relationOptions.madre')}</option>
+                            <option value="Tutor">{t('tutor.relationOptions.tutor')}</option>
+                            <option value="Otro">{t('tutor.relationOptions.otro')}</option>
                           </select>
                           {formData.relationship === 'Otro' && (
                             <input
                               type="text"
                               className="form-input mt-2"
-                              placeholder="Especifique el parentesco"
+                              placeholder={t('tutor.relationOtherPlaceholder')}
                               value={formData.relationshipOther}
                               onChange={(e) => updateFormData('relationshipOther', e.target.value)}
                               required={formData.relationship === 'Otro'}
@@ -940,7 +944,7 @@ export default function AgendarPage() {
                   ))
                 )}
               >
-                Revisar y confirmar →
+                {t('nextBtn')}
               </button>
             </div>
           </div>
@@ -949,59 +953,59 @@ export default function AgendarPage() {
         {/* Paso 2: Confirmación */}
         {currentStep === 2 && (
           <div ref={confirmStepRef} className="form-step form-step-confirm">
-            <h2 className="step-heading">Confirmación de tu solicitud</h2>
+            <h2 className="step-heading">{t('confirm.heading')}</h2>
             <p className="step-description">
-              Revisa que todos los datos sean correctos antes de enviar.
+              {t('confirm.desc')}
             </p>
 
             <div className="summary-card">
               <div className="summary-section">
-                <h3>🏫 Plantel</h3>
-                <p><strong>Campus:</strong> {formData.campus === 'winston' ? campusInfo.winston.name : campusInfo.churchill.name}</p>
-                <p><strong>Sitio web:</strong> {formData.campus === 'winston' ? campusInfo.winston.website : campusInfo.churchill.website}</p>
+                <h3>{t('confirm.sectionCampus')}</h3>
+                <p><strong>{t('confirm.campus')}</strong> {formData.campus === 'winston' ? campusInfo.winston.name : campusInfo.churchill.name}</p>
+                <p><strong>{t('confirm.website')}</strong> {formData.campus === 'winston' ? campusInfo.winston.website : campusInfo.churchill.website}</p>
               </div>
 
               <div className="summary-section">
-                <h3>📚 Aspirante</h3>
-                <p><strong>Nombre:</strong> {formData.studentName}{formData.studentLastNameP || formData.studentLastNameM ? ` ${formData.studentLastNameP || ''} ${formData.studentLastNameM || ''}`.trim() : ''}</p>
-                <p><strong>Fecha de nacimiento:</strong> {formData.studentBirthDate ? new Date(formData.studentBirthDate + 'T12:00:00').toLocaleDateString('es-MX') : '—'}</p>
-                <p><strong>Grado:</strong> {getGradeLevels().find(g => g.value === formData.gradeLevel)?.label}</p>
-                {formData.schoolCycle && <p><strong>Ciclo escolar:</strong> {formData.schoolCycle}</p>}
+                <h3>{t('confirm.sectionAspirant')}</h3>
+                <p><strong>{t('confirm.nombre')}</strong> {formData.studentName}{formData.studentLastNameP || formData.studentLastNameM ? ` ${formData.studentLastNameP || ''} ${formData.studentLastNameM || ''}`.trim() : ''}</p>
+                <p><strong>{t('confirm.dob')}</strong> {formData.studentBirthDate ? new Date(formData.studentBirthDate + 'T12:00:00').toLocaleDateString('es-MX') : '—'}</p>
+                <p><strong>{t('confirm.grado')}</strong> {getGradeLevels().find(g => g.value === formData.gradeLevel)?.label}</p>
+                {formData.schoolCycle && <p><strong>{t('confirm.ciclo')}</strong> {formData.schoolCycle}</p>}
                 {formData.howDidYouHear && (
-                <p><strong>Cómo se enteró:</strong> {formData.howDidYouHear === 'otra' && formData.howDidYouHearOther?.trim()
+                <p><strong>{t('confirm.howKnew')}</strong> {formData.howDidYouHear === 'otra' && formData.howDidYouHearOther?.trim()
                   ? `Otra: ${formData.howDidYouHearOther.trim()}`
                   : (HOW_DID_YOU_HEAR_OPTIONS.find(o => o.value === formData.howDidYouHear)?.label || formData.howDidYouHear)}</p>
               )}
               </div>
 
               <div className="summary-section">
-                <h3>👤 Padre/Tutor</h3>
-                <p><strong>Nombre:</strong> {formData.parentName}</p>
-                <p><strong>Parentesco:</strong> {formData.relationship === 'Otro' && formData.relationshipOther?.trim()
+                <h3>{t('confirm.sectionTutor')}</h3>
+                <p><strong>{t('confirm.nombre')}</strong> {formData.parentName}</p>
+                <p><strong>{t('confirm.parentesco')}</strong> {formData.relationship === 'Otro' && formData.relationshipOther?.trim()
                   ? `Otro: ${formData.relationshipOther.trim()}`
                   : formData.relationship}</p>
-                <p><strong>Email:</strong> {formData.parentEmail}</p>
-                <p><strong>Teléfono:</strong> {formData.parentPhone}</p>
+                <p><strong>{t('confirm.correo')}</strong> {formData.parentEmail}</p>
+                <p><strong>{t('confirm.telefono')}</strong> {formData.parentPhone}</p>
               </div>
 
               <div className="summary-section highlight">
-                <h3>📅 Cita</h3>
-                <p><strong>Fecha:</strong> {new Date(formData.appointmentDate).toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                <p><strong>Hora:</strong> {formData.appointmentTime || 'Por confirmar (la escuela te contactará)'}</p>
-                <p><strong>Contacto:</strong> {getContactEmail()}</p>
+                <h3>{t('confirm.sectionCita')}</h3>
+                <p><strong>{t('confirm.fecha')}</strong> {new Date(formData.appointmentDate).toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                <p><strong>{t('confirm.hora')}</strong> {formData.appointmentTime || t('confirm.hourPending')}</p>
+                <p><strong>{t('confirm.contacto')}</strong> {getContactEmail()}</p>
               </div>
             </div>
 
             <div className="form-actions form-actions-confirm">
               <button type="button" className="btn btn-secondary" onClick={prevStep}>
-                ← Corregir datos
+                {t('confirm.backBtn')}
               </button>
               <button
                 type="button"
                 className="btn btn-primary btn-large"
                 onClick={handleSubmit}
               >
-                Enviar solicitud
+                {t('confirm.submitBtn')}
               </button>
             </div>
           </div>
@@ -1021,9 +1025,9 @@ export default function AgendarPage() {
             <span className="familia-modal-icon">🏫</span>
             <div>
               <h2 className="familia-modal-title">
-                {familiaComprobante ? 'COMPROBANTE GENERADO' : 'REFERENCIAR ALUMNO'}
+                {familiaComprobante ? t('familiaWinston.voucherTitle') : t('familiaWinston.title')}
               </h2>
-              <p className="familia-modal-subtitle">Programa Familia Winston</p>
+              <p className="familia-modal-subtitle">{t('familiaWinston.subtitle')}</p>
             </div>
             <button className="familia-modal-close" onClick={handleCloseFamiliaModal} aria-label="Cerrar">✕</button>
           </div>
@@ -1033,14 +1037,14 @@ export default function AgendarPage() {
             <>
               <div className="familia-modal-body">
                 <p className="familia-modal-desc">
-                  Por favor, ingresa el número de control o nombre del alumno al que se desea otorgar el beneficio.
+                  {t('familiaWinston.desc')}
                 </p>
 
                 <div className="familia-search-wrap" ref={familiaSearchRef}>
                   <input
                     type="text"
                     className="familia-search-input"
-                    placeholder="ESCRIBE NOMBRE, APELLIDO O NÚMERO DE CONTROL..."
+                    placeholder={t('familiaWinston.searchPlaceholder')}
                     value={familiaSearch}
                     onChange={e => {
                       setFamiliaSearch(e.target.value)
@@ -1074,7 +1078,7 @@ export default function AgendarPage() {
                     </ul>
                   )}
                   {familiaShowDropdown && familiaSearch.length >= 2 && !familiaSearching && familiaResults.length === 0 && (
-                    <div className="familia-dropdown-empty">No se encontraron alumnos</div>
+                    <div className="familia-dropdown-empty">{t('familiaWinston.noResults')}</div>
                   )}
                 </div>
 
@@ -1085,7 +1089,7 @@ export default function AgendarPage() {
                       <strong>
                         {[familiaSelected.alumno_nombre, familiaSelected.alumno_app, familiaSelected.alumno_apm].filter(Boolean).join(' ')}
                       </strong>
-                      <span className="familia-selected-ctrl"> · Control: {familiaSelected.alumno_ref}</span>
+                      <span className="familia-selected-ctrl"> {t('familiaWinston.ctrlLabel')} {familiaSelected.alumno_ref}</span>
                     </div>
                   </div>
                 )}
@@ -1093,14 +1097,14 @@ export default function AgendarPage() {
 
               <div className="familia-modal-footer">
                 <button className="familia-btn-cancel" onClick={handleCloseFamiliaModal}>
-                  Cerrar
+                  {t('familiaWinston.cancelBtn')}
                 </button>
                 <button
                   className="familia-btn-generar"
                   onClick={handleGenerarComprobante}
                   disabled={!familiaSelected || familiaGenerating}
                 >
-                  {familiaGenerating ? 'Generando…' : 'Generar comprobante'}
+                  {familiaGenerating ? t('familiaWinston.generatingBtn') : t('familiaWinston.generateBtn')}
                 </button>
               </div>
             </>
@@ -1127,33 +1131,24 @@ export default function AgendarPage() {
 
                   {/* Cuerpo */}
                   <div className="familia-doc-body">
-                    <p className="familia-doc-saludo">Estimado padre de familia,</p>
+                    <p className="familia-doc-saludo">{t('familiaWinston.voucherGreeting')}</p>
 
                     <p className="familia-doc-parrafo">
-                      Este documento certifica que el interesado{' '}
-                      <strong>{familiaComprobante.estudiante}</strong>
-                      {familiaComprobante.nivelGrado && (
-                        <> a ingresar a <strong>{familiaComprobante.nivelGrado}</strong></>
-                      )}
-                      {familiaComprobante.ciclo && (
-                        <> en el ciclo <strong>{familiaComprobante.ciclo}</strong>,</>
-                      )}{' '}
-                      otorga al alumno con número de control{' '}
-                      <strong>{familiaComprobante.ctrl}</strong>
-                      {familiaComprobante.nombreRef && ` (${familiaComprobante.nombreRef})`}{' '}
-                      el beneficio de estar registrado en el programa{' '}
-                      <strong>Familia Winston</strong>.
+                      {t('familiaWinston.voucherP1', {
+                        name: familiaComprobante.estudiante,
+                        level: familiaComprobante.nivelGrado,
+                        cycle: familiaComprobante.ciclo,
+                        ctrl: familiaComprobante.ctrl,
+                        refName: familiaComprobante.nombreRef,
+                      })}
                     </p>
 
                     <p className="familia-doc-parrafo">
-                      El programa Familia Winston tiene como objetivo apoyar y fomentar la
-                      colaboración entre las familias y nuestra institución para brindar una
-                      mejor experiencia educativa a nuestros alumnos.
+                      {t('familiaWinston.voucherP2')}
                     </p>
 
                     <p className="familia-doc-parrafo">
-                      Por favor, conserve este comprobante para cualquier trámite relacionado
-                      con el programa.
+                      {t('familiaWinston.voucherP3')}
                     </p>
 
                     {/* QR */}
@@ -1164,13 +1159,13 @@ export default function AgendarPage() {
                       ) : (
                         <div className="familia-doc-qr-placeholder">{familiaComprobante.qr}</div>
                       )}
-                      <p className="familia-doc-qr-label">Código de Verificación</p>
+                      <p className="familia-doc-qr-label">{t('familiaWinston.voucherQrLabel')}</p>
                     </div>
 
                     {/* Firma */}
                     <div className="familia-doc-firma">
-                      <p>Atentamente,</p>
-                      <p className="familia-doc-firma-inst">Instituto Winston Churchill</p>
+                      <p>{t('familiaWinston.voucherSign')}</p>
+                      <p className="familia-doc-firma-inst">{t('familiaWinston.voucherInstitution')}</p>
                     </div>
 
                     <div className="familia-doc-folio">
@@ -1184,10 +1179,10 @@ export default function AgendarPage() {
               {/* Pie del modal */}
               <div className="familia-modal-footer">
                 <button className="familia-btn-cancel" onClick={handleCloseFamiliaModal}>
-                  Continuar con la solicitud
+                  {t('familiaWinston.continueBtn')}
                 </button>
                 <button className="familia-btn-generar" onClick={() => window.print()}>
-                  🖨️ Imprimir / Guardar PDF
+                  {t('familiaWinston.printBtn')}
                 </button>
               </div>
             </>

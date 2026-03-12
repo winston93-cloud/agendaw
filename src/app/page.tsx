@@ -1,9 +1,14 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { getTranslations, getLocale } from 'next-intl/server'
 import Carousel from '@/components/Carousel'
 import ScrollButton from '@/components/ScrollButton'
+import LangSelector from '@/components/LangSelector'
 
-export default function Home() {
+export default async function Home() {
+  const t = await getTranslations('home')
+  const locale = await getLocale()
+
   return (
     <main className="admission-page">
       {/* Hero Section */}
@@ -24,12 +29,15 @@ export default function Home() {
 
             {/* Contenido central */}
             <div className="hero-center-content">
+              <div className="hero-lang-bar">
+                <LangSelector currentLocale={locale as 'es' | 'en'} />
+              </div>
               <p className="hero-subtitle hero-intro">
-                Agenda tu examen de admisión en línea — seguro, sencillo y en pocos minutos.
+                {t('intro')}
               </p>
               <p className="hero-blink-text">
                 <span className="hero-blink-emoji" aria-hidden>🎓</span>
-                <span className="hero-blink-label">Más de 30 años formando líderes</span>
+                <span className="hero-blink-label">{t('tagline')}</span>
                 <span className="hero-blink-emoji" aria-hidden>✨</span>
               </p>
               <Carousel />
@@ -40,7 +48,7 @@ export default function Home() {
                 mobileScrollBlock="start"
                 className="hero-cta-button hero-title-cta"
               >
-                <span className="cta-text">Agenda tu examen de admisión</span>
+                <span className="cta-text">{t('ctaButton')}</span>
                 <span className="cta-arrow">↓</span>
               </ScrollButton>
             </div>
@@ -63,20 +71,20 @@ export default function Home() {
       {/* Process Steps */}
       <div className="container container-process">
         <div className="process-section">
-          <h2 className="section-title">¿Cómo funciona?</h2>
-          <p className="section-subtitle">Es muy sencillo</p>
+          <h2 className="section-title">{t('howTitle')}</h2>
+          <p className="section-subtitle">{t('howSubtitle')}</p>
 
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
             {/* Step 1: Solo agenda tu cita */}
             <div id="agendar-ahora" className="step-card step-highlight" style={{ maxWidth: '400px' }}>
               <div className="step-number">1</div>
               <div className="step-icon">📅</div>
-              <h3 className="step-title">Agenda tu examen de admisión</h3>
+              <h3 className="step-title">{t('step1Title')}</h3>
               <p className="step-description">
-                Llena el formulario y elige la fecha y hora que mejor te convenga
+                {t('step1Desc')}
               </p>
               <Link href="/agendar" className="step-cta">
-                Agendar ahora →
+                {t('step1Cta')}
               </Link>
             </div>
           </div>
@@ -86,11 +94,11 @@ export default function Home() {
             <span className="process-banner-icon">💳</span>
             <div className="process-banner-content">
               <p className="process-banner-text">
-                El día de tu cita realiza el pago del examen en recepción.
+                {t('bannerText')}
               </p>
               <p className="process-banner-price">
-                <span className="process-banner-label">Costo del examen:</span>
-                <strong className="process-banner-amount">$200 MXN</strong>
+                <span className="process-banner-label">{t('bannerLabel')}</span>
+                <strong className="process-banner-amount">{t('bannerAmount')}</strong>
               </p>
             </div>
           </div>
@@ -104,8 +112,8 @@ export default function Home() {
             color: '#64748b',
             fontSize: '0.875rem'
           }}>
-            <p style={{ margin: 0 }}>© 2026 Instituto Educativo Winston / Winston Churchill</p>
-            <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', opacity: 0.8 }}>Sistema de Admisión v1.0</p>
+            <p style={{ margin: 0 }}>{t('copyright')}</p>
+            <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', opacity: 0.8 }}>{t('version')}</p>
           </div>
         </div>
       </div>
