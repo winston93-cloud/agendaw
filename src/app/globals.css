@@ -1493,6 +1493,91 @@ body {
   --pub-accent:      #60a5fa;
   --pub-accent-lt:   rgba(96,165,250,0.15);
   --pub-shadow:      0 8px 32px rgba(0,0,0,0.5);
+
+  /* Sobreescribe los tokens GLOBALES para que todos los elementos
+     que usan var(--text-primary) / var(--text-secondary) sean
+     legibles sobre el fondo oscuro (normalize /harden). */
+  --text-primary:    #f1f5f9;
+  --text-secondary:  #94a3b8;
+  --light-bg:        #07091a;
+  --light-surface:   rgba(13,15,46,0.85);
+  --light-border:    rgba(21,101,192,0.35);
+}
+
+/* ── Tarjetas con fondo blanco propio → textos oscuros ─────
+   Las tarjetas que siguen siendo blancas/claras en dark mode
+   necesitan texto oscuro explícito para mantener contraste.
+── ────────────────────────────────────────────────────────── */
+.public-layout[data-theme="dark"] .step-card {
+  background: rgba(13,15,46,0.80);
+  backdrop-filter: blur(12px);
+  border-color: var(--pub-border);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  color: #f1f5f9;
+}
+
+.public-layout[data-theme="dark"] .step-card h3,
+.public-layout[data-theme="dark"] .step-card p {
+  color: inherit;
+}
+
+.public-layout[data-theme="dark"] .menu-card-inner {
+  background: rgba(13,15,46,0.80);
+  backdrop-filter: blur(12px);
+  border-color: var(--pub-border);
+  color: #f1f5f9;
+}
+
+.public-layout[data-theme="dark"] .menu-card-title,
+.public-layout[data-theme="dark"] .menu-card-desc {
+  color: #f1f5f9;
+}
+
+.public-layout[data-theme="dark"] .section-title,
+.public-layout[data-theme="dark"] .section-subtitle {
+  color: var(--pub-text);
+}
+
+.public-layout[data-theme="dark"] .process-banner {
+  background: rgba(120, 53, 15, 0.30);
+  border-color: rgba(245,158,11,0.35);
+}
+
+.public-layout[data-theme="dark"] .process-banner-text {
+  color: #fde68a;
+}
+
+.public-layout[data-theme="dark"] .process-banner-label {
+  color: #fcd34d;
+}
+
+.public-layout[data-theme="dark"] .process-banner-amount {
+  color: #fbbf24;
+}
+
+/* admission-hero: SIEMPRE texto blanco sin importar el tema
+   (tiene gradiente azul propio como fondo) */
+.admission-hero {
+  color: white !important;
+}
+.admission-hero h1,
+.admission-hero h2,
+.admission-hero h3,
+.admission-hero p,
+.admission-hero span:not(.badge),
+.admission-hero a,
+.admission-hero small {
+  color: white !important;
+}
+/* Excepción controlada: los botones de control (toggle/lang) */
+.admission-hero .pub-theme-btn,
+.admission-hero .lang-btn {
+  color: rgba(255,255,255,0.65) !important;
+}
+.admission-hero .pub-theme-btn.active,
+.admission-hero .lang-btn.active {
+  color: #fff !important;
 }
 
 /* Fondo estrellado synthwave en dark */
@@ -2285,12 +2370,28 @@ body {
 }
 
 .public-layout[data-theme="dark"] .agendar-header h1,
-.public-layout[data-theme="dark"] .agendar-header-desc {
+.public-layout[data-theme="dark"] .agendar-header-desc,
+.public-layout[data-theme="dark"] .agendar-header p {
   color: var(--pub-text);
 }
 
 .public-layout[data-theme="dark"] .back-link {
   color: var(--pub-accent);
+}
+
+/* Progress labels y titles */
+.public-layout[data-theme="dark"] .section-title,
+.public-layout[data-theme="dark"] .step-heading,
+.public-layout[data-theme="dark"] .form-title,
+.public-layout[data-theme="dark"] .confirm-title {
+  color: var(--pub-text);
+}
+
+/* Textos secundarios: párrafos y descripciones fuera de tarjetas claras */
+.public-layout[data-theme="dark"] .form-step p,
+.public-layout[data-theme="dark"] .form-step small,
+.public-layout[data-theme="dark"] .form-step span:not(.badge):not(.pill) {
+  color: var(--pub-text-muted);
 }
 
 .public-layout[data-theme="dark"] .progress-bar::before {
