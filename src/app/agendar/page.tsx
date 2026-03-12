@@ -1,11 +1,23 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import ExamDateCalendar from '@/components/ExamDateCalendar'
 import { createAdmissionAppointment } from './actions'
+
+interface AlumnoResult {
+  alumno_id: number
+  alumno_ref: string
+  alumno_nombre: string | null
+  alumno_app: string | null
+  alumno_apm: string | null
+  alumno_nombre_completo: string | null
+  alumno_nivel: number | null
+  alumno_grado: number | null
+  alumno_ciclo_escolar: number | null
+}
 
 type Step = 1 | 2
 
@@ -61,6 +73,18 @@ export default function AgendarPage() {
   const [pendingLeaveAction, setPendingLeaveAction] = useState<'prevStep' | 'goHome' | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const allowLeaveWithoutSendRef = useRef(false)
+
+  // --- Programa Familia Winston ---
+  const [showFamiliaModal, setShowFamiliaModal] = useState(false)
+  const [familiaSearch, setFamiliaSearch] = useState('')
+  const [familiaResults, setFamiliaResults] = useState<AlumnoResult[]>([])
+  const [familiaSearching, setFamiliaSearching] = useState(false)
+  const [familiaSelected, setFamiliaSelected] = useState<AlumnoResult | null>(null)
+  const [familiaShowDropdown, setFamiliaShowDropdown] = useState(false)
+  const [familiaGenerating, setFamiliaGenerating] = useState(false)
+  const [familiaCtrlConfirmed, setFamiliaCtrlConfirmed] = useState<string | null>(null)
+  const familiaSearchRef = useRef<HTMLDivElement>(null)
+
   const router = useRouter()
   const studentInfoRef = useRef<HTMLDivElement>(null)
   const afterHorarioRef = useRef<HTMLDivElement>(null)
@@ -192,6 +216,10 @@ export default function AgendarPage() {
       if (field === 'howDidYouHear' && value !== 'otra') {
         newData.howDidYouHearOther = ''
       }
+      if (field === 'howDidYouHear' && value === 'programa_familia_winston') {
+        // Abre modal al seleccionar Programa Familia Winston
+        setTimeout(() => setShowFamiliaModal(true), 0)
+      }
       if (field === 'relationship' && value !== 'Otro') {
         newData.relationshipOther = ''
       }
@@ -209,6 +237,79 @@ export default function AgendarPage() {
     if (formData.level === 'primaria') return 'primaria'
     if (formData.level === 'secundaria') return 'secundaria'
     return null
+  }
+
+  // Búsqueda autocomplete de alumnos con debounce
+  const searchAlumnos = useCallback(async (query: string) => {
+    if (query.length < 2) { setFamiliaResults([]); return }
+    setFamiliaSearching(true)
+    try {
+      const res = await fetch(`/api/alumno-search?q=${encodeURIComponent(query)}`)
+      const data = await res.json()
+      setFamiliaResults(Array.isArray(data) ? data : [])
+      setFamiliaShowDropdown(true)
+    } catch {
+      setFamiliaResults([])
+    } finally {
+      setFamiliaSearching(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    const t = setTimeout(() => { if (familiaSearch) searchAlumnos(familiaSearch) }, 300)
+    return () => clearTimeout(t)
+  }, [familiaSearch, searchAlumnos])
+
+  // Cierra el dropdown al hacer click fuera
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (familiaSearchRef.current && !familiaSearchRef.current.contains(e.target as Node)) {
+        setFamiliaShowDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const handleFamiliaSelect = (alumno: AlumnoResult) => {
+    setFamiliaSelected(alumno)
+    const nombre = [alumno.alumno_nombre, alumno.alumno_app, alumno.alumno_apm].filter(Boolean).join(' ')
+    setFamiliaSearch(alumno.alumno_ref + (nombre ? ` — ${nombre}` : ''))
+    setFamiliaShowDropdown(false)
+  }
+
+  const handleGenerarComprobante = async () => {
+    if (!familiaSelected) return
+    setFamiliaGenerating(true)
+    try {
+      const res = await fetch('/api/wsp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ctrl: parseInt(familiaSelected.alumno_ref) || 0 }),
+      })
+      const data = await res.json()
+      if (!data.ok) throw new Error(data.error ?? 'Error al generar comprobante')
+      setFamiliaCtrlConfirmed(familiaSelected.alumno_ref)
+      setShowFamiliaModal(false)
+      // Abre el comprobante en nueva pestaña
+      window.open(`/comprobante-wsp/${data.id}?qr=${data.qr}&ctrl=${data.ctrl}&ref=${encodeURIComponent(familiaSelected.alumno_ref)}&nombre=${encodeURIComponent([familiaSelected.alumno_nombre, familiaSelected.alumno_app, familiaSelected.alumno_apm].filter(Boolean).join(' '))}`, '_blank')
+    } catch (err) {
+      alert('Error: ' + (err instanceof Error ? err.message : String(err)))
+    } finally {
+      setFamiliaGenerating(false)
+    }
+  }
+
+  const handleCloseFamiliaModal = () => {
+    setShowFamiliaModal(false)
+    // Si cierra sin confirmar, revierte la selección
+    if (!familiaCtrlConfirmed) {
+      setFormData(prev => ({ ...prev, howDidYouHear: '' }))
+    }
+    setFamiliaSearch('')
+    setFamiliaResults([])
+    setFamiliaSelected(null)
+    setFamiliaShowDropdown(false)
   }
 
   useEffect(() => {
@@ -369,6 +470,7 @@ export default function AgendarPage() {
   }
 
   return (
+    <>
     <div className="agendar-page">
       {/* Modal de confirmación exitosa */}
       {showSuccessModal && (
@@ -860,5 +962,95 @@ export default function AgendarPage() {
         )}
       </div>
     </div>
+
+    {/* ─── Modal Programa Familia Winston ─────────────────────────────── */}
+    {showFamiliaModal && (
+      <div className="familia-overlay" onClick={handleCloseFamiliaModal}>
+        <div className="familia-modal" onClick={e => e.stopPropagation()}>
+          <div className="familia-modal-header">
+            <span className="familia-modal-icon">🏫</span>
+            <div>
+              <h2 className="familia-modal-title">REFERENCIAR ALUMNO</h2>
+              <p className="familia-modal-subtitle">Programa Familia Winston</p>
+            </div>
+            <button className="familia-modal-close" onClick={handleCloseFamiliaModal} aria-label="Cerrar">✕</button>
+          </div>
+
+          <div className="familia-modal-body">
+            <p className="familia-modal-desc">
+              Por favor, ingresa el número de control o nombre del alumno al que se desea otorgar el beneficio.
+            </p>
+
+            <div className="familia-search-wrap" ref={familiaSearchRef}>
+              <input
+                type="text"
+                className="familia-search-input"
+                placeholder="ESCRIBE NOMBRE, APELLIDO O NÚMERO DE CONTROL..."
+                value={familiaSearch}
+                onChange={e => {
+                  setFamiliaSearch(e.target.value)
+                  setFamiliaSelected(null)
+                  if (e.target.value.length >= 2) setFamiliaShowDropdown(true)
+                  else setFamiliaShowDropdown(false)
+                }}
+                onFocus={() => { if (familiaResults.length > 0) setFamiliaShowDropdown(true) }}
+                autoFocus
+              />
+              {familiaSearching && <span className="familia-search-spinner">⏳</span>}
+
+              {familiaShowDropdown && familiaResults.length > 0 && (
+                <ul className="familia-dropdown">
+                  {familiaResults.map(a => {
+                    const nombre = [a.alumno_nombre, a.alumno_app, a.alumno_apm].filter(Boolean).join(' ')
+                    const niveles: Record<number, string> = { 1: 'Maternal', 2: 'Kinder', 3: 'Primaria', 4: 'Secundaria' }
+                    const nivel = a.alumno_nivel ? (niveles[a.alumno_nivel] ?? '') : ''
+                    return (
+                      <li
+                        key={a.alumno_id}
+                        className="familia-dropdown-item"
+                        onMouseDown={() => handleFamiliaSelect(a)}
+                      >
+                        <span className="familia-dropdown-ref">#{a.alumno_ref}</span>
+                        <span className="familia-dropdown-nombre">{nombre || 'Sin nombre'}</span>
+                        {nivel && <span className="familia-dropdown-nivel">{nivel}{a.alumno_grado ? ` ${a.alumno_grado}°` : ''}</span>}
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+              {familiaShowDropdown && familiaSearch.length >= 2 && !familiaSearching && familiaResults.length === 0 && (
+                <div className="familia-dropdown-empty">No se encontraron alumnos</div>
+              )}
+            </div>
+
+            {familiaSelected && (
+              <div className="familia-selected-card">
+                <span className="familia-selected-check">✓</span>
+                <div>
+                  <strong>
+                    {[familiaSelected.alumno_nombre, familiaSelected.alumno_app, familiaSelected.alumno_apm].filter(Boolean).join(' ')}
+                  </strong>
+                  <span className="familia-selected-ctrl"> · Control: {familiaSelected.alumno_ref}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="familia-modal-footer">
+            <button className="familia-btn-cancel" onClick={handleCloseFamiliaModal}>
+              Cerrar
+            </button>
+            <button
+              className="familia-btn-generar"
+              onClick={handleGenerarComprobante}
+              disabled={!familiaSelected || familiaGenerating}
+            >
+              {familiaGenerating ? 'Generando…' : 'Generar comprobante'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   )
 }
