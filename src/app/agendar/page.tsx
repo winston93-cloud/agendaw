@@ -773,7 +773,7 @@ export default function AgendarPage() {
 
                   {(formData.appointmentTime || scheduleTimes.length === 0) && formData.gradeLevel && formData.appointmentDate && (
                     <div className="student-data-section" ref={afterHorarioRef}>
-                      <h3 className="section-subtitle">Datos del alumno</h3>
+                      <h3 className="section-subtitle">{t('aspirante.heading')}</h3>
                       <div className="form-grid">
                         <div className="form-group">
                           <label className="form-label">{t('aspirante.nameLabel')}</label>
