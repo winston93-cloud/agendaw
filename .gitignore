@@ -30,6 +30,7 @@ yarn-error.log*
 !package.json
 !package-lock.json
 !tsconfig.json
+!messages/*.json
 
 # local env files
 .env*.local
