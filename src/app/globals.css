@@ -2151,9 +2151,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.25rem;
+  margin-bottom: 1rem;
   gap: 1rem;
   flex-wrap: wrap;
+}
+
+/* Anula el margin-bottom del back-link cuando está en la fila flex */
+.agendar-header-top .back-link {
+  margin-bottom: 0;
 }
 
 /* Controles agrupados: ThemeToggle + LangSelector */
@@ -2286,7 +2291,7 @@ body {
   left: 15%;
   right: 15%;
   height: 3px;
-  background: #e2e8f0;
+  background: var(--light-border, #e2e8f0);
   z-index: 0;
 }
 
@@ -2395,7 +2400,13 @@ body {
 }
 
 .public-layout[data-theme="dark"] .progress-bar::before {
-  background: var(--pub-border);
+  background: rgba(21,101,192,0.45);
+}
+
+.public-layout[data-theme="dark"] .progress-circle {
+  background: rgba(255,255,255,0.08);
+  color: var(--pub-text-muted);
+  border: 2px solid rgba(255,255,255,0.15);
 }
 
 .public-layout[data-theme="dark"] .progress-circle {
@@ -2453,21 +2464,31 @@ body {
   color: var(--pub-text);
 }
 
-/* Campus cards dark mode */
+/* Campus cards dark mode — !important vs background:white base */
 .public-layout[data-theme="dark"] .campus-card {
-  background: rgba(255,255,255,0.05);
-  border-color: var(--pub-border);
-  color: var(--pub-text);
+  background: rgba(255,255,255,0.06) !important;
+  border-color: var(--pub-border) !important;
+  color: #f1f5f9;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.35);
 }
 
-.public-layout[data-theme="dark"] .campus-card h3,
+.public-layout[data-theme="dark"] .campus-card h3 {
+  color: #f1f5f9 !important;
+}
+
 .public-layout[data-theme="dark"] .campus-card p {
-  color: var(--pub-text);
+  color: var(--pub-text-muted);
+}
+
+.public-layout[data-theme="dark"] .campus-card .campus-website {
+  color: var(--pub-accent) !important;
 }
 
 .public-layout[data-theme="dark"] .campus-card.selected {
-  background: rgba(96,165,250,0.15);
-  border-color: var(--pub-accent);
+  background: rgba(96,165,250,0.18) !important;
+  border-color: var(--pub-accent) !important;
+  box-shadow: 0 0 0 1px var(--pub-accent),
+              0 8px 28px rgba(96,165,250,0.25) !important;
 }
 
 /* Summary / confirm dark mode */
@@ -2517,8 +2538,19 @@ body {
 
 /* Level badges dark mode */
 .public-layout[data-theme="dark"] .level-badge {
-  background: rgba(255,255,255,0.08);
-  color: var(--pub-text);
+  background: rgba(96,165,250,0.12) !important;
+  color: #93c5fd !important;
+  border-color: rgba(96,165,250,0.35) !important;
+}
+
+.public-layout[data-theme="dark"] .level-badge.selected {
+  background: var(--pub-accent) !important;
+  color: #fff !important;
+  border-color: var(--pub-accent) !important;
+}
+
+.public-layout[data-theme="dark"] .level-badge:hover {
+  background: rgba(96,165,250,0.25) !important;
 }
 
 /* Autocomplete dark mode (búsqueda alumno) */
