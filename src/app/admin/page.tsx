@@ -32,8 +32,13 @@ export default async function AdminPage() {
     <div className="admin-dashboard">
       <header className="admin-header">
         <div className="admin-header-inner">
-          <h1>Panel de Psicólogas</h1>
-          <p>Citas de examen de admisión</p>
+          <div className="admin-header-brand">
+            <h1>Panel de Psicólogas</h1>
+            <span className="admin-header-badge">
+              <span aria-hidden="true">🎓</span>
+              Citas de examen de admisión
+            </span>
+          </div>
           <div className="admin-header-actions">
             <AdminThemeToggle />
             <a href="/admin" className="admin-link">← Dashboard</a>

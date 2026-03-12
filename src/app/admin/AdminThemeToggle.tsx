@@ -27,7 +27,7 @@ export default function AdminThemeToggle() {
         aria-pressed={theme === 'light'}
         title="Modo claro"
       >
-        ☀️ Light
+        <span aria-hidden="true">☀️</span> Light
       </button>
       <button
         type="button"
@@ -36,7 +36,7 @@ export default function AdminThemeToggle() {
         aria-pressed={theme === 'dark'}
         title="Modo oscuro synthwave"
       >
-        🌌 Dark
+        <span aria-hidden="true">🌌</span> Dark
       </button>
     </div>
   )
