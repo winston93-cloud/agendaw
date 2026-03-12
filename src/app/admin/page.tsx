@@ -1,5 +1,6 @@
 import { getAdmissionAppointments, getBlockedDates, getSchedules, getRecorridos } from './actions'
 import AdminDashboard from './AdminDashboard'
+import AdminThemeToggle from './AdminThemeToggle'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,6 +35,7 @@ export default async function AdminPage() {
           <h1>Panel de Psicólogas</h1>
           <p>Citas de examen de admisión</p>
           <div className="admin-header-actions">
+            <AdminThemeToggle />
             <a href="/admin" className="admin-link">← Dashboard</a>
             <a href="/api/admin/logout" className="admin-link">Cerrar sesión</a>
           </div>

@@ -2991,23 +2991,21 @@ body {
   --adm-font:        'Plus Jakarta Sans', system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --adm-bg:          #0f172a;
-    --adm-surface:     #1e293b;
-    --adm-surface-alt: #263344;
-    --adm-border:      #334155;
-    --adm-text:        #f1f5f9;
-    --adm-text-muted:  #94a3b8;
-    --adm-text-faint:  #64748b;
-    --adm-accent:      #3b82f6;
-    --adm-accent-dark: #2563eb;
-    --adm-accent-lt:   rgba(59,130,246,0.15);
-    --adm-danger-lt:   rgba(220,38,38,0.15);
-    --adm-success-lt:  rgba(22,163,74,0.15);
-    --adm-warn-lt:     rgba(217,119,6,0.15);
-    --adm-purple-lt:   rgba(124,58,237,0.15);
-  }
+.admin-layout[data-theme="dark"] {
+  --adm-bg:          #0f172a;
+  --adm-surface:     #1e293b;
+  --adm-surface-alt: #263344;
+  --adm-border:      #334155;
+  --adm-text:        #f1f5f9;
+  --adm-text-muted:  #94a3b8;
+  --adm-text-faint:  #64748b;
+  --adm-accent:      #3b82f6;
+  --adm-accent-dark: #2563eb;
+  --adm-accent-lt:   rgba(59,130,246,0.15);
+  --adm-danger-lt:   rgba(220,38,38,0.15);
+  --adm-success-lt:  rgba(22,163,74,0.15);
+  --adm-warn-lt:     rgba(217,119,6,0.15);
+  --adm-purple-lt:   rgba(124,58,237,0.15);
 }
 
 .admin-layout {
@@ -3017,90 +3015,88 @@ body {
   font-family: var(--adm-font);
 }
 
-/* ══ SYNTHWAVE MODE — dark only ══════════════════════════════════
+/* ══ SYNTHWAVE MODE — [data-theme="dark"] ════════════════════════
    Fondo espacial + cuadrícula en perspectiva + estrellas CSS puras.
-   Solo activa en dark mode (prefers-color-scheme: dark).
+   Se activa cuando AdminThemeWrapper tiene data-theme="dark".
 ═══════════════════════════════════════════════════════════════ */
-@media (prefers-color-scheme: dark) {
-  .admin-layout {
-    background: #07091a;
-    /* Campo de estrellas: 3 capas de radial-gradient */
-    background-image:
-      radial-gradient(1px 1px at 15%  8%,  rgba(255,255,255,0.7) 0%, transparent 0%),
-      radial-gradient(1px 1px at 72%  14%, rgba(255,255,255,0.5) 0%, transparent 0%),
-      radial-gradient(1px 1px at 40%  5%,  rgba(255,255,255,0.6) 0%, transparent 0%),
-      radial-gradient(1px 1px at 88%  22%, rgba(255,255,255,0.4) 0%, transparent 0%),
-      radial-gradient(1px 1px at 55%  30%, rgba(255,255,255,0.5) 0%, transparent 0%),
-      radial-gradient(1px 1px at 28%  40%, rgba(255,255,255,0.3) 0%, transparent 0%),
-      radial-gradient(1px 1px at 65%  2%,  rgba(255,255,255,0.6) 0%, transparent 0%),
-      radial-gradient(1px 1px at 92%  35%, rgba(255,255,255,0.4) 0%, transparent 0%),
-      radial-gradient(1px 1px at 8%   50%, rgba(255,255,255,0.3) 0%, transparent 0%),
-      radial-gradient(1px 1px at 48%  18%, rgba(255,255,255,0.5) 0%, transparent 0%),
-      radial-gradient(2px 2px at 33%  12%, rgba(200,212,0,0.6)   0%, transparent 0%),
-      radial-gradient(2px 2px at 80%  6%,  rgba(21,101,192,0.7)  0%, transparent 0%),
-      radial-gradient(2px 2px at 10%  28%, rgba(200,212,0,0.4)   0%, transparent 0%),
-      linear-gradient(180deg, #07091a 0%, #0d0f2e 55%, #07091a 100%);
-  }
+.admin-layout[data-theme="dark"] {
+  background: #07091a;
+  /* Campo de estrellas: capas de radial-gradient */
+  background-image:
+    radial-gradient(1px 1px at 15%  8%,  rgba(255,255,255,0.7) 0%, transparent 0%),
+    radial-gradient(1px 1px at 72%  14%, rgba(255,255,255,0.5) 0%, transparent 0%),
+    radial-gradient(1px 1px at 40%  5%,  rgba(255,255,255,0.6) 0%, transparent 0%),
+    radial-gradient(1px 1px at 88%  22%, rgba(255,255,255,0.4) 0%, transparent 0%),
+    radial-gradient(1px 1px at 55%  30%, rgba(255,255,255,0.5) 0%, transparent 0%),
+    radial-gradient(1px 1px at 28%  40%, rgba(255,255,255,0.3) 0%, transparent 0%),
+    radial-gradient(1px 1px at 65%  2%,  rgba(255,255,255,0.6) 0%, transparent 0%),
+    radial-gradient(1px 1px at 92%  35%, rgba(255,255,255,0.4) 0%, transparent 0%),
+    radial-gradient(1px 1px at 8%   50%, rgba(255,255,255,0.3) 0%, transparent 0%),
+    radial-gradient(1px 1px at 48%  18%, rgba(255,255,255,0.5) 0%, transparent 0%),
+    radial-gradient(2px 2px at 33%  12%, rgba(200,212,0,0.6)   0%, transparent 0%),
+    radial-gradient(2px 2px at 80%  6%,  rgba(21,101,192,0.7)  0%, transparent 0%),
+    radial-gradient(2px 2px at 10%  28%, rgba(200,212,0,0.4)   0%, transparent 0%),
+    linear-gradient(180deg, #07091a 0%, #0d0f2e 55%, #07091a 100%);
+}
 
-  /* Cuadrícula en perspectiva — fija en el fondo, no scrollea */
-  .admin-layout::before {
-    content: '';
-    position: fixed;
-    left: -30%;
-    right: -30%;
-    bottom: 0;
-    height: 52vh;
-    background-image:
-      linear-gradient(rgba(21,101,192,0.45) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(21,101,192,0.45) 1px, transparent 1px);
-    background-size: 56px 56px;
-    transform: perspective(280px) rotateX(58deg);
-    transform-origin: 50% 100%;
-    -webkit-mask-image: linear-gradient(to top, black 0%, transparent 90%);
-    mask-image: linear-gradient(to top, black 0%, transparent 90%);
-    pointer-events: none;
-    z-index: 0;
-  }
+/* Cuadrícula en perspectiva — fija en el fondo, no scrollea */
+.admin-layout[data-theme="dark"]::before {
+  content: '';
+  position: fixed;
+  left: -30%;
+  right: -30%;
+  bottom: 0;
+  height: 52vh;
+  background-image:
+    linear-gradient(rgba(21,101,192,0.45) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(21,101,192,0.45) 1px, transparent 1px);
+  background-size: 56px 56px;
+  transform: perspective(280px) rotateX(58deg);
+  transform-origin: 50% 100%;
+  -webkit-mask-image: linear-gradient(to top, black 0%, transparent 90%);
+  mask-image: linear-gradient(to top, black 0%, transparent 90%);
+  pointer-events: none;
+  z-index: 0;
+}
 
-  /* Resplandor horizonte — línea de luz debajo del contenido */
-  .admin-layout::after {
-    content: '';
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 48vh;
-    height: 2px;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(200,212,0,0.4) 20%,
-      rgba(21,101,192,0.8) 50%,
-      rgba(200,212,0,0.4) 80%,
-      transparent 100%
-    );
-    filter: blur(3px);
-    pointer-events: none;
-    z-index: 0;
-  }
+/* Resplandor horizonte — línea de luz */
+.admin-layout[data-theme="dark"]::after {
+  content: '';
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 48vh;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(200,212,0,0.4) 20%,
+    rgba(21,101,192,0.8) 50%,
+    rgba(200,212,0,0.4) 80%,
+    transparent 100%
+  );
+  filter: blur(3px);
+  pointer-events: none;
+  z-index: 0;
+}
 
-  /* Asegurar que el contenido quede sobre el fondo */
-  .admin-dashboard,
-  .admin-section {
-    position: relative;
-    z-index: 1;
-  }
+/* Contenido sobre el fondo */
+.admin-layout[data-theme="dark"] .admin-dashboard,
+.admin-layout[data-theme="dark"] .admin-section {
+  position: relative;
+  z-index: 1;
+}
 
-  /* Sección / tabla: fondo cristal sobre el espacio */
-  .admin-section {
-    background: rgba(13, 15, 46, 0.82);
-    border-color: rgba(21, 101, 192, 0.4);
-    box-shadow:
-      0 0 0 1px rgba(21,101,192,0.2),
-      0 8px 32px rgba(0,0,0,0.5),
-      inset 0 1px 0 rgba(255,255,255,0.05);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
+/* Sección / tabla: fondo cristal sobre el espacio */
+.admin-layout[data-theme="dark"] .admin-section {
+  background: rgba(13, 15, 46, 0.82);
+  border-color: rgba(21, 101, 192, 0.4);
+  box-shadow:
+    0 0 0 1px rgba(21,101,192,0.2),
+    0 8px 32px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 
@@ -3245,6 +3241,35 @@ body {
   display: flex;
   gap: 0.75rem;
   align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ── Theme toggle ─────────────────────────────────────────── */
+.admin-theme-toggle {
+  display: flex;
+  background: rgba(0,0,0,0.25);
+  border-radius: 9999px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.admin-theme-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.65);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.admin-theme-btn.active {
+  background: rgba(255,255,255,0.18);
+  color: #fff;
 }
 
 .admin-link {
