@@ -200,8 +200,8 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
       {modal?.type === 'solicitar-reagendar' && (
         <div className="modal-overlay" onClick={() => !sendingSol && setModal(null)}>
           <div className="modal-box" style={{ maxWidth: '520px' }} onClick={e => e.stopPropagation()}>
-            <div className="modal-header" style={{ background: 'linear-gradient(135deg,#7c3aed 0%,#a78bfa 100%)' }}>
-              <span className="modal-header-icon">📋</span>
+            <div className="modal-header modal-header-confirm" style={{ background: 'var(--adm-purple)' }}>
+              <span className="modal-header-icon" aria-hidden="true">📋</span>
               <h3>Solicitar autorización — Reagendar</h3>
             </div>
             <div className="modal-body">
@@ -220,7 +220,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
 
               {/* Calendario con validaciones reales */}
               <div style={{ marginTop: '1rem' }}>
-                <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600', display: 'block', marginBottom: '0.4rem' }}>
+                <label className="modal-field-label">
                   Nueva fecha propuesta
                 </label>
                 <ExamDateCalendar
@@ -233,7 +233,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
 
               {/* Slots de hora: aparecen desde que abre el modal */}
               <div style={{ marginTop: '1rem' }}>
-                <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600', display: 'block', marginBottom: '0.4rem' }}>
+                <label className="modal-field-label">
                   Nueva hora propuesta
                 </label>
                 {calScheduleTimes.length === 0 ? (
@@ -241,7 +241,8 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                   <input type="time" value={solicitudTime} onChange={e => setSolicitudTime(e.target.value)}
                     disabled={!solicitudDate}
                     placeholder={!solicitudDate ? 'Primero elige una fecha' : ''}
-                    style={{ padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '8px', width: '100%', boxSizing: 'border-box', opacity: solicitudDate ? 1 : 0.5 }} />
+                    className="modal-time-input"
+                    style={{ opacity: solicitudDate ? 1 : 0.5 }} />
                 ) : (
                   /* Horarios configurados → botones (todos visibles desde el inicio) */
                   <>
@@ -277,18 +278,19 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
               </div>
 
               <div style={{ marginTop: '1rem' }}>
-                <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>Mensaje para la directora (opcional)</label>
+                <label className="modal-field-label">Mensaje para la directora (opcional)</label>
                 <textarea value={solicitudMsg} onChange={e => setSolicitudMsg(e.target.value)} rows={2}
                   placeholder="Explica el motivo de la reagendación..."
-                  style={{ width: '100%', marginTop: '0.25rem', padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '8px', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                  className="modal-textarea" />
               </div>
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" onClick={() => setModal(null)} disabled={sendingSol}>Cancelar</button>
-              <button type="button" onClick={() => enviarSolicitudReagendar(modal.appointment)}
-                disabled={sendingSol || !solicitudDate || (calScheduleTimes.length > 0 && !solicitudTime)}
-                style={{ padding: '0.6rem 1.25rem', background: 'linear-gradient(135deg,#7c3aed,#a78bfa)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '700', cursor: 'pointer', opacity: (!solicitudDate || (calScheduleTimes.length > 0 && !solicitudTime)) ? 0.5 : 1 }}>
-                {sendingSol ? 'Enviando…' : '📋 Enviar solicitud'}
+              <button type="button"
+                className="btn btn-primary"
+                onClick={() => enviarSolicitudReagendar(modal.appointment)}
+                disabled={sendingSol || !solicitudDate || (calScheduleTimes.length > 0 && !solicitudTime)}>
+                {sendingSol ? 'Enviando…' : 'Enviar solicitud'}
               </button>
             </div>
           </div>
@@ -300,7 +302,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
         <div className="modal-overlay" onClick={() => !approving && setModal(null)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
             <div className="modal-header modal-header-confirm">
-              <span className="modal-header-icon">✅</span>
+              <span className="modal-header-icon" aria-hidden="true">✅</span>
               <h3>Confirmar aprobación de ingreso</h3>
             </div>
             <div className="modal-body">
@@ -338,7 +340,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
         <div className="modal-overlay" onClick={() => { setModal(null); if (modal.ok) window.location.reload() }}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
             <div className={`modal-header ${modal.ok ? 'modal-header-success' : 'modal-header-error'}`}>
-              <span className="modal-header-icon">{modal.ok ? '✅' : '❌'}</span>
+              <span className="modal-header-icon" aria-hidden="true">{modal.ok ? '✅' : '❌'}</span>
               <h3>{modal.ok ? 'Operación exitosa' : 'Error'}</h3>
             </div>
             <div className="modal-body"><p className="modal-result-message">{modal.message}</p></div>
@@ -354,7 +356,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
         <div className="modal-overlay" onClick={() => setModal(null)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
             <div className="modal-header modal-header-error">
-              <span className="modal-header-icon">⚠️</span>
+              <span className="modal-header-icon" aria-hidden="true">⚠️</span>
               <h3>Atención</h3>
             </div>
             <div className="modal-body"><p className="modal-result-message">{modal.message}</p></div>
@@ -368,7 +370,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
       {/* ── FILTROS ─────────────────────────────────────────────── */}
       <div className="admin-filters" style={{ alignItems: 'flex-end' }}>
         <div className="admin-filters-group">
-          <label className="admin-filter-label"><span className="filter-icon">🎓</span> Nivel</label>
+          <label className="admin-filter-label"><span className="filter-icon" aria-hidden="true">🎓</span> Nivel</label>
           <div className="filter-input-wrapper">
             <select value={filterLevel} onChange={e => setFilterLevel(e.target.value)} className="admin-filter-select">
               <option value="">Todos los niveles</option>
@@ -380,7 +382,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
           </div>
         </div>
         <div className="admin-filters-group">
-          <label className="admin-filter-label"><span className="filter-icon">📌</span> Estado</label>
+          <label className="admin-filter-label"><span className="filter-icon" aria-hidden="true">📌</span> Estado</label>
           <div className="filter-input-wrapper">
             <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="admin-filter-select">
               <option value="">Todos los estados</option>
@@ -393,7 +395,7 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
         </div>
         <div className="admin-filters-divider"></div>
         <div className="admin-filters-group-dates">
-          <div className="admin-filters-date-label"><span className="filter-icon">📅</span> Fecha de Examen</div>
+          <div className="admin-filters-date-label"><span className="filter-icon" aria-hidden="true">📅</span> Fecha de examen</div>
           <div className="admin-filters-date-inputs">
             <div className="date-input-container">
               <label>Desde:</label>
@@ -408,8 +410,8 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
         </div>
         {(filterStart || filterEnd || filterLevel || filterStatus) && (
           <button onClick={() => { setFilterStart(''); setFilterEnd(''); setFilterLevel(''); setFilterStatus('') }}
-            className="admin-filter-clear" title="Limpiar filtros">
-            <span style={{ fontSize: '1.1rem' }}>🧹</span>
+            className="admin-filter-clear" title="Limpiar filtros" aria-label="Limpiar filtros">
+            <span aria-hidden="true">✕</span>
           </button>
         )}
       </div>
@@ -483,62 +485,47 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
                         <option value="completed">Completada</option>
                       </select>
                     </td>
-                    <td style={{ padding: '0.5rem 0.5rem 0.5rem 0.25rem' }}>
+                    <td>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
 
-                        {/* Botón reagendar */}
+                        {/* Reagendar */}
                         <button type="button"
+                          className="admin-btn-action admin-btn-reagendar"
                           onClick={() => { setSolicitudDate(''); setSolicitudTime(''); setSolicitudMsg(''); setModal({ type: 'solicitar-reagendar', appointment: a }) }}
-                          style={{ padding: '0.3rem 0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', background: '#f5f3ff', border: '1px solid #c4b5fd', color: '#7c3aed', whiteSpace: 'nowrap', borderRadius: '6px', cursor: 'pointer', fontSize: '0.72rem', fontWeight: '600', width: 'fit-content' }}
                         >
-                          📋 Reagendar
+                          <span aria-hidden="true">📋</span> Reagendar
                         </button>
-                        {/* Indicador del estado de la última solicitud */}
-                        {reqStatus === 'aprobada' && (
-                          <span style={{ fontSize: '0.65rem', color: '#065f46', background: '#d1fae5', border: '1px solid #6ee7b7', borderRadius: '4px', padding: '0.1rem 0.4rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
-                            ✅ Última aprobada
-                          </span>
-                        )}
-                        {reqStatus === 'pendiente' && (
-                          <span style={{ fontSize: '0.65rem', color: '#92400e', background: '#fef9c3', border: '1px solid #fde68a', borderRadius: '4px', padding: '0.1rem 0.4rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
-                            ⏳ Solicitud pendiente
-                          </span>
-                        )}
-                        {reqStatus === 'rechazada' && (
-                          <span style={{ fontSize: '0.65rem', color: '#991b1b', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: '4px', padding: '0.1rem 0.4rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
-                            ❌ Última rechazada
-                          </span>
-                        )}
 
-                        {/* Botón aprobar directo para alumnos del sistema anterior */}
+                        {/* Estado última solicitud */}
+                        {reqStatus === 'aprobada'  && <span className="req-badge req-badge-ok">Aprobada</span>}
+                        {reqStatus === 'pendiente' && <span className="req-badge req-badge-pending">Pendiente</span>}
+                        {reqStatus === 'rechazada' && <span className="req-badge req-badge-rejected">Rechazada</span>}
+
+                        {/* Aprobar legacy */}
                         {a.origin === 'legacy' && a.status !== 'completed' && (
                           <button type="button"
+                            className="admin-btn-action admin-btn-aprobar"
                             onClick={async () => {
                               if (!confirm(`¿Aprobar ingreso de ${a.student_name}? Se creará el alumno en el sistema.`)) return
                               const res = await completeAdmissionLegacy(a.id)
-                              if (res.success) {
-                                alert(res.message)
-                                router.refresh()
-                              } else {
-                                alert('Error: ' + res.message)
-                              }
-                            }}
-                            style={{ padding: '0.3rem 0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', background: '#10b981', border: 'none', color: 'white', whiteSpace: 'nowrap', borderRadius: '6px', cursor: 'pointer', fontSize: '0.72rem', fontWeight: '600', width: 'fit-content' }}>
-                            ✅ Aprobar ingreso
+                              if (res.success) { alert(res.message); router.refresh() }
+                              else { alert('Error: ' + res.message) }
+                            }}>
+                            Aprobar ingreso
                           </button>
                         )}
 
                         {expedientesMap[a.id] && (<>
                           <button type="button"
-                            onClick={() => window.open(`/expediente_inicial/ver?cita=${a.id}`, '_blank')}
-                            style={{ padding: '0.3rem 0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', background: '#3b82f6', border: 'none', color: 'white', whiteSpace: 'nowrap', borderRadius: '6px', cursor: 'pointer', fontSize: '0.72rem', fontWeight: '600' }}>
-                            👁️ Ver Expediente
+                            className="admin-btn-action admin-btn-expediente"
+                            onClick={() => window.open(`/expediente_inicial/ver?cita=${a.id}`, '_blank')}>
+                            Ver expediente
                           </button>
                           {a.status !== 'completed' && a.origin !== 'legacy' && (
                             <button type="button"
-                              onClick={() => setModal({ type: 'confirm-aprobar', appointment: a })}
-                              style={{ padding: '0.3rem 0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', background: '#10b981', border: 'none', color: 'white', whiteSpace: 'nowrap', borderRadius: '6px', cursor: 'pointer', fontSize: '0.72rem', fontWeight: '600' }}>
-                              ✅ Aprobar ingreso
+                              className="admin-btn-action admin-btn-aprobar"
+                              onClick={() => setModal({ type: 'confirm-aprobar', appointment: a })}>
+                              Aprobar ingreso
                             </button>
                           )}
                         </>)}
