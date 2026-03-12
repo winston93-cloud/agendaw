@@ -3727,6 +3727,59 @@ body {
   padding: 0 1.5rem 1.5rem;
 }
 
+/* ── /extract — Tokens de solicitud de autorización ──────────────
+   Patrón compartido: AdminCitas · AdminBloquear · AdminHorarios
+   Se extrae para eliminar los inline styles `#7c3aed` repetidos.
+─────────────────────────────────────────────────────────────── */
+.modal-header-solicitud { background: var(--adm-purple); }
+
+/* Botón para iniciar solicitud */
+.btn-solicitud-accion {
+  padding: 0.4rem 0.9rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border-radius: var(--adm-radius-sm);
+  cursor: pointer;
+  background: var(--adm-purple-lt);
+  border: 1.5px solid color-mix(in srgb, var(--adm-purple) 30%, transparent);
+  color: var(--adm-purple);
+  font-family: var(--adm-font);
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.btn-solicitud-accion:hover:not(:disabled) { opacity: 0.80; }
+.btn-solicitud-accion.btn-solicitud-disabled,
+.btn-solicitud-accion:disabled {
+  background: var(--adm-surface-alt);
+  border-color: var(--adm-border);
+  color: var(--adm-text-faint);
+  cursor: not-allowed;
+}
+.btn-solicitud-accion.btn-solicitud-danger {
+  background: var(--adm-danger-lt);
+  border-color: color-mix(in srgb, var(--adm-danger) 28%, transparent);
+  color: var(--adm-danger);
+}
+.btn-solicitud-accion:focus-visible {
+  outline: 2px solid var(--adm-purple);
+  outline-offset: 2px;
+}
+
+/* Botón "Reenviar" tras solicitud rechazada */
+.btn-solicitud-reenviar {
+  padding: 0.25rem 0.65rem;
+  background: var(--adm-warn-lt);
+  border: 1px solid color-mix(in srgb, var(--adm-warn) 28%, transparent);
+  color: var(--adm-warn);
+  border-radius: var(--adm-radius-sm);
+  font-weight: 600;
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-family: var(--adm-font);
+  transition: opacity 0.15s;
+}
+.btn-solicitud-reenviar:hover { opacity: 0.80; }
+
 /* ── Modal form helpers (/polish) ── */
 .modal-field-label {
   display: block;

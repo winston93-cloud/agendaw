@@ -93,8 +93,8 @@ export default function AdminHorarios({ schedules }: { schedules: AdmissionSched
       {modal && (
         <div className="modal-overlay" onClick={() => !sending && setModal(null)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-header" style={{ background: 'linear-gradient(135deg,#7c3aed 0%,#a78bfa 100%)' }}>
-              <span className="modal-header-icon">📋</span>
+            <div className="modal-header modal-header-solicitud">
+              <span className="modal-header-icon" aria-hidden="true">📋</span>
               <h3>Solicitar autorización — Horario</h3>
             </div>
             <div className="modal-body">
@@ -113,17 +113,16 @@ export default function AdminHorarios({ schedules }: { schedules: AdmissionSched
                 </div>
               </div>
               <div style={{ marginTop: '1rem' }}>
-                <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>Mensaje para la directora (opcional)</label>
+                <label className="modal-field-label">Mensaje para la directora (opcional)</label>
                 <textarea value={msg} onChange={e => setMsg(e.target.value)} rows={3}
                   placeholder="Explica el motivo..."
-                  style={{ width: '100%', marginTop: '0.25rem', padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '8px', resize: 'vertical', fontFamily: 'inherit' }} />
+                  className="modal-textarea" />
               </div>
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" onClick={() => setModal(null)} disabled={sending}>Cancelar</button>
-              <button type="button" onClick={enviar} disabled={sending}
-                style={{ padding: '0.6rem 1.25rem', background: 'linear-gradient(135deg,#7c3aed,#a78bfa)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '700', cursor: 'pointer' }}>
-                {sending ? 'Enviando…' : '📋 Enviar solicitud'}
+              <button type="button" className="btn btn-primary" onClick={enviar} disabled={sending}>
+                {sending ? 'Enviando…' : 'Enviar solicitud'}
               </button>
             </div>
           </div>
@@ -209,15 +208,7 @@ function SolicitudBtn({
   onClick: () => void
 }) {
   if (status === 'aprobada') {
-    return (
-      <span style={{
-        padding: '0.3rem 0.85rem', background: '#d1fae5', color: '#065f46',
-        border: '1.5px solid #6ee7b7', borderRadius: '8px',
-        fontWeight: '700', fontSize: '0.82rem',
-      }}>
-        {approvedLabel}
-      </span>
-    )
+    return <span className="req-badge req-badge-ok">{approvedLabel}</span>
   }
   if (status === 'pendiente') {
     return <StatusBadge status="pendiente" />
@@ -226,24 +217,24 @@ function SolicitudBtn({
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
         <StatusBadge status="rechazada" />
-        <button type="button" onClick={onClick}
-          style={{ padding: '0.25rem 0.65rem', background: '#fef3c7', border: '1px solid #fcd34d', color: '#92400e', borderRadius: '6px', fontWeight: '600', fontSize: '0.75rem', cursor: 'pointer' }}>
+        <button type="button" onClick={onClick} className="btn-solicitud-reenviar">
           Reenviar
         </button>
       </div>
     )
   }
   return (
-    <button type="button" onClick={onClick} disabled={disabled}
-      style={{
-        padding: '0.3rem 0.75rem', fontWeight: '600', fontSize: '0.82rem',
-        borderRadius: '8px', cursor: disabled ? 'not-allowed' : 'pointer',
-        background: disabled ? '#f1f5f9' : danger ? '#fff1f2' : '#f5f3ff',
-        border: `1.5px solid ${disabled ? '#e2e8f0' : danger ? '#fda4af' : '#c4b5fd'}`,
-        color: disabled ? '#94a3b8' : danger ? '#e11d48' : '#7c3aed',
-        transition: 'all 0.15s',
-      }}>
-      📋 {label}
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={[
+        'btn-solicitud-accion',
+        danger ? 'btn-solicitud-danger' : '',
+        disabled ? 'btn-solicitud-disabled' : '',
+      ].filter(Boolean).join(' ')}
+    >
+      {label}
     </button>
   )
 }

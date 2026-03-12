@@ -85,8 +85,8 @@ export default function AdminBloquear({ blockedDates }: { blockedDates: BlockedD
       {showModal && (
         <div className="modal-overlay" onClick={() => !sending && setShowModal(false)}>
           <div className="modal-box" onClick={e => e.stopPropagation()}>
-            <div className="modal-header" style={{ background: 'linear-gradient(135deg,#7c3aed 0%,#a78bfa 100%)' }}>
-              <span className="modal-header-icon">📋</span>
+            <div className="modal-header modal-header-solicitud">
+              <span className="modal-header-icon" aria-hidden="true">📋</span>
               <h3>Solicitar autorización — Bloqueo de día</h3>
             </div>
             <div className="modal-body">
@@ -107,17 +107,16 @@ export default function AdminBloquear({ blockedDates }: { blockedDates: BlockedD
                 )}
               </div>
               <div style={{ marginTop: '1rem' }}>
-                <label style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600' }}>Mensaje para la directora (opcional)</label>
+                <label className="modal-field-label">Mensaje para la directora (opcional)</label>
                 <textarea value={msg} onChange={e => setMsg(e.target.value)} rows={3}
                   placeholder="Explica el motivo del bloqueo..."
-                  style={{ width: '100%', marginTop: '0.25rem', padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '8px', resize: 'vertical', fontFamily: 'inherit' }} />
+                  className="modal-textarea" />
               </div>
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)} disabled={sending}>Cancelar</button>
-              <button type="button" onClick={enviar} disabled={sending}
-                style={{ padding: '0.6rem 1.25rem', background: 'linear-gradient(135deg,#7c3aed,#a78bfa)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '700', cursor: 'pointer' }}>
-                {sending ? 'Enviando…' : '📋 Enviar solicitud'}
+              <button type="button" className="btn btn-primary" onClick={enviar} disabled={sending}>
+                {sending ? 'Enviando…' : 'Enviar solicitud'}
               </button>
             </div>
           </div>
@@ -149,12 +148,7 @@ export default function AdminBloquear({ blockedDates }: { blockedDates: BlockedD
         {/* Botón con estado */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
           {currentStatus === 'aprobada' ? (
-            <span style={{
-              padding: '0.6rem 1.25rem', background: '#d1fae5', color: '#065f46',
-              border: '2px solid #6ee7b7', borderRadius: '10px', fontWeight: '700',
-            }}>
-              ✅ Bloqueo aprobado
-            </span>
+            <span className="req-badge req-badge-ok">Bloqueo aprobado</span>
           ) : currentStatus === 'pendiente' ? (
             <StatusBadge status="pendiente" />
           ) : (
@@ -162,22 +156,16 @@ export default function AdminBloquear({ blockedDates }: { blockedDates: BlockedD
               type="button"
               disabled={!block_date}
               onClick={() => { setMsg(''); setShowModal(true) }}
-              style={{
-                padding: '0.6rem 1.25rem', fontWeight: '700', borderRadius: '10px',
-                background: !block_date ? '#f1f5f9' : '#f5f3ff',
-                border: `1.5px solid ${!block_date ? '#e2e8f0' : '#c4b5fd'}`,
-                color: !block_date ? '#94a3b8' : '#7c3aed',
-                cursor: !block_date ? 'not-allowed' : 'pointer',
-              }}
+              className={`btn-solicitud-accion${!block_date ? ' btn-solicitud-disabled' : ''}`}
             >
-              📋 Solicitar autorización de bloqueo
+              Solicitar autorización de bloqueo
             </button>
           )}
           {currentStatus === 'rechazada' && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <StatusBadge status="rechazada" />
               <button type="button" onClick={() => { setMsg(''); setShowModal(true) }}
-                style={{ padding: '0.3rem 0.75rem', background: '#fef3c7', border: '1px solid #fcd34d', color: '#92400e', borderRadius: '6px', fontWeight: '600', fontSize: '0.8rem', cursor: 'pointer' }}>
+                className="btn-solicitud-reenviar">
                 Reenviar
               </button>
             </div>
