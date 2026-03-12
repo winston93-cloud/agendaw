@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     const insertData = {
       ctrl,
       qr,
-      estatus: ctrl > 0 ? 'EMPTY' : 'INICIAL',
+      estatus: 'INICIAL',
       status: 'pendiente',
     }
 
