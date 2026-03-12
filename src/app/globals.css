@@ -5912,6 +5912,11 @@ body {
   animation: familiaSlideIn 0.2s ease;
 }
 
+/* Modal expandido cuando muestra el comprobante */
+.familia-modal-wide {
+  max-width: 700px;
+}
+
 @keyframes familiaSlideIn {
   from { opacity: 0; transform: translateY(-12px) scale(0.97); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -6127,6 +6132,182 @@ body {
 }
 .familia-btn-generar:hover:not(:disabled) { opacity: 0.88; }
 .familia-btn-generar:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   DOCUMENTO COMPROBANTE DENTRO DEL MODAL (Familia Winston)
+═══════════════════════════════════════════════════════════════════ */
+
+/* Zona scrollable del documento en el modal */
+.familia-doc-scroll {
+  overflow-y: auto;
+  max-height: 70vh;
+  padding: 1.25rem 1.5rem;
+  background: #e8ecf0;
+}
+
+/* El documento (hoja blanca) */
+.familia-doc {
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.14);
+  font-family: 'Times New Roman', Times, serif;
+  overflow: hidden;
+}
+
+/* Header azul del documento */
+.familia-doc-header {
+  position: relative;
+  background: #1565c0;
+  display: flex;
+  align-items: center;
+  min-height: 64px;
+  padding: 0.6rem 1.2rem;
+  overflow: hidden;
+  gap: 0.75rem;
+}
+
+/* Franja diagonal amarilla */
+.familia-doc-header-stripe {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 130px;
+  height: 120%;
+  background: #c8d400;
+  transform: skewX(-18deg);
+  z-index: 1;
+}
+
+/* Línea blanca entre azul y amarillo */
+.familia-doc-header::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  right: 96px;
+  width: 18px;
+  height: 120%;
+  background: #fff;
+  transform: skewX(-18deg);
+  z-index: 2;
+}
+
+.familia-doc-logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  position: relative;
+  z-index: 3;
+  flex-shrink: 0;
+}
+
+.familia-doc-header-title {
+  color: #fff;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  position: relative;
+  z-index: 3;
+  flex: 1;
+}
+
+/* Cuerpo del documento */
+.familia-doc-body {
+  padding: 2rem 2.5rem 1.5rem;
+}
+
+.familia-doc-saludo {
+  font-size: 0.95rem;
+  margin: 0 0 1.25rem;
+  color: #111;
+}
+
+.familia-doc-parrafo {
+  font-size: 0.92rem;
+  line-height: 1.8;
+  text-align: justify;
+  color: #111;
+  margin: 0 0 1.25rem;
+}
+
+.familia-doc-qr-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1.25rem 0 1.5rem;
+}
+
+.familia-doc-qr {
+  width: 130px;
+  height: 130px;
+  image-rendering: pixelated;
+}
+
+.familia-doc-qr-placeholder {
+  width: 130px;
+  height: 130px;
+  background: #1e293b;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  font-family: 'Courier New', monospace;
+}
+
+.familia-doc-qr-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #111;
+  margin: 0.4rem 0 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.familia-doc-firma {
+  margin-top: 0.75rem;
+  font-size: 0.92rem;
+  color: #111;
+  line-height: 1.6;
+}
+.familia-doc-firma p { margin: 0; }
+.familia-doc-firma-inst { font-style: italic; text-decoration: underline; }
+
+.familia-doc-folio {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 0.7rem;
+  color: #64748b;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 0.5rem;
+}
+
+/* ── Print: solo muestra el documento ──────────────────── */
+@media print {
+  body > * { visibility: hidden !important; }
+  .familia-print-area,
+  .familia-print-area * { visibility: visible !important; }
+  .familia-print-area {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    z-index: 99999;
+  }
+}
+
+/* ── Responsive modal comprobante ──────────────────────── */
+@media (max-width: 600px) {
+  .familia-modal-wide { max-width: 100%; border-radius: 0; }
+  .familia-overlay { padding: 0; align-items: flex-start; }
+  .familia-doc-scroll { max-height: calc(100vh - 140px); }
+  .familia-doc-body { padding: 1.25rem 1.25rem 1rem; }
+  .familia-doc-header { min-height: 52px; }
+  .familia-doc-logo { height: 30px; }
+  .familia-doc-header-title { font-size: 0.82rem; }
+}
 
 /* ═══════════════════════════════════════════════════════════════════
    COMPROBANTE WSP (página imprimible — Familia Winston)

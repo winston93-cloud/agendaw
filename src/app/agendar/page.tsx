@@ -83,6 +83,11 @@ export default function AgendarPage() {
   const [familiaShowDropdown, setFamiliaShowDropdown] = useState(false)
   const [familiaGenerating, setFamiliaGenerating] = useState(false)
   const [familiaCtrlConfirmed, setFamiliaCtrlConfirmed] = useState<string | null>(null)
+  const [familiaComprobante, setFamiliaComprobante] = useState<{
+    id: number; qr: number; ctrl: string; nombreRef: string;
+    estudiante: string; nivelGrado: string; ciclo: string;
+  } | null>(null)
+  const [familiaQrDataUrl, setFamiliaQrDataUrl] = useState<string | null>(null)
   const familiaSearchRef = useRef<HTMLDivElement>(null)
 
   const router = useRouter()
@@ -271,6 +276,16 @@ export default function AgendarPage() {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
+  // Genera QR code cuando hay datos de comprobante
+  useEffect(() => {
+    if (!familiaComprobante) { setFamiliaQrDataUrl(null); return }
+    import('qrcode').then(QRCode => {
+      QRCode.toDataURL(String(familiaComprobante.qr), { width: 180, margin: 1 })
+        .then(url => setFamiliaQrDataUrl(url))
+        .catch(() => setFamiliaQrDataUrl(null))
+    })
+  }, [familiaComprobante])
+
   const handleFamiliaSelect = (alumno: AlumnoResult) => {
     setFamiliaSelected(alumno)
     const nombre = [alumno.alumno_nombre, alumno.alumno_app, alumno.alumno_apm].filter(Boolean).join(' ')
@@ -300,10 +315,7 @@ export default function AgendarPage() {
         throw new Error(errMsg || 'Error desconocido al guardar en WSP')
       }
 
-      setFamiliaCtrlConfirmed(familiaSelected.alumno_ref)
-      setShowFamiliaModal(false)
-
-      // Construir datos del estudiante para el comprobante
+      // Construir datos para mostrar el comprobante dentro del modal
       const estudianteNombre = [formData.studentName, formData.studentLastNameP, formData.studentLastNameM]
         .filter(Boolean).join(' ').toUpperCase() || 'N/D'
       const gradoLabel = getGradeLevels().find(g => g.value === formData.gradeLevel)?.label ?? ''
@@ -311,20 +323,20 @@ export default function AgendarPage() {
         maternal: 'Maternal', kinder: 'Kinder', primaria: 'Primaria', secundaria: 'Secundaria',
       }
       const nivelGrado = [levelLabel[formData.level] ?? formData.level, gradoLabel].filter(Boolean).join(' ')
-      const ciclo = formData.schoolCycle || ''
+      const ciclo = (formData.schoolCycle || '').replace('-', ' - ')
       const nombreRef = [familiaSelected.alumno_nombre, familiaSelected.alumno_app, familiaSelected.alumno_apm]
         .filter(Boolean).join(' ')
 
-      const params = new URLSearchParams({
-        qr: String(data.qr),
-        ctrl: String(data.ctrl),
-        ref: familiaSelected.alumno_ref,
-        nombre_ref: nombreRef,
+      setFamiliaCtrlConfirmed(familiaSelected.alumno_ref)
+      setFamiliaComprobante({
+        id: data.id as number,
+        qr: data.qr as number,
+        ctrl: familiaSelected.alumno_ref,
+        nombreRef,
         estudiante: estudianteNombre,
-        nivel_grado: nivelGrado,
+        nivelGrado,
         ciclo,
       })
-      window.open(`/comprobante-wsp/${data.id}?${params.toString()}`, '_blank')
     } catch (err) {
       alert('❌ Error al generar comprobante:\n' + (err instanceof Error ? err.message : String(err)))
     } finally {
@@ -342,6 +354,8 @@ export default function AgendarPage() {
     setFamiliaResults([])
     setFamiliaSelected(null)
     setFamiliaShowDropdown(false)
+    setFamiliaComprobante(null)
+    setFamiliaQrDataUrl(null)
   }
 
   useEffect(() => {
@@ -997,89 +1011,187 @@ export default function AgendarPage() {
 
     {/* ─── Modal Programa Familia Winston ─────────────────────────────── */}
     {showFamiliaModal && (
-      <div className="familia-overlay" onClick={handleCloseFamiliaModal}>
-        <div className="familia-modal" onClick={e => e.stopPropagation()}>
+      <div className="familia-overlay" onClick={familiaComprobante ? undefined : handleCloseFamiliaModal}>
+        <div
+          className={`familia-modal${familiaComprobante ? ' familia-modal-wide' : ''}`}
+          onClick={e => e.stopPropagation()}
+        >
+          {/* HEADER */}
           <div className="familia-modal-header">
             <span className="familia-modal-icon">🏫</span>
             <div>
-              <h2 className="familia-modal-title">REFERENCIAR ALUMNO</h2>
+              <h2 className="familia-modal-title">
+                {familiaComprobante ? 'COMPROBANTE GENERADO' : 'REFERENCIAR ALUMNO'}
+              </h2>
               <p className="familia-modal-subtitle">Programa Familia Winston</p>
             </div>
             <button className="familia-modal-close" onClick={handleCloseFamiliaModal} aria-label="Cerrar">✕</button>
           </div>
 
-          <div className="familia-modal-body">
-            <p className="familia-modal-desc">
-              Por favor, ingresa el número de control o nombre del alumno al que se desea otorgar el beneficio.
-            </p>
+          {/* ── Vista 1: Búsqueda ── */}
+          {!familiaComprobante && (
+            <>
+              <div className="familia-modal-body">
+                <p className="familia-modal-desc">
+                  Por favor, ingresa el número de control o nombre del alumno al que se desea otorgar el beneficio.
+                </p>
 
-            <div className="familia-search-wrap" ref={familiaSearchRef}>
-              <input
-                type="text"
-                className="familia-search-input"
-                placeholder="ESCRIBE NOMBRE, APELLIDO O NÚMERO DE CONTROL..."
-                value={familiaSearch}
-                onChange={e => {
-                  setFamiliaSearch(e.target.value)
-                  setFamiliaSelected(null)
-                  if (e.target.value.length >= 2) setFamiliaShowDropdown(true)
-                  else setFamiliaShowDropdown(false)
-                }}
-                onFocus={() => { if (familiaResults.length > 0) setFamiliaShowDropdown(true) }}
-                autoFocus
-              />
-              {familiaSearching && <span className="familia-search-spinner">⏳</span>}
+                <div className="familia-search-wrap" ref={familiaSearchRef}>
+                  <input
+                    type="text"
+                    className="familia-search-input"
+                    placeholder="ESCRIBE NOMBRE, APELLIDO O NÚMERO DE CONTROL..."
+                    value={familiaSearch}
+                    onChange={e => {
+                      setFamiliaSearch(e.target.value)
+                      setFamiliaSelected(null)
+                      if (e.target.value.length >= 2) setFamiliaShowDropdown(true)
+                      else setFamiliaShowDropdown(false)
+                    }}
+                    onFocus={() => { if (familiaResults.length > 0) setFamiliaShowDropdown(true) }}
+                    autoFocus
+                  />
+                  {familiaSearching && <span className="familia-search-spinner">⏳</span>}
 
-              {familiaShowDropdown && familiaResults.length > 0 && (
-                <ul className="familia-dropdown">
-                  {familiaResults.map(a => {
-                    const nombre = [a.alumno_nombre, a.alumno_app, a.alumno_apm].filter(Boolean).join(' ')
-                    const niveles: Record<number, string> = { 1: 'Maternal', 2: 'Kinder', 3: 'Primaria', 4: 'Secundaria' }
-                    const nivel = a.alumno_nivel ? (niveles[a.alumno_nivel] ?? '') : ''
-                    return (
-                      <li
-                        key={a.alumno_id}
-                        className="familia-dropdown-item"
-                        onMouseDown={() => handleFamiliaSelect(a)}
-                      >
-                        <span className="familia-dropdown-ref">#{a.alumno_ref}</span>
-                        <span className="familia-dropdown-nombre">{nombre || 'Sin nombre'}</span>
-                        {nivel && <span className="familia-dropdown-nivel">{nivel}{a.alumno_grado ? ` ${a.alumno_grado}°` : ''}</span>}
-                      </li>
-                    )
-                  })}
-                </ul>
-              )}
-              {familiaShowDropdown && familiaSearch.length >= 2 && !familiaSearching && familiaResults.length === 0 && (
-                <div className="familia-dropdown-empty">No se encontraron alumnos</div>
-              )}
-            </div>
+                  {familiaShowDropdown && familiaResults.length > 0 && (
+                    <ul className="familia-dropdown">
+                      {familiaResults.map(a => {
+                        const nombre = [a.alumno_nombre, a.alumno_app, a.alumno_apm].filter(Boolean).join(' ')
+                        const niveles: Record<number, string> = { 1: 'Maternal', 2: 'Kinder', 3: 'Primaria', 4: 'Secundaria' }
+                        const nivel = a.alumno_nivel ? (niveles[a.alumno_nivel] ?? '') : ''
+                        return (
+                          <li
+                            key={a.alumno_id}
+                            className="familia-dropdown-item"
+                            onMouseDown={() => handleFamiliaSelect(a)}
+                          >
+                            <span className="familia-dropdown-ref">#{a.alumno_ref}</span>
+                            <span className="familia-dropdown-nombre">{nombre || 'Sin nombre'}</span>
+                            {nivel && <span className="familia-dropdown-nivel">{nivel}{a.alumno_grado ? ` ${a.alumno_grado}°` : ''}</span>}
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  )}
+                  {familiaShowDropdown && familiaSearch.length >= 2 && !familiaSearching && familiaResults.length === 0 && (
+                    <div className="familia-dropdown-empty">No se encontraron alumnos</div>
+                  )}
+                </div>
 
-            {familiaSelected && (
-              <div className="familia-selected-card">
-                <span className="familia-selected-check">✓</span>
-                <div>
-                  <strong>
-                    {[familiaSelected.alumno_nombre, familiaSelected.alumno_app, familiaSelected.alumno_apm].filter(Boolean).join(' ')}
-                  </strong>
-                  <span className="familia-selected-ctrl"> · Control: {familiaSelected.alumno_ref}</span>
+                {familiaSelected && (
+                  <div className="familia-selected-card">
+                    <span className="familia-selected-check">✓</span>
+                    <div>
+                      <strong>
+                        {[familiaSelected.alumno_nombre, familiaSelected.alumno_app, familiaSelected.alumno_apm].filter(Boolean).join(' ')}
+                      </strong>
+                      <span className="familia-selected-ctrl"> · Control: {familiaSelected.alumno_ref}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="familia-modal-footer">
+                <button className="familia-btn-cancel" onClick={handleCloseFamiliaModal}>
+                  Cerrar
+                </button>
+                <button
+                  className="familia-btn-generar"
+                  onClick={handleGenerarComprobante}
+                  disabled={!familiaSelected || familiaGenerating}
+                >
+                  {familiaGenerating ? 'Generando…' : 'Generar comprobante'}
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* ── Vista 2: Comprobante ── */}
+          {familiaComprobante && (
+            <>
+              <div className="familia-doc-scroll">
+                {/* Documento imprimible */}
+                <div className="familia-doc familia-print-area">
+
+                  {/* Encabezado azul + franja amarilla */}
+                  <div className="familia-doc-header">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/logo-winston-churchill.png"
+                      alt="Winston"
+                      className="familia-doc-logo"
+                    />
+                    <span className="familia-doc-header-title">Comprobante Familia Winston</span>
+                    <div className="familia-doc-header-stripe" />
+                  </div>
+
+                  {/* Cuerpo */}
+                  <div className="familia-doc-body">
+                    <p className="familia-doc-saludo">Estimado padre de familia,</p>
+
+                    <p className="familia-doc-parrafo">
+                      Este documento certifica que el interesado{' '}
+                      <strong>{familiaComprobante.estudiante}</strong>
+                      {familiaComprobante.nivelGrado && (
+                        <> a ingresar a <strong>{familiaComprobante.nivelGrado}</strong></>
+                      )}
+                      {familiaComprobante.ciclo && (
+                        <> en el ciclo <strong>{familiaComprobante.ciclo}</strong>,</>
+                      )}{' '}
+                      otorga al alumno con número de control{' '}
+                      <strong>{familiaComprobante.ctrl}</strong>
+                      {familiaComprobante.nombreRef && ` (${familiaComprobante.nombreRef})`}{' '}
+                      el beneficio de estar registrado en el programa{' '}
+                      <strong>Familia Winston</strong>.
+                    </p>
+
+                    <p className="familia-doc-parrafo">
+                      El programa Familia Winston tiene como objetivo apoyar y fomentar la
+                      colaboración entre las familias y nuestra institución para brindar una
+                      mejor experiencia educativa a nuestros alumnos.
+                    </p>
+
+                    <p className="familia-doc-parrafo">
+                      Por favor, conserve este comprobante para cualquier trámite relacionado
+                      con el programa.
+                    </p>
+
+                    {/* QR */}
+                    <div className="familia-doc-qr-wrap">
+                      {familiaQrDataUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={familiaQrDataUrl} alt="QR" className="familia-doc-qr" />
+                      ) : (
+                        <div className="familia-doc-qr-placeholder">{familiaComprobante.qr}</div>
+                      )}
+                      <p className="familia-doc-qr-label">Código de Verificación</p>
+                    </div>
+
+                    {/* Firma */}
+                    <div className="familia-doc-firma">
+                      <p>Atentamente,</p>
+                      <p className="familia-doc-firma-inst">Instituto Winston Churchill</p>
+                    </div>
+
+                    <div className="familia-doc-folio">
+                      <span>Folio: WSP-{String(familiaComprobante.id).padStart(5, '0')}</span>
+                      <span>{new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' })}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            )}
-          </div>
 
-          <div className="familia-modal-footer">
-            <button className="familia-btn-cancel" onClick={handleCloseFamiliaModal}>
-              Cerrar
-            </button>
-            <button
-              className="familia-btn-generar"
-              onClick={handleGenerarComprobante}
-              disabled={!familiaSelected || familiaGenerating}
-            >
-              {familiaGenerating ? 'Generando…' : 'Generar comprobante'}
-            </button>
-          </div>
+              {/* Pie del modal */}
+              <div className="familia-modal-footer">
+                <button className="familia-btn-cancel" onClick={handleCloseFamiliaModal}>
+                  Continuar con la solicitud
+                </button>
+                <button className="familia-btn-generar" onClick={() => window.print()}>
+                  🖨️ Imprimir / Guardar PDF
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     )}
