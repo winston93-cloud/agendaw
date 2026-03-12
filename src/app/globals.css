@@ -6129,224 +6129,195 @@ body {
 .familia-btn-generar:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* ═══════════════════════════════════════════════════════════════════
-   COMPROBANTE WSP (página imprimible)
+   COMPROBANTE WSP (página imprimible — Familia Winston)
 ═══════════════════════════════════════════════════════════════════ */
 
-.comprobante-page {
+.wsp-page {
   min-height: 100vh;
-  background: #e2e8f0;
+  background: #dde3ea;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 2rem 1rem;
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  padding: 2.5rem 1rem 3rem;
+  font-family: 'Times New Roman', Times, serif;
 }
 
-.comprobante-paper {
+/* Hoja carta */
+.wsp-paper {
   background: #fff;
   width: 100%;
-  max-width: 480px;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  max-width: 700px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  position: relative;
   overflow: hidden;
 }
 
-.comprobante-header {
-  background: linear-gradient(135deg, #1e3a5f 0%, #1d4ed8 100%);
+/* ── Header ─────────────────────────────────────────────── */
+.wsp-header {
+  position: relative;
+  background: #1565c0;           /* azul institucional */
+  display: flex;
+  align-items: center;
+  min-height: 80px;
+  padding: 0 1.5rem;
+  overflow: hidden;
+}
+
+/* Franja amarilla diagonal (esquina superior derecha) */
+.wsp-header::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  right: -20px;
+  width: 160px;
+  height: 140%;
+  background: #c8d400;           /* amarillo-verde institucional */
+  transform: skewX(-18deg);
+  z-index: 1;
+}
+
+/* Franja blanca delgada entre azul y amarillo */
+.wsp-header::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  right: 112px;
+  width: 24px;
+  height: 140%;
+  background: #fff;
+  transform: skewX(-18deg);
+  z-index: 2;
+}
+
+.wsp-header-left {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+}
+
+.wsp-header-center {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  z-index: 3;
+}
+
+.wsp-header-title {
   color: #fff;
-  padding: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.comprobante-logos {
-  flex-shrink: 0;
-}
-
-.comprobante-logo-placeholder {
-  width: 50px;
-  height: 50px;
-  background: rgba(255,255,255,0.2);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-family: 'Segoe UI', Arial, sans-serif;
   font-size: 1.2rem;
-  font-weight: 800;
-  color: #fff;
-}
-
-.comprobante-header-text { flex: 1; }
-
-.comprobante-inst {
-  font-size: 0.95rem;
   font-weight: 700;
-  margin: 0;
-  color: #fff;
+  letter-spacing: 0.02em;
 }
 
-.comprobante-subinst {
-  font-size: 0.78rem;
-  color: rgba(255,255,255,0.75);
-  margin: 0.15rem 0 0;
+.wsp-header-right {
+  width: 140px;
+  flex-shrink: 0;
 }
 
-.comprobante-programa {
-  font-size: 0.72rem;
-  background: rgba(255,255,255,0.2);
-  display: inline-block;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  margin-top: 0.35rem;
-  color: #fff;
-  font-weight: 600;
-  letter-spacing: 0.03em;
+/* ── Body ───────────────────────────────────────────────── */
+.wsp-body {
+  padding: 2.5rem 3.5rem 2rem;
 }
 
-.comprobante-divider {
-  height: 1px;
-  background: #e2e8f0;
-  margin: 0;
-}
-
-.comprobante-title {
-  text-align: center;
+.wsp-saludo {
   font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: #1e293b;
-  margin: 1.25rem 1.5rem 0.25rem;
+  margin: 0 0 1.5rem;
+  color: #111;
 }
 
-.comprobante-folio,
-.comprobante-fecha {
-  text-align: center;
-  font-size: 0.82rem;
-  color: #64748b;
-  margin: 0.25rem 1.5rem;
+.wsp-parrafo {
+  font-size: 1rem;
+  line-height: 1.75;
+  text-align: justify;
+  color: #111;
+  margin: 0 0 1.5rem;
 }
 
-.comprobante-section {
-  padding: 1rem 1.5rem;
-}
-
-.comprobante-section-title {
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: #2563eb;
-  margin: 0 0 0.75rem;
-}
-
-.comprobante-row {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 0.4rem;
-  font-size: 0.875rem;
-}
-
-.comprobante-label {
-  color: #64748b;
-  flex-shrink: 0;
-  min-width: 110px;
-}
-
-.comprobante-value {
-  color: #1e293b;
-  font-weight: 600;
-}
-
-.comprobante-qr-section {
-  padding: 1.25rem 1.5rem;
-  display: flex;
-  gap: 1.25rem;
-  align-items: center;
-}
-
-.comprobante-qr-box {
-  flex-shrink: 0;
+/* QR centrado */
+.wsp-qr-wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
+  margin: 1.5rem 0 2rem;
 }
 
-.comprobante-qr-code {
-  width: 90px;
-  height: 90px;
+.wsp-qr-img {
+  width: 150px;
+  height: 150px;
+  image-rendering: pixelated;
+}
+
+.wsp-qr-placeholder {
+  width: 150px;
+  height: 150px;
   background: #1e293b;
   color: #fff;
-  font-size: 1.4rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
   font-family: 'Courier New', monospace;
 }
 
-.comprobante-qr-label {
-  font-size: 0.68rem;
-  color: #64748b;
-  text-align: center;
-  margin: 0;
+.wsp-qr-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #111;
+  margin: 0.5rem 0 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
 }
 
-.comprobante-qr-info {
-  flex: 1;
-  font-size: 0.8rem;
-  color: #475569;
-  line-height: 1.55;
+.wsp-firma {
+  margin-top: 1rem;
+  font-size: 1rem;
+  color: #111;
+  line-height: 1.6;
 }
 
-.comprobante-qr-info p { margin: 0 0 0.5rem; }
+.wsp-firma p { margin: 0; }
 
-.comprobante-nota {
-  font-size: 0.72rem;
-  color: #94a3b8;
+.wsp-firma-inst {
   font-style: italic;
+  text-decoration: underline;
 }
 
-.comprobante-footer {
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
-  padding: 0.85rem 1.5rem;
-  text-align: center;
+.wsp-meta {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Segoe UI', Arial, sans-serif;
   font-size: 0.75rem;
   color: #64748b;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 0.6rem;
 }
 
-.comprobante-footer p { margin: 0.2rem 0; }
-
-.comprobante-footer-status {
-  font-size: 0.78rem;
-  color: #d97706;
-}
-
-.comprobante-actions {
-  margin-top: 1.25rem;
+/* ── Botones (no se imprimen) ───────────────────────────── */
+.wsp-actions {
+  margin-top: 1.5rem;
   display: flex;
   gap: 0.75rem;
 }
 
-.comprobante-btn-print {
-  background: linear-gradient(135deg, #1e3a5f, #2563eb);
+.wsp-btn-print {
+  background: linear-gradient(135deg, #1565c0, #1976d2);
   color: #fff;
   border: none;
-  padding: 0.65rem 1.4rem;
+  padding: 0.65rem 1.5rem;
   border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.15s;
+  font-family: 'Segoe UI', Arial, sans-serif;
 }
-.comprobante-btn-print:hover { opacity: 0.88; }
+.wsp-btn-print:hover { opacity: 0.87; }
 
-.comprobante-btn-close {
+.wsp-btn-close {
   background: #fff;
   border: 1.5px solid #cbd5e1;
   color: #64748b;
@@ -6355,11 +6326,13 @@ body {
   font-size: 0.875rem;
   cursor: pointer;
   transition: background 0.15s;
+  font-family: 'Segoe UI', Arial, sans-serif;
 }
-.comprobante-btn-close:hover { background: #f1f5f9; }
+.wsp-btn-close:hover { background: #f1f5f9; }
 
+/* ── Print media ────────────────────────────────────────── */
 @media print {
   .no-print { display: none !important; }
-  .comprobante-page { background: #fff; padding: 0; justify-content: flex-start; }
-  .comprobante-paper { box-shadow: none; border-radius: 0; max-width: 100%; }
+  .wsp-page  { background: #fff; padding: 0; }
+  .wsp-paper { box-shadow: none; max-width: 100%; }
 }

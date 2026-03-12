@@ -287,14 +287,46 @@ export default function AgendarPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ctrl: parseInt(familiaSelected.alumno_ref) || 0 }),
       })
-      const data = await res.json()
-      if (!data.ok) throw new Error(data.error ?? 'Error al generar comprobante')
+
+      let data: Record<string, unknown>
+      try {
+        data = await res.json()
+      } catch {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`)
+      }
+
+      if (!data.ok) {
+        const errMsg = [data.error, data.details, data.hint].filter(Boolean).join(' | ')
+        throw new Error(errMsg || 'Error desconocido al guardar en WSP')
+      }
+
       setFamiliaCtrlConfirmed(familiaSelected.alumno_ref)
       setShowFamiliaModal(false)
-      // Abre el comprobante en nueva pestaña
-      window.open(`/comprobante-wsp/${data.id}?qr=${data.qr}&ctrl=${data.ctrl}&ref=${encodeURIComponent(familiaSelected.alumno_ref)}&nombre=${encodeURIComponent([familiaSelected.alumno_nombre, familiaSelected.alumno_app, familiaSelected.alumno_apm].filter(Boolean).join(' '))}`, '_blank')
+
+      // Construir datos del estudiante para el comprobante
+      const estudianteNombre = [formData.studentName, formData.studentLastNameP, formData.studentLastNameM]
+        .filter(Boolean).join(' ').toUpperCase() || 'N/D'
+      const gradoLabel = getGradeLevels().find(g => g.value === formData.gradeLevel)?.label ?? ''
+      const levelLabel: Record<string, string> = {
+        maternal: 'Maternal', kinder: 'Kinder', primaria: 'Primaria', secundaria: 'Secundaria',
+      }
+      const nivelGrado = [levelLabel[formData.level] ?? formData.level, gradoLabel].filter(Boolean).join(' ')
+      const ciclo = formData.schoolCycle || ''
+      const nombreRef = [familiaSelected.alumno_nombre, familiaSelected.alumno_app, familiaSelected.alumno_apm]
+        .filter(Boolean).join(' ')
+
+      const params = new URLSearchParams({
+        qr: String(data.qr),
+        ctrl: String(data.ctrl),
+        ref: familiaSelected.alumno_ref,
+        nombre_ref: nombreRef,
+        estudiante: estudianteNombre,
+        nivel_grado: nivelGrado,
+        ciclo,
+      })
+      window.open(`/comprobante-wsp/${data.id}?${params.toString()}`, '_blank')
     } catch (err) {
-      alert('Error: ' + (err instanceof Error ? err.message : String(err)))
+      alert('❌ Error al generar comprobante:\n' + (err instanceof Error ? err.message : String(err)))
     } finally {
       setFamiliaGenerating(false)
     }
