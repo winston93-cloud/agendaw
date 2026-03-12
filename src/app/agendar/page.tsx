@@ -6,6 +6,8 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import ExamDateCalendar from '@/components/ExamDateCalendar'
+import PublicThemeToggle from '@/components/PublicThemeToggle'
+import ClientLangSelector from '@/components/ClientLangSelector'
 import { createAdmissionAppointment } from './actions'
 
 interface AlumnoResult {
@@ -606,13 +608,19 @@ export default function AgendarPage() {
       )}
 
       <div className="agendar-header">
-        {currentStep === 2 && !showSuccessModal ? (
-          <button type="button" className="back-link" onClick={() => openLeaveConfirmModal('goHome')}>
-            {t('back')}
-          </button>
-        ) : (
-          <Link href="/" className="back-link">{t('back')}</Link>
-        )}
+        <div className="agendar-header-top">
+          {currentStep === 2 && !showSuccessModal ? (
+            <button type="button" className="back-link" onClick={() => openLeaveConfirmModal('goHome')}>
+              {t('back')}
+            </button>
+          ) : (
+            <Link href="/" className="back-link">{t('back')}</Link>
+          )}
+          <div className="agendar-header-controls">
+            <PublicThemeToggle />
+            <ClientLangSelector />
+          </div>
+        </div>
         <h1>{t('title')}</h1>
         <p className="agendar-header-desc">{t('subtitle')}</p>
       </div>

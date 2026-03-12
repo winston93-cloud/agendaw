@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
+import PublicThemeWrapper from '@/components/PublicThemeWrapper'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -44,7 +45,9 @@ export default async function RootLayout({
       </head>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          {children}
+          <PublicThemeWrapper>
+            {children}
+          </PublicThemeWrapper>
         </NextIntlClientProvider>
       </body>
     </html>

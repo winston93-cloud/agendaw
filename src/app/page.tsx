@@ -4,6 +4,7 @@ import { getTranslations, getLocale } from 'next-intl/server'
 import Carousel from '@/components/Carousel'
 import ScrollButton from '@/components/ScrollButton'
 import LangSelector from '@/components/LangSelector'
+import PublicThemeToggle from '@/components/PublicThemeToggle'
 
 export default async function Home() {
   const t = await getTranslations('home')
@@ -30,6 +31,7 @@ export default async function Home() {
             {/* Contenido central */}
             <div className="hero-center-content">
               <div className="hero-lang-bar">
+                <PublicThemeToggle />
                 <LangSelector currentLocale={locale as 'es' | 'en'} />
               </div>
               <p className="hero-subtitle hero-intro">

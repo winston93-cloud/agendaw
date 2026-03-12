@@ -354,7 +354,40 @@ body {
 /* Admission Page Styles */
 .admission-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
+  background: var(--pub-bg, linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%));
+  transition: background 0.3s;
+}
+
+/* ── Landing dark mode (/normalize /polish) ────────────── */
+.public-layout[data-theme="dark"] .admission-page {
+  background: transparent;
+}
+
+.public-layout[data-theme="dark"] .menu-card,
+.public-layout[data-theme="dark"] .process-card,
+.public-layout[data-theme="dark"] .info-card {
+  background: rgba(13,15,46,0.75);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--pub-border);
+  color: var(--pub-text);
+}
+
+.public-layout[data-theme="dark"] .menu-card h3,
+.public-layout[data-theme="dark"] .process-card h3,
+.public-layout[data-theme="dark"] .info-card h3 {
+  color: var(--pub-text);
+}
+
+.public-layout[data-theme="dark"] .menu-card p,
+.public-layout[data-theme="dark"] .process-card p,
+.public-layout[data-theme="dark"] .info-card p {
+  color: var(--pub-text-muted);
+}
+
+.public-layout[data-theme="dark"] .process-section,
+.public-layout[data-theme="dark"] .banner-section {
+  background: rgba(13,15,46,0.6);
+  color: var(--pub-text);
 }
 
 .admission-hero {
@@ -474,8 +507,25 @@ body {
 /* ── Barra de idioma en el hero ── */
 .hero-lang-bar {
   display: flex;
+  align-items: center;
   justify-content: center;
-  margin-bottom: 1rem;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+/* ThemeToggle dentro del hero (fondo oscuro) */
+.hero-lang-bar .pub-theme-toggle {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.25);
+}
+
+.hero-lang-bar .pub-theme-btn {
+  color: rgba(255,255,255,0.75);
+}
+
+.hero-lang-bar .pub-theme-btn.active {
+  background: rgba(255,255,255,0.22);
+  color: #fff;
 }
 
 /* ── Selector de idioma (LangSelector) ── */
@@ -1407,12 +1457,106 @@ body {
 }
 
 /* Agendar Page Styles */
+/* ══════════════════════════════════════════════════════════════
+   DESIGN TOKENS PÚBLICOS — /normalize
+   Separados de admin para evolucionar de forma independiente.
+   Light mode = valores por defecto. Dark mode = synthwave.
+══════════════════════════════════════════════════════════════ */
+.public-layout {
+  /* Light */
+  --pub-bg:          #f0f4ff;
+  --pub-surface:     #ffffff;
+  --pub-surface-alt: #f8fafc;
+  --pub-border:      #e2e8f0;
+  --pub-text:        #0f172a;
+  --pub-text-muted:  #475569;
+  --pub-accent:      #2563eb;
+  --pub-accent-lt:   rgba(37,99,235,0.10);
+  --pub-shadow:      0 4px 20px rgba(0,0,0,0.07);
+  --pub-radius:      14px;
+  --pub-ease:        cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 100vh;
+  background: var(--pub-bg);
+  color: var(--pub-text);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  transition: background 0.3s var(--pub-ease), color 0.3s;
+}
+
+/* ── Dark / Synthwave ────────────────────────────────────── */
+.public-layout[data-theme="dark"] {
+  --pub-bg:          #07091a;
+  --pub-surface:     rgba(13,15,46,0.85);
+  --pub-surface-alt: rgba(21,30,60,0.75);
+  --pub-border:      rgba(21,101,192,0.35);
+  --pub-text:        #f1f5f9;
+  --pub-text-muted:  #94a3b8;
+  --pub-accent:      #60a5fa;
+  --pub-accent-lt:   rgba(96,165,250,0.15);
+  --pub-shadow:      0 8px 32px rgba(0,0,0,0.5);
+}
+
+/* Fondo estrellado synthwave en dark */
+.public-layout[data-theme="dark"] {
+  background-image:
+    radial-gradient(1px 1px at 12%  7%,  rgba(255,255,255,0.6) 0%, transparent 0%),
+    radial-gradient(1px 1px at 75%  13%, rgba(255,255,255,0.4) 0%, transparent 0%),
+    radial-gradient(1px 1px at 45%  4%,  rgba(255,255,255,0.5) 0%, transparent 0%),
+    radial-gradient(1px 1px at 90%  20%, rgba(255,255,255,0.35) 0%, transparent 0%),
+    radial-gradient(1px 1px at 30%  35%, rgba(255,255,255,0.3) 0%, transparent 0%),
+    radial-gradient(1px 1px at 60%  1%,  rgba(255,255,255,0.5) 0%, transparent 0%),
+    radial-gradient(2px 2px at 22%  10%, rgba(200,212,0,0.55)  0%, transparent 0%),
+    radial-gradient(2px 2px at 82%  5%,  rgba(21,101,192,0.65) 0%, transparent 0%),
+    linear-gradient(180deg, #07091a 0%, #0d0f2e 60%, #07091a 100%);
+}
+
+/* Cuadrícula perspectiva */
+.public-layout[data-theme="dark"]::before {
+  content: '';
+  position: fixed;
+  left: -30%; right: -30%; bottom: 0;
+  height: 48vh;
+  background-image:
+    linear-gradient(rgba(21,101,192,0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(21,101,192,0.4) 1px, transparent 1px);
+  background-size: 56px 56px;
+  transform: perspective(280px) rotateX(58deg);
+  transform-origin: 50% 100%;
+  -webkit-mask-image: linear-gradient(to top, black 0%, transparent 88%);
+  mask-image: linear-gradient(to top, black 0%, transparent 88%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Horizonte luminoso */
+.public-layout[data-theme="dark"]::after {
+  content: '';
+  position: fixed;
+  left: 0; right: 0; bottom: 46vh;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(200,212,0,0.35) 25%,
+    rgba(21,101,192,0.7) 50%, rgba(200,212,0,0.35) 75%, transparent 100%);
+  filter: blur(3px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Contenido sobre el fondo */
+.public-layout[data-theme="dark"] .agendar-page,
+.public-layout[data-theme="dark"] .admission-page,
+.public-layout[data-theme="dark"] .expediente-page {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+}
+
+/* ── Páginas que heredan tokens ── */
 .agendar-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
+  background: var(--pub-bg, linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%));
   padding: 2rem 0;
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
+  transition: background 0.3s;
 }
 
 /* Modal de confirmación exitosa */
@@ -1910,10 +2054,92 @@ body {
   margin-bottom: 1.5rem;
 }
 
+/* ── Agendar header — /normalize /polish ────────────────── */
 .agendar-header {
   max-width: 900px;
   margin: 0 auto 2rem;
   padding: 0 2rem;
+}
+
+/* Fila superior: back + controles (toggle + lang) */
+.agendar-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Controles agrupados: ThemeToggle + LangSelector */
+.agendar-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ── PublicThemeToggle — pill icónico ────────────────────── */
+.pub-theme-toggle {
+  display: flex;
+  background: rgba(0,0,0,0.06);
+  border: 1px solid var(--pub-border, #e2e8f0);
+  border-radius: 9999px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.public-layout[data-theme="dark"] .pub-theme-toggle {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.15);
+}
+
+.pub-theme-btn {
+  background: transparent;
+  border: none;
+  font-size: 0.9rem;
+  padding: 0.28rem 0.6rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  line-height: 1;
+}
+
+.pub-theme-btn.active {
+  background: rgba(37,99,235,0.12);
+  transform: scale(1.1);
+}
+
+.public-layout[data-theme="dark"] .pub-theme-btn.active {
+  background: rgba(255,255,255,0.18);
+}
+
+/* Mismo estilo pill para el LangSelector dentro de agendar */
+.agendar-header-controls .lang-selector {
+  background: rgba(0,0,0,0.06);
+  border-color: var(--pub-border, #e2e8f0);
+}
+
+.public-layout[data-theme="dark"] .agendar-header-controls .lang-selector {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.15);
+}
+
+.agendar-header-controls .lang-btn {
+  color: var(--pub-text-muted, #475569);
+}
+
+.agendar-header-controls .lang-btn.active {
+  background: rgba(37,99,235,0.12);
+  color: var(--pub-accent, #2563eb);
+}
+
+.public-layout[data-theme="dark"] .agendar-header-controls .lang-btn {
+  color: rgba(255,255,255,0.6);
+}
+
+.public-layout[data-theme="dark"] .agendar-header-controls .lang-btn.active {
+  background: rgba(255,255,255,0.18);
+  color: #fff;
 }
 
 .back-link {
@@ -2039,12 +2265,176 @@ body {
 }
 
 .form-step {
-  background: #ffffff;
+  background: var(--pub-surface, #ffffff);
   border-radius: 12px;
   padding: 2.5rem 2.75rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: var(--pub-shadow, 0 1px 3px rgba(0,0,0,0.06));
+  border: 1px solid var(--pub-border, rgba(0,0,0,0.06));
+  color: var(--pub-text, inherit);
   animation: slideIn 0.3s ease-out;
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+
+/* ── Dark mode: formulario ────────────────────────────────
+   /normalize: usa tokens en vez de valores fijos
+   /harden: contraste suficiente para todos los textos
+   /polish: transiciones suaves
+── ────────────────────────────────────────────────────── */
+.public-layout[data-theme="dark"] .agendar-page {
+  background: transparent;
+}
+
+.public-layout[data-theme="dark"] .agendar-header h1,
+.public-layout[data-theme="dark"] .agendar-header-desc {
+  color: var(--pub-text);
+}
+
+.public-layout[data-theme="dark"] .back-link {
+  color: var(--pub-accent);
+}
+
+.public-layout[data-theme="dark"] .progress-bar::before {
+  background: var(--pub-border);
+}
+
+.public-layout[data-theme="dark"] .progress-circle {
+  background: var(--pub-surface-alt);
+  color: var(--pub-text-muted);
+}
+
+.public-layout[data-theme="dark"] .progress-label {
+  color: var(--pub-text-muted);
+}
+
+.public-layout[data-theme="dark"] .progress-step.active .progress-label {
+  color: var(--pub-accent);
+}
+
+.public-layout[data-theme="dark"] .form-step {
+  background: rgba(13,15,46,0.75);
+  backdrop-filter: blur(14px);
+  border-color: var(--pub-border);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px var(--pub-border);
+}
+
+.public-layout[data-theme="dark"] .step-heading,
+.public-layout[data-theme="dark"] .form-label,
+.public-layout[data-theme="dark"] .form-step label,
+.public-layout[data-theme="dark"] .form-step p,
+.public-layout[data-theme="dark"] .form-step h2,
+.public-layout[data-theme="dark"] .form-step h3 {
+  color: var(--pub-text);
+}
+
+.public-layout[data-theme="dark"] .form-input,
+.public-layout[data-theme="dark"] .form-select,
+.public-layout[data-theme="dark"] .form-textarea {
+  background: rgba(255,255,255,0.06);
+  border-color: var(--pub-border);
+  color: var(--pub-text);
+}
+
+.public-layout[data-theme="dark"] .form-input::placeholder,
+.public-layout[data-theme="dark"] .form-textarea::placeholder {
+  color: var(--pub-text-muted);
+}
+
+.public-layout[data-theme="dark"] .form-input:focus,
+.public-layout[data-theme="dark"] .form-select:focus,
+.public-layout[data-theme="dark"] .form-textarea:focus {
+  border-color: var(--pub-accent);
+  box-shadow: 0 0 0 3px rgba(96,165,250,0.25);
+  background: rgba(255,255,255,0.09);
+}
+
+.public-layout[data-theme="dark"] .form-select option {
+  background: #0d0f2e;
+  color: var(--pub-text);
+}
+
+/* Campus cards dark mode */
+.public-layout[data-theme="dark"] .campus-card {
+  background: rgba(255,255,255,0.05);
+  border-color: var(--pub-border);
+  color: var(--pub-text);
+}
+
+.public-layout[data-theme="dark"] .campus-card h3,
+.public-layout[data-theme="dark"] .campus-card p {
+  color: var(--pub-text);
+}
+
+.public-layout[data-theme="dark"] .campus-card.selected {
+  background: rgba(96,165,250,0.15);
+  border-color: var(--pub-accent);
+}
+
+/* Summary / confirm dark mode */
+.public-layout[data-theme="dark"] .summary-card,
+.public-layout[data-theme="dark"] .summary-section,
+.public-layout[data-theme="dark"] .summary-row {
+  color: var(--pub-text);
+}
+
+.public-layout[data-theme="dark"] .summary-label {
+  color: var(--pub-text-muted);
+}
+
+.public-layout[data-theme="dark"] .summary-value {
+  color: var(--pub-text);
+}
+
+/* Modal dark mode */
+.public-layout[data-theme="dark"] .success-modal,
+.public-layout[data-theme="dark"] .modal-content,
+.public-layout[data-theme="dark"] .wsp-modal-box {
+  background: rgba(13,15,46,0.95);
+  border: 1px solid var(--pub-border);
+  color: var(--pub-text);
+}
+
+.public-layout[data-theme="dark"] .success-modal h2,
+.public-layout[data-theme="dark"] .success-modal h3,
+.public-layout[data-theme="dark"] .success-modal p,
+.public-layout[data-theme="dark"] .modal-content h2,
+.public-layout[data-theme="dark"] .modal-content p {
+  color: var(--pub-text);
+}
+
+/* Time slots dark mode */
+.public-layout[data-theme="dark"] .time-slot {
+  background: rgba(255,255,255,0.05);
+  border-color: var(--pub-border);
+  color: var(--pub-text);
+}
+
+.public-layout[data-theme="dark"] .time-slot.selected,
+.public-layout[data-theme="dark"] .time-slot:hover {
+  border-color: var(--pub-accent);
+  background: rgba(96,165,250,0.15);
+}
+
+/* Level badges dark mode */
+.public-layout[data-theme="dark"] .level-badge {
+  background: rgba(255,255,255,0.08);
+  color: var(--pub-text);
+}
+
+/* Autocomplete dark mode (búsqueda alumno) */
+.public-layout[data-theme="dark"] .autocomplete-dropdown,
+.public-layout[data-theme="dark"] .autocomplete-item {
+  background: rgba(13,15,46,0.95);
+  border-color: var(--pub-border);
+  color: var(--pub-text);
+}
+
+.public-layout[data-theme="dark"] .autocomplete-item:hover {
+  background: rgba(96,165,250,0.2);
+}
+
+/* Divider dark mode */
+.public-layout[data-theme="dark"] .form-section-divider {
+  background: var(--pub-border);
 }
 
 .form-step-confirm {
