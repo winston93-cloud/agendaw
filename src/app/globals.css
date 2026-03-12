@@ -3017,16 +3017,6 @@ body {
   font-family: var(--adm-font);
 }
 
-/* Fondo dark con cuadrícula neón — /bolder */
-@media (prefers-color-scheme: dark) {
-  .admin-layout {
-    background-color: #060c1a;
-    background-image:
-      linear-gradient(rgba(21,101,192,0.12) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(21,101,192,0.12) 1px, transparent 1px);
-    background-size: 48px 48px;
-  }
-}
 
 .admin-login-page {
   min-height: 100vh;
@@ -3117,29 +3107,39 @@ body {
 }
 
 .admin-header {
-  background: linear-gradient(120deg, #0f1e4a 0%, #1565c0 45%, #6d28d9 100%);
+  background: var(--adm-accent);
   border-radius: var(--adm-radius);
   padding: 1.5rem 2rem;
   margin-bottom: 2rem;
-  box-shadow:
-    0 4px 24px rgba(21,101,192,0.35),
-    0 0 60px rgba(109,40,217,0.15);
+  box-shadow: 0 4px 20px rgba(21,101,192,0.25);
   color: #fff;
   animation: adminFadeInUp 0.4s var(--adm-ease);
   position: relative;
   overflow: hidden;
 }
 
-/* Forma abstracta en el header */
+/* Banda diagonal amarillo-verde institucional — echo del logo Winston */
+.admin-header::before {
+  content: '';
+  position: absolute;
+  right: -40px;
+  top: 0;
+  height: 100%;
+  width: 38%;
+  background: rgba(200, 212, 0, 0.09);
+  transform: skewX(-18deg);
+  pointer-events: none;
+}
+
 .admin-header::after {
   content: '';
   position: absolute;
-  right: -60px;
-  top: -60px;
-  width: 220px;
-  height: 220px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+  right: 60px;
+  top: 0;
+  height: 100%;
+  width: 18%;
+  background: rgba(200, 212, 0, 0.05);
+  transform: skewX(-18deg);
   pointer-events: none;
 }
 
@@ -3187,13 +3187,23 @@ body {
 
 /* ══════════════════════════════════════════════════════════════
    TARJETAS ADMIN — /bolder /colorize /delight
-   Fondos vibrantes + formas abstractas en CSS
+   Colores saturados + formas geométricas angulares
+   Sin neon-glow, sin gradientes genéricos — energía a través
+   de composición, formas diagonales y animación coreografiada.
 ══════════════════════════════════════════════════════════════ */
 .admin-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1.25rem;
 }
+
+/* Entrada escalonada — /delight */
+.admin-card:nth-child(1) { animation-delay: 0.00s; }
+.admin-card:nth-child(2) { animation-delay: 0.07s; }
+.admin-card:nth-child(3) { animation-delay: 0.14s; }
+.admin-card:nth-child(4) { animation-delay: 0.21s; }
+.admin-card:nth-child(5) { animation-delay: 0.28s; }
+.admin-card:nth-child(6) { animation-delay: 0.35s; }
 
 .admin-card {
   display: flex;
@@ -3202,70 +3212,72 @@ body {
   text-align: left;
   padding: 1.75rem 1.6rem 1.5rem;
   border-radius: 14px;
-  border: 1px solid color-mix(in srgb, var(--card-color, var(--adm-accent)) 50%, transparent);
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--card-color, var(--adm-accent)) 90%, #000) 0%,
-    color-mix(in srgb, var(--card-color, var(--adm-accent)) 70%, #000) 100%
-  );
+  border: none;
+  background: var(--card-color, var(--adm-accent));
   color: #fff;
-  box-shadow:
-    0 4px 20px color-mix(in srgb, var(--card-color, var(--adm-accent)) 40%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--card-color, var(--adm-accent)) 20%, transparent),
-    inset 0 1px 0 rgba(255,255,255,0.12);
+  /* Sombra coloreada limpia — sin neon blur */
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--card-color, var(--adm-accent)) 35%, transparent);
   cursor: pointer;
-  transition: transform 0.3s var(--adm-ease), box-shadow 0.3s var(--adm-ease);
+  transition:
+    transform 0.3s var(--adm-ease),
+    box-shadow 0.3s var(--adm-ease);
   position: relative;
   overflow: hidden;
+  /* Entrada coreografiada */
+  animation: adminFadeInUp 0.4s var(--adm-ease) backwards;
 }
 
-/* Forma abstracta 1 — círculo grande inferior-derecha */
+/* Forma geométrica 1 — banda diagonal (paralelo al logo Winston) */
 .admin-card::before {
   content: '';
   position: absolute;
-  right: -35px;
-  bottom: -45px;
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.14) 0%, transparent 70%);
+  right: -15%;
+  top: 0;
+  bottom: 0;
+  width: 55%;
+  background: rgba(255,255,255,0.08);
+  transform: skewX(-20deg);
   pointer-events: none;
-  transition: transform 0.5s var(--adm-ease);
+  transition: transform 0.4s var(--adm-ease), opacity 0.3s;
 }
 
-/* Forma abstracta 2 — anillo, esquina superior-derecha */
+/* Forma geométrica 2 — rombo en esquina */
 .admin-card::after {
   content: '';
   position: absolute;
-  right: 16px;
-  top: -30px;
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  border: 16px solid rgba(255,255,255,0.08);
+  bottom: -24px;
+  right: -24px;
+  width: 72px;
+  height: 72px;
+  background: rgba(255,255,255,0.10);
+  transform: rotate(45deg);
   pointer-events: none;
 }
 
 .admin-card:hover {
-  transform: translateY(-5px);
-  box-shadow:
-    0 12px 40px color-mix(in srgb, var(--card-color, var(--adm-accent)) 60%, transparent),
-    0 0 50px color-mix(in srgb, var(--card-color, var(--adm-accent)) 25%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--card-color, var(--adm-accent)) 45%, transparent),
-    inset 0 1px 0 rgba(255,255,255,0.18);
+  transform: translateY(-5px) scale(1.01);
+  box-shadow: 0 14px 36px color-mix(in srgb, var(--card-color, var(--adm-accent)) 50%, transparent);
 }
 
+/* Al hover la banda diagonal se desplaza levemente */
 .admin-card:hover::before {
-  transform: scale(1.2) translate(8px, 8px);
+  transform: skewX(-20deg) translateX(6px);
+  opacity: 0.85;
 }
 
-/* ── Paleta neón por tarjeta ─────────────────────────────── */
-.admin-card-citas      { --card-color: #1d78d4; }   /* azul institucional  */
-.admin-card-horarios   { --card-color: #0d9488; }   /* esmeralda           */
-.admin-card-bloquear   { --card-color: #e53e3e; }   /* rojo neón           */
-.admin-card-buscar     { --card-color: #7c3aed; }   /* violeta neón        */
-.admin-card-recorridos { --card-color: #0284c7; }   /* azul cielo          */
-.admin-card-migracion  { --card-color: #d97706; }   /* ámbar neón          */
+/* Presionar — feedback satisfactorio /delight */
+.admin-card:active {
+  transform: translateY(-2px) scale(0.99);
+  transition-duration: 0.1s;
+}
+
+/* ── Paleta saturada e institucional ─────────────────────── */
+.admin-card-citas      { --card-color: #1565c0; }  /* azul institucional */
+.admin-card-horarios   { --card-color: #0d7c5f; }  /* verde esmeralda    */
+.admin-card-bloquear   { --card-color: #c0392b; }  /* rojo claro         */
+.admin-card-buscar     { --card-color: #6d28d9; }  /* violeta            */
+.admin-card-recorridos { --card-color: #0277bd; }  /* azul cielo         */
+.admin-card-migracion  { --card-color: #b7510a; }  /* ámbar tierra       */
 
 /* ── Componente AdminMigracion ─────────────────────────────────────── */
 .migracion-container {
@@ -3468,11 +3480,17 @@ body {
 }
 
 .admin-card-icon {
-  font-size: 2.2rem;
-  margin-bottom: 0.75rem;
+  font-size: 2.4rem;
+  margin-bottom: 0.85rem;
   line-height: 1;
   position: relative;
   z-index: 1;
+  transition: transform 0.35s var(--adm-ease);
+  display: inline-block;
+}
+
+.admin-card:hover .admin-card-icon {
+  transform: translateY(-5px) scale(1.12);
 }
 
 .admin-card-title {
@@ -3487,7 +3505,7 @@ body {
 
 .admin-card-desc {
   font-size: 0.85rem;
-  color: rgba(255,255,255,0.75);
+  color: rgba(255,255,255,0.78);
   line-height: 1.5;
   margin: 0 0 1.25rem;
   flex: 1;
@@ -3495,18 +3513,19 @@ body {
   z-index: 1;
 }
 
+/* Flecha institucional amarillo-verde — /colorize */
 .admin-card-arrow {
   align-self: flex-end;
-  font-size: 1rem;
-  color: rgba(255,255,255,0.5);
-  transition: transform 0.3s var(--adm-ease), color 0.2s;
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.45);
+  transition: transform 0.35s var(--adm-ease), color 0.25s;
   position: relative;
   z-index: 1;
 }
 
 .admin-card:hover .admin-card-arrow {
-  transform: translateX(6px);
-  color: rgba(255,255,255,0.9);
+  transform: translateX(8px);
+  color: #c8d400; /* amarillo-verde institucional — acento distintivo */
 }
 
 .admin-dashboard-content {
