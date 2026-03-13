@@ -5108,10 +5108,21 @@ body {
   color: #f1f5f9;
 }
 
-.admin-layout[data-theme="dark"] .admin-bloquear-form select {
+.admin-layout[data-theme="dark"] .admin-bloquear-form {
   background: var(--adm-surface) !important;
   border-color: var(--adm-border) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-bloquear-form label {
   color: var(--adm-text) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-bloquear-form input,
+.admin-layout[data-theme="dark"] .admin-bloquear-form select {
+  background: var(--adm-surface-alt) !important;
+  border-color: var(--adm-border) !important;
+  color: var(--adm-text) !important;
+  color-scheme: dark;
 }
 
 .admin-layout[data-theme="dark"] .admin-recorridos-form select,
@@ -5453,7 +5464,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 1.25rem;
-  align-items: flex-end;
+  align-items: stretch;
   margin-bottom: 2rem;
   padding: 1.25rem;
   background: linear-gradient(135deg, #fff7ed 0%, #fffbeb 100%);
@@ -5468,6 +5479,7 @@ body {
   font-weight: 600;
   font-size: 0.9rem;
   color: #1e293b;
+  width: 100%;
 }
 
 .admin-bloquear-form input,
@@ -5475,9 +5487,10 @@ body {
   padding: 0.6rem 1rem;
   border: 2px solid #e2e8f0;
   border-radius: 10px;
-  min-width: 160px;
+  width: 100%;
   background: #fff;
   transition: border-color 0.2s;
+  font-size: 0.95rem;
 }
 
 .admin-bloquear-form input:focus,
