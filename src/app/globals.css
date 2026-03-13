@@ -3768,11 +3768,12 @@ body {
    dark mode vía prefers-color-scheme.
 ══════════════════════════════════════════════════════════════ */
 :root {
-  /* ── Superficie — off-white #e5e7eb claramente gris, no blanco ── */
-  --adm-bg:          #e5e7eb;
-  --adm-surface:     #ffffff;
-  --adm-surface-alt: #f3f4f6;
+  /* ── Superficie — slate-100 suave y cálido ─────────────────── */
+  --adm-bg:          #f1f5f9;   /* slate-100: off-white limpio, no gris crudo */
+  --adm-surface:     #fdfdfe;   /* leve tint — contrasta sin chocar con fondo */
+  --adm-surface-alt: #f8fafc;
   --adm-border:      #d1d5db;
+  --adm-border-soft: #cbd5e1;
   /* ── Texto — máximo contraste ───────────────────────────── */
   --adm-text:        #0f172a;   /* casi negro */
   --adm-text-muted:  #334155;
@@ -4177,12 +4178,12 @@ body {
    Dark mode restaura el rainbow en el bloque de overrides abajo.
 ═══════════════════════════════════════════════════════════ */
 .admin-header {
-  background: #ffffff;
-  border: 1px solid #d1d5db;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
   border-radius: var(--adm-radius);
   padding: 1.25rem 1.75rem;
   margin-bottom: 2rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.04);
   color: #0f172a;
   animation: adminHeaderDrop 400ms var(--adm-ease) both;
   position: relative;
@@ -4258,11 +4259,11 @@ body {
   flex-shrink: 0;
 }
 
-/* ── Theme toggle — pill segmentado (light: gris limpio) ─── */
+/* ── Theme toggle — pill segmentado (light: slate suave) ─── */
 .admin-theme-toggle {
   display: flex;
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
+  background: #e2e8f0;
+  border: 1px solid #cbd5e1;
   border-radius: 9999px;
   padding: 3px;
   gap: 2px;
@@ -4275,7 +4276,7 @@ body {
   gap: 0.3rem;
   background: transparent;
   border: none;
-  color: #6b7280;
+  color: #64748b;
   font-size: 0.73rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -4290,13 +4291,21 @@ body {
 }
 
 .admin-theme-btn:hover {
-  color: #111827;
+  color: #0f172a;
 }
 
-.admin-theme-btn.active {
-  background: #1565c0;
-  color: #ffffff;
-  box-shadow: 0 1px 4px rgba(21,101,192,0.30);
+/* Light (primer botón) activo: indigo-100 / indigo-700 */
+.admin-theme-btn:first-child.active {
+  background: #e0e7ff;
+  color: #3730a3;
+  box-shadow: 0 1px 3px rgba(55,48,163,0.18);
+}
+
+/* Dark (segundo botón) activo: slate-200 / slate-700 */
+.admin-theme-btn:last-child.active {
+  background: #e2e8f0;
+  color: #334155;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.10);
 }
 
 /* ── Nav links — light: gris limpio, dark: translúcido blanco ── */
@@ -4408,11 +4417,11 @@ body {
   /* Left accent — el color semántico se expresa sin saturar el fondo */
   border: 1px solid #d1d5db;
   border-left: 3px solid var(--card-color, var(--adm-accent));
-  background: #ffffff;
+  background: var(--adm-surface);
   color: #0f172a;
   box-shadow:
-    0 4px 6px -1px rgba(0,0,0,0.08),
-    0 2px 4px -1px rgba(0,0,0,0.05);
+    0 10px 15px -3px rgba(0,0,0,0.07),
+    0 4px 6px -2px rgba(0,0,0,0.04);
   cursor: pointer;
   /* Compositor-only — fixing-motion-performance */
   transition:
@@ -4744,15 +4753,15 @@ body {
 }
 
 .admin-section {
-  background: #ffffff;
+  background: var(--adm-surface);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   color: var(--adm-text);
   border-radius: var(--adm-radius);
   padding: 1.75rem 2rem 2rem;
   box-shadow:
-    0 4px 6px -1px rgba(0,0,0,0.08),
-    0 2px 4px -1px rgba(0,0,0,0.05);
+    0 10px 15px -3px rgba(0,0,0,0.07),
+    0 4px 6px -2px rgba(0,0,0,0.04);
   border: 1px solid #d1d5db;
   position: relative;
   overflow: hidden;
