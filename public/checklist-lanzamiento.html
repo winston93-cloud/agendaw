@@ -1275,5 +1275,130 @@ restore();
 
 })();
 </script>
+
+<style>
+  .db-improvements {
+    margin: 2rem auto;
+    max-width: 860px;
+    font-family: var(--font);
+  }
+  .db-improvements h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .db-improvements h3 span.badge-v2 {
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: #d1fae5;
+    color: #059669;
+    padding: 2px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+  }
+  .db-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 0.875rem;
+  }
+  .db-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .db-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 10px 0 0 10px;
+    background: var(--accent-line, #1565c0);
+  }
+  .db-card-icon {
+    font-size: 1.25rem;
+    margin-bottom: 0.4rem;
+  }
+  .db-card-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.3rem;
+  }
+  .db-card-desc {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+  .db-card-tag {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--tag-bg, #e0e7ff);
+    color: var(--tag-color, #3730a3);
+  }
+</style>
+
+<div class="db-improvements">
+  <h3>🛠 Mejoras aplicadas a la base de datos <span class="badge-v2">v2 — 13 mar 2026</span></h3>
+  <div class="db-grid">
+
+    <div class="db-card" style="--accent-line:#c0392b;">
+      <div class="db-card-icon">🗑️</div>
+      <div class="db-card-title">Tablas legacy eliminadas</div>
+      <div class="db-card-desc">
+        Se borraron 6 tablas heredadas de la plantilla base que nunca se usaron:
+        <code>users, clients, professionals, services, appointments, availability</code>.
+        El schema ahora solo contiene tablas activas del proyecto.
+      </div>
+      <span class="db-card-tag" style="--tag-bg:#fee2e2;--tag-color:#b91c1c;">Migración 011</span>
+    </div>
+
+    <div class="db-card" style="--accent-line:#059669;">
+      <div class="db-card-icon">👥</div>
+      <div class="db-card-title">Tabla <code>staff</code> — personal administrativo</div>
+      <div class="db-card-desc">
+        Nueva tabla para registrar psicólogas, directoras y admins.
+        Vinculada a Supabase Auth vía <code>supabase_user_id</code>.
+        Permite saber quién autorizó cada acción y escalar roles en el futuro.
+      </div>
+      <span class="db-card-tag" style="--tag-bg:#d1fae5;--tag-color:#065f46;">Migración 012</span>
+    </div>
+
+    <div class="db-card" style="--accent-line:#b7510a;">
+      <div class="db-card-icon">✍️</div>
+      <div class="db-card-title">Auditoría en <code>permission_requests</code></div>
+      <div class="db-card-desc">
+        Se agregaron dos columnas: <code>approved_by</code> (FK → staff) y
+        <code>approved_at</code> (timestamp). Ahora queda registro de quién
+        del staff aprobó o rechazó cada solicitud de permiso.
+      </div>
+      <span class="db-card-tag" style="--tag-bg:#ffedd5;--tag-color:#9a3412;">Migración 012</span>
+    </div>
+
+    <div class="db-card" style="--accent-line:#1565c0;">
+      <div class="db-card-icon">⚡</div>
+      <div class="db-card-title">Índices de performance</div>
+      <div class="db-card-desc">
+        Se añadieron índices en los campos más consultados:
+        <code>appointment_date</code>, <code>status</code> y <code>level</code>
+        en citas; <code>block_date</code> y <code>level</code> en bloqueos;
+        <code>status</code> y <code>appointment_id</code> en permisos.
+      </div>
+      <span class="db-card-tag" style="--tag-bg:#dbeafe;--tag-color:#1e40af;">Migración 012</span>
+    </div>
+
+  </div>
+</div>
+
 </body>
 </html>
