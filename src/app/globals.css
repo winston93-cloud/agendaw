@@ -113,26 +113,33 @@ body {
 }
 
 .btn {
-  display: inline-block;
-  padding: 1rem 2rem;
-  border-radius: var(--radius);
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.2s;
-  cursor: pointer;
-  border: none;
-  font-size: 1rem;
-  min-height: 48px; /* Tamaño mínimo para touch en móvil */
   display: inline-flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  padding: 1rem 2rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  text-decoration: none;
+  /* Explícito: evita reanimar layout props innecesarias */
+  transition:
+    background-color 200ms cubic-bezier(0.25, 1, 0.5, 1),
+    color           200ms cubic-bezier(0.25, 1, 0.5, 1),
+    border-color    200ms cubic-bezier(0.25, 1, 0.5, 1),
+    box-shadow      200ms cubic-bezier(0.25, 1, 0.5, 1),
+    transform       150ms cubic-bezier(0.25, 1, 0.5, 1),
+    opacity         150ms cubic-bezier(0.25, 1, 0.5, 1);
+  cursor: pointer;
+  border: none;
+  font-size: 1rem;
+  min-height: 48px;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
 
 .btn:active {
-  transform: scale(0.98);
+  transform: scale(0.96);
+  transition-duration: 100ms;
 }
 
 .btn-primary {
@@ -142,8 +149,8 @@ body {
 
 .btn-primary:hover {
   background-color: var(--primary-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(59,130,246,0.35);
 }
 
 .btn-secondary {
@@ -155,12 +162,13 @@ body {
 .btn-secondary:hover {
   background-color: var(--primary-color);
   color: var(--text-light);
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 .btn-sm {
   padding: 0.4rem 0.75rem;
   font-size: 0.875rem;
+  min-height: 36px;
 }
 
 .btn-danger {
@@ -3652,11 +3660,39 @@ body {
 @keyframes adminFadeInUp {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes adminSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ── Accessibility: sin motion para quienes lo necesitan ── */
+@media (prefers-reduced-motion: reduce) {
+  .admin-card,
+  .admin-section,
+  .admin-link,
+  .admin-back-cards,
+  .admin-dashboard-content,
+  .admin-header,
+  .admin-login-card {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+  .admin-table tbody tr {
+    transition: none !important;
   }
 }
 
@@ -3688,7 +3724,11 @@ body {
   --adm-radius-sm:   6px;
   --adm-shadow-sm:   0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   --adm-shadow-md:   0 4px 12px rgba(0,0,0,0.08);
-  --adm-ease:        cubic-bezier(0.16, 1, 0.3, 1);
+  --adm-ease:        cubic-bezier(0.16, 1, 0.3, 1);   /* expo-out — decisivo */
+  --adm-ease-soft:   cubic-bezier(0.25, 1, 0.5, 1);   /* quart-out — refinado */
+  --adm-dur-micro:   120ms;   /* press/toggle */
+  --adm-dur-fast:    200ms;   /* hover, input focus */
+  --adm-dur-base:    300ms;   /* show/hide, layout */
   --adm-font:        'Plus Jakarta Sans', system-ui, sans-serif;
 }
 
@@ -4037,7 +4077,10 @@ body {
   border-radius: 9999px;
   background: rgba(255,255,255,0.14);
   border: 1px solid rgba(255,255,255,0.18);
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 150ms var(--adm-ease-soft),
+    border-color 150ms var(--adm-ease-soft),
+    transform 150ms var(--adm-ease-soft);
   white-space: nowrap;
   backdrop-filter: blur(6px);
 }
@@ -4045,6 +4088,12 @@ body {
 .admin-link:hover {
   background: rgba(255,255,255,0.26);
   border-color: rgba(255,255,255,0.35);
+  transform: scale(1.03);
+}
+
+.admin-link:active {
+  transform: scale(0.97);
+  transition-duration: 80ms;
 }
 
 .admin-link:focus-visible {
@@ -4106,12 +4155,16 @@ body {
     0 0 48px color-mix(in srgb, var(--card-color, var(--adm-accent)) 18%, transparent);
   cursor: pointer;
   transition:
-    transform 0.3s var(--adm-ease),
-    box-shadow 0.3s var(--adm-ease);
+    transform 200ms var(--adm-ease),
+    box-shadow 200ms var(--adm-ease);
   position: relative;
   overflow: hidden;
   /* Entrada coreografiada */
   animation: adminFadeInUp 0.4s var(--adm-ease) backwards;
+}
+
+.admin-card:hover {
+  will-change: transform;
 }
 
 /* Forma geométrica 1 — banda diagonal (paralelo al logo Winston) */
@@ -4435,13 +4488,22 @@ body {
   font-weight: 600;
   color: var(--adm-text-muted);
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
+  transition:
+    border-color 150ms var(--adm-ease-soft),
+    color        150ms var(--adm-ease-soft),
+    transform    150ms var(--adm-ease-soft);
   box-shadow: var(--adm-shadow-sm);
 }
 
 .admin-back-cards:hover {
   border-color: var(--adm-accent);
   color: var(--adm-accent);
+  transform: translateX(-2px);
+}
+
+.admin-back-cards:active {
+  transform: scale(0.97);
+  transition-duration: 80ms;
 }
 
 .admin-section {
@@ -5387,7 +5449,9 @@ body {
 
 .admin-table tbody tr {
   background: var(--adm-surface);
-  transition: background 0.15s;
+  transition:
+    background 150ms var(--adm-ease-soft),
+    box-shadow 150ms var(--adm-ease-soft);
   border-bottom: 1px solid var(--adm-border);
 }
 
@@ -5397,6 +5461,7 @@ body {
 
 .admin-table tbody tr:hover {
   background: var(--adm-surface-alt);
+  box-shadow: inset 3px 0 0 var(--adm-accent);
 }
 
 .admin-table td {
