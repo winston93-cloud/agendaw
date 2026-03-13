@@ -2617,6 +2617,40 @@ body {
   color: var(--pub-text);
 }
 
+.public-layout[data-theme="dark"] .success-modal-title {
+  color: var(--pub-text) !important;
+}
+
+.public-layout[data-theme="dark"] .success-modal-text {
+  color: var(--pub-text-muted) !important;
+}
+
+.public-layout[data-theme="dark"] .success-modal-status {
+  background: rgba(255,255,255,0.06) !important;
+  border-color: var(--pub-border) !important;
+}
+
+.public-layout[data-theme="dark"] .status-ok {
+  color: #6ee7b7 !important;
+}
+
+.public-layout[data-theme="dark"] .status-fail {
+  color: #fca5a5 !important;
+}
+
+.public-layout[data-theme="dark"] .success-modal-expediente {
+  background: rgba(245,158,11,0.12) !important;
+  border-color: rgba(245,158,11,0.4) !important;
+}
+
+.public-layout[data-theme="dark"] .success-modal-expediente-title {
+  color: #fcd34d !important;
+}
+
+.public-layout[data-theme="dark"] .success-modal-expediente-text {
+  color: var(--pub-text-muted) !important;
+}
+
 /* Time slots dark mode */
 .public-layout[data-theme="dark"] .time-slot {
   background: rgba(255,255,255,0.05);
