@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checklist de Lanzamiento — AgendaW · 18 Mar 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #f1f5f9;
+    --surface:   #ffffff;
+    --border:    #e2e8f0;
+    --border2:   #cbd5e1;
+    --text:      #0f172a;
+    --muted:     #64748b;
+    --accent:    #1565c0;
+    --accent-lt: #dbeafe;
+    --green:     #16a34a;
+    --green-lt:  #dcfce7;
+    --orange:    #d97706;
+    --orange-lt: #fef3c7;
+    --red:       #dc2626;
+    --red-lt:    #fee2e2;
+    --radius:    10px;
+    --font:      'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 4rem;
+  }
+
+  /* ── Header ── */
+  .page-header {
+    background: #ffffff;
+    border-bottom: 1px solid var(--border2);
+    padding: 1.5rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .page-header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .header-brand { display: flex; align-items: center; gap: 0.75rem; }
+  .header-logo {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 800; font-size: 1rem;
+  }
+  .header-title { font-size: 1.1rem; font-weight: 800; color: var(--text); letter-spacing: -0.02em; }
+  .header-sub { font-size: 0.78rem; color: var(--muted); font-weight: 500; }
+  .launch-badge {
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    color: #92400e;
+    font-size: 0.73rem;
+    font-weight: 700;
+    padding: 0.3rem 0.8rem;
+    border-radius: 9999px;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── Progress global ── */
+  .progress-bar-wrap {
+    max-width: 900px;
+    margin: 1.5rem auto 0;
+    padding: 0 2rem;
+  }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.4rem;
+  }
+  .progress-label { font-size: 0.8rem; font-weight: 600; color: var(--muted); }
+  .progress-count { font-size: 0.85rem; font-weight: 700; color: var(--accent); }
+  .progress-track {
+    height: 8px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent) 0%, #22d3ee 100%);
+    border-radius: 999px;
+    transition: width 0.5s cubic-bezier(0.16,1,0.3,1);
+    width: 0%;
+  }
+  .progress-fill.complete { background: linear-gradient(90deg, var(--green) 0%, #34d399 100%); }
+
+  /* ── Layout ── */
+  .main {
+    max-width: 900px;
+    margin: 2rem auto 0;
+    padding: 0 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  /* ── Platform card ── */
+  .platform {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+  }
+  .platform-header {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .platform-header-left { display: flex; align-items: center; gap: 0.85rem; }
+  .platform-icon {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+  }
+  .platform-1 .platform-icon { background: #dbeafe; }
+  .platform-2 .platform-icon { background: #dcfce7; }
+  .platform-3 .platform-icon { background: #fef3c7; }
+  .platform-name { font-size: 1rem; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
+  .platform-url { font-size: 0.75rem; color: var(--accent); font-weight: 500; text-decoration: none; }
+  .platform-url:hover { text-decoration: underline; }
+  .platform-progress {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--muted);
+    background: var(--bg);
+    padding: 0.3rem 0.75rem;
+    border-radius: 9999px;
+    border: 1px solid var(--border2);
+    white-space: nowrap;
+  }
+  .platform-progress.done { background: var(--green-lt); border-color: #86efac; color: var(--green); }
+
+  /* ── Section ── */
+  .section {
+    border-bottom: 1px solid var(--border);
+  }
+  .section:last-child { border-bottom: none; }
+  .section-title {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* ── Check item ── */
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding: 0.85rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    transition: background 150ms ease;
+    cursor: pointer;
+    user-select: none;
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-item:hover { background: #f8fafc; }
+  .check-item.checked { background: #f0fdf4; }
+  .check-item.checked .item-text { color: var(--muted); text-decoration: line-through; }
+
+  .checkbox {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border2);
+    border-radius: 5px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 150ms ease;
+    background: white;
+  }
+  .check-item.checked .checkbox {
+    background: var(--green);
+    border-color: var(--green);
+  }
+  .checkbox-check {
+    width: 10px; height: 10px;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 150ms cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .check-item.checked .checkbox-check { opacity: 1; transform: scale(1); }
+
+  .item-content { flex: 1; min-width: 0; }
+  .item-text { font-size: 0.88rem; font-weight: 500; color: var(--text); line-height: 1.4; }
+  .item-hint { font-size: 0.77rem; color: var(--muted); margin-top: 0.15rem; }
+
+  .item-tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    align-self: flex-start;
+    margin-top: 2px;
+  }
+  .tag-critico  { background: var(--red-lt);    color: var(--red);    }
+  .tag-ux       { background: var(--accent-lt); color: var(--accent); }
+  .tag-mobile   { background: #f5f3ff;          color: #7c3aed;       }
+  .tag-email    { background: var(--orange-lt); color: var(--orange); }
+
+  /* ── Bug notes ── */
+  .bug-btn {
+    background: none;
+    border: 1px dashed var(--border2);
+    border-radius: 6px;
+    font-size: 0.75rem;
+    color: var(--muted);
+    padding: 0.2rem 0.55rem;
+    cursor: pointer;
+    font-family: var(--font);
+    transition: all 120ms ease;
+    flex-shrink: 0;
+    align-self: flex-start;
+    margin-top: 2px;
+  }
+  .bug-btn:hover { background: var(--red-lt); border-color: var(--red); color: var(--red); }
+  .bug-input {
+    display: none;
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.65rem;
+    font-size: 0.8rem;
+    font-family: var(--font);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    color: var(--text);
+    background: white;
+    resize: vertical;
+    min-height: 60px;
+  }
+  .bug-input.visible { display: block; }
+  .has-bug .bug-btn { background: var(--red-lt); border-color: var(--red); color: var(--red); border-style: solid; }
+  .has-bug .item-text::after { content: ' 🐛'; }
+
+  /* ── Reset button ── */
+  .reset-wrap { text-align: center; margin-top: 2rem; }
+  .reset-btn {
+    background: none;
+    border: 1px solid var(--border2);
+    padding: 0.5rem 1.25rem;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: var(--font);
+    transition: all 150ms ease;
+  }
+  .reset-btn:hover { background: var(--red-lt); border-color: var(--red); color: var(--red); }
+
+  /* ── Celebration ── */
+  .celebration {
+    display: none;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border: 1px solid #6ee7b7;
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    text-align: center;
+  }
+  .celebration.visible { display: block; }
+  .celebration h2 { font-size: 1.3rem; font-weight: 800; color: #065f46; margin-bottom: 0.3rem; }
+  .celebration p  { font-size: 0.9rem; color: #047857; }
+
+  @media (max-width: 640px) {
+    .page-header { padding: 1rem; }
+    .main { padding: 0 1rem; }
+    .check-item { padding: 0.75rem 1rem; }
+    .section-title { padding: 0.6rem 1rem; }
+    .platform-header { padding: 1rem; }
+    .item-tag { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="page-header">
+  <div class="page-header-inner">
+    <div class="header-brand">
+      <div class="header-logo">AW</div>
+      <div>
+        <div class="header-title">Checklist de Lanzamiento</div>
+        <div class="header-sub">Instituto Winston Churchill · AgendaW</div>
+      </div>
+    </div>
+    <div class="launch-badge">🚀 Lanzamiento: Miér 18 Mar · 10:00 AM</div>
+  </div>
+</header>
+
+<!-- PROGRESS GLOBAL -->
+<div class="progress-bar-wrap">
+  <div class="progress-info">
+    <span class="progress-label">PROGRESO TOTAL</span>
+    <span class="progress-count" id="globalCount">0 / 0</span>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="globalFill"></div>
+  </div>
+</div>
+
+<main class="main">
+
+  <!-- ═══════════════════════════════════════════════
+       PLATAFORMA 1 — AGENDA DE PAPÁS
+  ════════════════════════════════════════════════ -->
+  <div class="platform platform-1" id="platform-0">
+    <div class="platform-header">
+      <div class="platform-header-left">
+        <div class="platform-icon">🗓️</div>
+        <div>
+          <div class="platform-name">Agenda de Papás</div>
+          <a class="platform-url" href="https://agendaw.vercel.app" target="_blank">agendaw.vercel.app</a>
+        </div>
+      </div>
+      <div class="platform-progress" id="prog-0">0 / 0</div>
+    </div>
+
+    <!-- Landing -->
+    <div class="section">
+      <div class="section-title">🏠 Landing Page</div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Página carga en menos de 3 segundos</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Logos de ambos planteles visibles y correctos</div><div class="item-hint">IWC e IEW</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Botón "Agenda tu examen de admisión" funciona y hace scroll al formulario</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Toggle Light/Dark funciona — todos los textos visibles en ambos modos</div></div>
+        <span class="item-tag tag-ux">UX</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Selector de idioma Español / English funciona</div><div class="item-hint">Todos los textos cambian correctamente al inglés</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Vista en móvil (375px): todos los elementos accesibles y legibles</div></div>
+        <span class="item-tag tag-mobile">Móvil</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+    </div>
+
+    <!-- Formulario Paso 1 -->
+    <div class="section">
+      <div class="section-title">📋 Formulario — Paso 1: Plantel y Nivel</div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Tarjetas de campus (IWC / IEW) se muestran correctas con imágenes y niveles</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Seleccionar campus resalta la tarjeta y habilita los niveles correspondientes</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Calendario muestra fechas disponibles (no bloqueadas, no pasadas)</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Al seleccionar fecha aparecen los horarios disponibles del nivel</div><div class="item-hint">Deben cargarse de la tabla admission_schedules en Supabase</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Campos del aspirante: nombre, apellidos, fecha de nacimiento, ciclo escolar</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Validaciones del formulario funcionan (campos requeridos, email inválido)</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Formulario visible en dark mode — labels, inputs y placeholders legibles</div></div>
+        <span class="item-tag tag-ux">UX</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+    </div>
+
+    <!-- Formulario Paso 2 -->
+    <div class="section">
+      <div class="section-title">👨‍👩‍👧 Formulario — Paso 2: Datos del Padre/Tutor</div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Campos del padre/tutor: nombre, email, teléfono se muestran correctos</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Resumen de la cita muestra todos los datos correctamente antes de confirmar</div><div class="item-hint">Campus, nivel, fecha, hora, nombre del aspirante</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Resumen visible en dark mode — sin textos o fondos perdidos</div></div>
+        <span class="item-tag tag-ux">UX</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+    </div>
+
+    <!-- Confirmación y Éxito -->
+    <div class="section">
+      <div class="section-title">✅ Confirmación y Éxito</div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Al confirmar, la cita se registra en Supabase (tabla appointments)</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Modal de éxito aparece con número de confirmación y datos de la cita</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Email de confirmación llega al correo del padre/tutor</div></div>
+        <span class="item-tag tag-email">Email</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Modal de éxito visible en dark mode — textos y fondos legibles</div></div>
+        <span class="item-tag tag-ux">UX</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Flujo completo en inglés funciona igual (idioma EN)</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Flujo completo en móvil (iPhone/Android) sin errores de layout</div></div>
+        <span class="item-tag tag-mobile">Móvil</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       PLATAFORMA 2 — ADMIN PSICÓLOGAS
+  ════════════════════════════════════════════════ -->
+  <div class="platform platform-2" id="platform-1">
+    <div class="platform-header">
+      <div class="platform-header-left">
+        <div class="platform-icon">🧠</div>
+        <div>
+          <div class="platform-name">Admin — Panel de Psicólogas</div>
+          <a class="platform-url" href="https://agendaw.vercel.app/admin" target="_blank">agendaw.vercel.app/admin</a>
+        </div>
+      </div>
+      <div class="platform-progress" id="prog-1">0 / 0</div>
+    </div>
+
+    <!-- Login -->
+    <div class="section">
+      <div class="section-title">🔐 Acceso</div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Login con credenciales correctas redirige al dashboard</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Login con contraseña incorrecta muestra error sin redirigir</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Botón "Cerrar sesión" cierra la sesión y regresa al login</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Toggle Light/Dark funciona — todos los elementos visibles en ambos modos</div></div>
+        <span class="item-tag tag-ux">UX</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="section">
+      <div class="section-title">🏠 Dashboard Principal</div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Las 6 tarjetas del dashboard cargan con sus íconos y descripciones</div><div class="item-hint">Exámenes, Horarios, Días bloqueados, Buscar alumno, Recorridos, Migración</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Cada tarjeta navega a su sección correcta al hacer clic</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Botón "Dashboard" del header regresa al inicio del admin</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+    </div>
+
+    <!-- Exámenes Programados -->
+    <div class="section">
+      <div class="section-title">📅 Exámenes Programados</div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Lista de citas carga correctamente con datos reales de Supabase</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Filtros de nivel y estado funcionan y filtran correctamente</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Cambiar estado de una cita (pendiente → confirmada → completada) guarda en BD</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Función de reagendar cita (pide permiso a directora o aplica directo)</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Dropdowns de nivel/estado visibles en dark mode (texto no desaparece)</div></div>
+        <span class="item-tag tag-ux">UX</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+    </div>
+
+    <!-- Horarios -->
+    <div class="section">
+      <div class="section-title">🕐 Horarios por Nivel</div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Se muestran los 3 niveles (Maternal/Kinder, Primaria, Secundaria) con sus horarios</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Agregar un nuevo horario a un nivel se guarda y aparece en el formulario público</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Eliminar un horario lo quita de la lista y del formulario público</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Sección visible en dark mode — tarjetas, inputs y textos legibles</div></div>
+        <span class="item-tag tag-ux">UX</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+    </div>
+
+    <!-- Días bloqueados -->
+    <div class="section">
+      <div class="section-title">🚫 Días Bloqueados por Nivel</div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Formulario de bloquear fecha se muestra alineado y sin desplazamientos</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Bloquear una fecha la quita del calendario público para ese nivel</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Desbloquear una fecha la vuelve a habilitar en el formulario público</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+    </div>
+
+    <!-- Buscar Alumno -->
+    <div class="section">
+      <div class="section-title">🔍 Buscar Alumno</div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Buscar por nombre del alumno retorna resultados correctos</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Buscar por fecha muestra las citas de ese día</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Detalle de un resultado muestra todos los datos del alumno y su cita</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Sección completamente visible en dark mode</div></div>
+        <span class="item-tag tag-ux">UX</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+    </div>
+
+    <!-- Recorridos -->
+    <div class="section">
+      <div class="section-title">🏫 Recorridos Programados</div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Lista de recorridos carga con los datos correctos</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Cambiar estado de recorrido se guarda correctamente</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       PLATAFORMA 3 — DASHBOARD DIRECTORAS
+  ════════════════════════════════════════════════ -->
+  <div class="platform platform-3" id="platform-2">
+    <div class="platform-header">
+      <div class="platform-header-left">
+        <div class="platform-icon">👩‍💼</div>
+        <div>
+          <div class="platform-name">Dashboard de Directoras</div>
+          <a class="platform-url" href="https://agendaw.vercel.app/admin/dashboard" target="_blank">agendaw.vercel.app/admin/dashboard</a>
+        </div>
+      </div>
+      <div class="platform-progress" id="prog-2">0 / 0</div>
+    </div>
+
+    <!-- Login Directora -->
+    <div class="section">
+      <div class="section-title">🔐 Acceso por Nivel</div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Login con nivel "Maternal y Kinder" + contraseña correcta funciona</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Login con nivel "Primaria" + contraseña correcta funciona</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Login con nivel "Secundaria" + contraseña correcta funciona</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Contraseña incorrecta muestra error sin acceso</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+    </div>
+
+    <!-- Solicitudes -->
+    <div class="section">
+      <div class="section-title">📋 Solicitudes de Cambio</div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Dashboard muestra el conteo correcto: Pendientes, Aprobadas, Rechazadas, Total</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Tab "Pendientes" muestra solo solicitudes sin resolver</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Expandir una solicitud muestra todos los detalles (alumno, fecha actual, fecha propuesta)</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Aprobar una solicitud ejecuta el cambio en la cita y mueve al historial</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Rechazar una solicitud (con nota opcional) la mueve al historial como rechazada</div></div>
+        <span class="item-tag tag-critico">Crítico</span>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Tab "Historial" muestra solicitudes ya resueltas con su decisión</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Link "← Panel Psicólogas" navega de regreso a /admin correctamente</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+      <div class="check-item" onclick="toggle(this)">
+        <div class="checkbox"><svg class="checkbox-check" viewBox="0 0 10 10" fill="none"><polyline points="1.5,5.5 4,8 8.5,2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="item-content"><div class="item-text">Cerrar sesión de directora funciona y regresa a su login</div></div>
+        <button class="bug-btn" onclick="toggleBug(event,this)">+ Bug</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Celebración -->
+  <div class="celebration" id="celebration">
+    <h2>🎉 ¡Todo listo para el lanzamiento!</h2>
+    <p>Todas las pruebas completadas. AgendaW está listo para el 18 de marzo.</p>
+  </div>
+
+  <div class="reset-wrap">
+    <button class="reset-btn" onclick="resetAll()">↺ Reiniciar checklist</button>
+  </div>
+
+</main>
+
+<script>
+const STORAGE_KEY = 'agendaw-checklist-v2';
+
+function getState() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; }
+}
+function saveState(state) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function getItemId(item) {
+  return item.querySelector('.item-text').textContent.trim().slice(0, 60);
+}
+
+function toggle(item) {
+  const id = getItemId(item);
+  const state = getState();
+  if (item.classList.contains('checked')) {
+    item.classList.remove('checked');
+    delete state[id];
+  } else {
+    item.classList.add('checked');
+    state[id] = true;
+  }
+  saveState(state);
+  updateProgress();
+}
+
+function toggleBug(e, btn) {
+  e.stopPropagation();
+  const item = btn.closest('.check-item');
+  const id = getItemId(item);
+  let input = item.querySelector('.bug-input');
+  if (!input) {
+    input = document.createElement('textarea');
+    input.className = 'bug-input';
+    input.placeholder = 'Describe el bug o inconsistencia encontrada...';
+    input.onclick = e => e.stopPropagation();
+    item.querySelector('.item-content').appendChild(input);
+  }
+  const state = getState();
+  input.classList.toggle('visible');
+  if (input.classList.contains('visible')) {
+    input.focus();
+    input.value = (state[id + '_bug'] || '');
+    input.oninput = () => {
+      const s = getState();
+      if (input.value.trim()) {
+        s[id + '_bug'] = input.value;
+        item.classList.add('has-bug');
+      } else {
+        delete s[id + '_bug'];
+        item.classList.remove('has-bug');
+      }
+      saveState(s);
+    };
+  }
+}
+
+function updateProgress() {
+  const allItems = document.querySelectorAll('.check-item');
+  const checkedItems = document.querySelectorAll('.check-item.checked');
+  const total = allItems.length;
+  const done  = checkedItems.length;
+
+  document.getElementById('globalCount').textContent = done + ' / ' + total;
+  const fill = document.getElementById('globalFill');
+  const pct = total > 0 ? (done / total * 100) : 0;
+  fill.style.width = pct + '%';
+  fill.classList.toggle('complete', pct === 100);
+
+  // Per platform
+  document.querySelectorAll('.platform').forEach((plat, i) => {
+    const platItems = plat.querySelectorAll('.check-item');
+    const platDone  = plat.querySelectorAll('.check-item.checked');
+    const prog = document.getElementById('prog-' + i);
+    if (prog) {
+      prog.textContent = platDone.length + ' / ' + platItems.length;
+      prog.classList.toggle('done', platDone.length === platItems.length && platItems.length > 0);
+    }
+  });
+
+  document.getElementById('celebration').classList.toggle('visible', done === total && total > 0);
+}
+
+function restore() {
+  const state = getState();
+  document.querySelectorAll('.check-item').forEach(item => {
+    const id = getItemId(item);
+    if (state[id]) item.classList.add('checked');
+    if (state[id + '_bug']) {
+      item.classList.add('has-bug');
+      let input = item.querySelector('.bug-input');
+      if (!input) {
+        input = document.createElement('textarea');
+        input.className = 'bug-input';
+        input.placeholder = 'Describe el bug o inconsistencia encontrada...';
+        input.onclick = e => e.stopPropagation();
+        item.querySelector('.item-content').appendChild(input);
+        input.oninput = () => {
+          const s = getState();
+          if (input.value.trim()) { s[id + '_bug'] = input.value; item.classList.add('has-bug'); }
+          else { delete s[id + '_bug']; item.classList.remove('has-bug'); }
+          saveState(s);
+        };
+      }
+      input.value = state[id + '_bug'];
+    }
+  });
+  updateProgress();
+}
+
+function resetAll() {
+  if (!confirm('¿Reiniciar todo el checklist? Se perderán los avances guardados.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  document.querySelectorAll('.check-item').forEach(i => {
+    i.classList.remove('checked','has-bug');
+    const inp = i.querySelector('.bug-input');
+    if (inp) { inp.value=''; inp.classList.remove('visible'); }
+  });
+  updateProgress();
+}
+
+restore();
+</script>
+</body>
+</html>
