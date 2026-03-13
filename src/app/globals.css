@@ -5086,6 +5086,41 @@ body {
   font-family: var(--adm-font);
 }
 
+.admin-filter-select option {
+  background: var(--adm-surface, #ffffff);
+  color: var(--adm-text, #1e293b);
+}
+
+.admin-layout[data-theme="dark"] .admin-filter-select option {
+  background: #1e293b;
+  color: #f1f5f9;
+}
+
+/* Todos los selects del admin en dark mode */
+.admin-layout[data-theme="dark"] select {
+  background: var(--adm-surface);
+  color: var(--adm-text);
+  border-color: var(--adm-border);
+}
+
+.admin-layout[data-theme="dark"] select option {
+  background: #1e293b;
+  color: #f1f5f9;
+}
+
+.admin-layout[data-theme="dark"] .admin-bloquear-form select {
+  background: var(--adm-surface) !important;
+  border-color: var(--adm-border) !important;
+  color: var(--adm-text) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-recorridos-form select,
+.admin-layout[data-theme="dark"] .admin-recorridos-edit-grid select {
+  background: var(--adm-surface) !important;
+  border-color: var(--adm-border) !important;
+  color: var(--adm-text) !important;
+}
+
 .admin-filters-divider {
   width: 1px;
   height: 2.5rem;
