@@ -3768,15 +3768,15 @@ body {
    dark mode vía prefers-color-scheme.
 ══════════════════════════════════════════════════════════════ */
 :root {
-  /* ── Superficie — light mode profesional (#f9fafb base) ──── */
-  --adm-bg:          #f9fafb;
+  /* ── Superficie — off-white visible, no #ffffff puro ─────── */
+  --adm-bg:          #f3f4f6;   /* gris-blanco claro — notablemente off-white */
   --adm-surface:     #ffffff;
-  --adm-surface-alt: #f3f4f6;
+  --adm-surface-alt: #f9fafb;
   --adm-border:      #e5e7eb;
-  /* ── Texto — alto contraste ─────────────────────────────── */
-  --adm-text:        #111827;
-  --adm-text-muted:  #4b5563;
-  --adm-text-faint:  #9ca3af;
+  /* ── Texto — máximo contraste ───────────────────────────── */
+  --adm-text:        #0f172a;   /* casi negro */
+  --adm-text-muted:  #334155;
+  --adm-text-faint:  #64748b;
   /* ── Accent / semánticos ─────────────────────────────────── */
   --adm-accent:      #1565c0;
   --adm-accent-dark: #1251a3;
@@ -4182,8 +4182,8 @@ body {
   border-radius: var(--adm-radius);
   padding: 1.25rem 1.75rem;
   margin-bottom: 2rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.04);
-  color: #111827;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.04);
+  color: #0f172a;
   animation: adminHeaderDrop 400ms var(--adm-ease) both;
   position: relative;
   overflow: hidden;
@@ -4742,17 +4742,14 @@ body {
 }
 
 .admin-section {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: #ffffff;          /* card blanco sobre fondo off-white #f3f4f6 */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   color: var(--adm-text);
   border-radius: var(--adm-radius);
   padding: 1.75rem 2rem 2rem;
-  box-shadow:
-    0 1px 3px rgba(15, 28, 53, 0.06),
-    0 8px 28px rgba(21, 101, 192, 0.07),
-    0 0 0 1px rgba(221, 231, 244, 0.9);
-  border: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
+  border: 1px solid #e5e7eb;
   position: relative;
   overflow: hidden;
   animation: adminFadeInUp 0.4s var(--adm-ease) backwards;
