@@ -5132,6 +5132,101 @@ body {
   color: var(--adm-text) !important;
 }
 
+/* ── Buscar alumno dark mode ── */
+.admin-layout[data-theme="dark"] .admin-buscar-box-inner {
+  background: var(--adm-surface) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-buscar-title {
+  color: #34d399 !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-buscar-field label {
+  color: #34d399 !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-buscar-field .admin-input {
+  background: var(--adm-surface-alt) !important;
+  border-color: rgba(52,211,153,0.3) !important;
+  color: var(--adm-text) !important;
+  color-scheme: dark;
+}
+
+.admin-layout[data-theme="dark"] .admin-buscar-field .admin-input::placeholder {
+  color: var(--adm-text-muted) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-buscar-field .admin-input:focus {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 3px rgba(16,185,129,0.2) !important;
+  background: var(--adm-surface) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-buscar-hint {
+  background: rgba(16,185,129,0.1) !important;
+  border-left-color: #10b981 !important;
+  color: #6ee7b7 !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-buscar-loading {
+  background: rgba(16,185,129,0.08) !important;
+  border-color: rgba(16,185,129,0.2) !important;
+  color: #6ee7b7 !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-buscar-card {
+  border-color: var(--adm-border) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-buscar-card:hover {
+  border-color: rgba(52,211,153,0.4) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-buscar-card.selected {
+  border-color: #10b981 !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-buscar-card-head {
+  background: var(--adm-surface) !important;
+  color: var(--adm-text) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-buscar-card-head:hover {
+  background: var(--adm-surface-alt) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-buscar-card-name {
+  color: var(--adm-text) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-buscar-card-meta {
+  color: var(--adm-text-muted) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-buscar-card-arrow {
+  color: var(--adm-text-muted) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-buscar-card-body {
+  background: var(--adm-surface-alt) !important;
+  border-top-color: var(--adm-border) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-buscar-detail {
+  background: rgba(255,255,255,0.04) !important;
+  color: var(--adm-text) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-buscar-reagendar {
+  border-top-color: var(--adm-border) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-buscar-reagendar h4,
+.admin-layout[data-theme="dark"] .admin-buscar-calendar label,
+.admin-layout[data-theme="dark"] .admin-buscar-time label {
+  color: var(--adm-text) !important;
+}
+
 .admin-filters-divider {
   width: 1px;
   height: 2.5rem;
