@@ -3918,13 +3918,13 @@ body {
    /baseline-ui: solo estos selectores; no afecta light.
 ══════════════════════════════════════════════════════════════ */
 
-/* Header: rainbow gradient de vuelta */
+/* Header: degradado de blanco a azul institucional */
 .admin-layout[data-theme="dark"] .admin-header {
-  background: linear-gradient(105deg, #c8d400 0%, #d4007a 38%, #1565c0 70%, #0d0f2e 100%);
+  background: linear-gradient(115deg, #ffffff 0%, #90bce8 30%, #1565c0 65%, #0d3480 100%);
   border: none;
   box-shadow:
-    0 6px 30px rgba(212,0,122,0.35),
-    0 2px 8px rgba(21,101,192,0.4);
+    0 6px 30px rgba(21,101,192,0.45),
+    0 2px 8px rgba(13,52,128,0.4);
   color: #fff;
 }
 
@@ -3952,7 +3952,8 @@ body {
 
 .admin-layout[data-theme="dark"] .admin-header h1 {
   color: #fff;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.35);
+  /* Sombra más pronunciada para legibilidad sobre el extremo blanco del gradiente */
+  text-shadow: 0 1px 4px rgba(13,52,128,0.5), 0 2px 12px rgba(0,0,0,0.25);
 }
 
 .admin-layout[data-theme="dark"] .admin-header-badge {
@@ -4070,6 +4071,16 @@ body {
 }
 
 .admin-layout[data-theme="dark"] .admin-card-icon-wrap { background: rgba(255,255,255,0.12); }
+
+/* Todas las cards en dark mode → azul institucional unificado */
+.admin-layout[data-theme="dark"] .admin-card-citas,
+.admin-layout[data-theme="dark"] .admin-card-horarios,
+.admin-layout[data-theme="dark"] .admin-card-bloquear,
+.admin-layout[data-theme="dark"] .admin-card-buscar,
+.admin-layout[data-theme="dark"] .admin-card-recorridos,
+.admin-layout[data-theme="dark"] .admin-card-migracion {
+  --card-color: #1565c0;
+}
 
 
 .admin-login-page {
