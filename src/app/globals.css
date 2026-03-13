@@ -121,25 +121,49 @@ body {
   border-radius: var(--radius);
   font-weight: 600;
   text-decoration: none;
-  /* Explícito: evita reanimar layout props innecesarias */
+  /* Compositor-only + paint mínimo (fixing-motion-performance) */
   transition:
-    background-color 200ms cubic-bezier(0.25, 1, 0.5, 1),
-    color           200ms cubic-bezier(0.25, 1, 0.5, 1),
-    border-color    200ms cubic-bezier(0.25, 1, 0.5, 1),
-    box-shadow      200ms cubic-bezier(0.25, 1, 0.5, 1),
-    transform       150ms cubic-bezier(0.25, 1, 0.5, 1),
-    opacity         150ms cubic-bezier(0.25, 1, 0.5, 1);
+    background-color 200ms var(--adm-ease-soft),
+    color            200ms var(--adm-ease-soft),
+    border-color     200ms var(--adm-ease-soft),
+    box-shadow       200ms var(--adm-ease-soft),
+    transform        180ms var(--adm-ease-soft),
+    opacity          180ms var(--adm-ease-soft);
   cursor: pointer;
   border: none;
   font-size: 1rem;
   min-height: 48px;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  position: relative;
+  overflow: hidden;
 }
 
+/* Ripple al presionar — radial desde centro, compositor puro */
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120%;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(255,255,255,0.28) 0%, transparent 65%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 1;
+  pointer-events: none;
+}
+.btn:active::after {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 0;
+  transition: transform 500ms var(--adm-ease), opacity 500ms;
+}
+
+/* Spring-like press: easing con slight overshoot */
 .btn:active {
   transform: scale(0.96);
-  transition-duration: 100ms;
+  opacity: 0.9;
+  transition-duration: var(--adm-dur-micro);
 }
 
 .btn-primary {
@@ -3657,10 +3681,11 @@ body {
 }
 
 /* ========== ADMIN (Psicólogas) – UI vibrante ========== */
+/* Cards + sections: slide desde abajo con easing expresivo */
 @keyframes adminFadeInUp {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -3668,15 +3693,46 @@ body {
   }
 }
 
+/* Header + sidebar: slide lateral */
 @keyframes adminSlideIn {
   from {
     opacity: 0;
-    transform: translateX(-10px);
+    transform: translateX(-12px);
   }
   to {
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+/* Header principal: drop desde arriba — más dramático */
+@keyframes adminHeaderDrop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Skeleton shimmer — loading states sin layout thrash */
+@keyframes adminShimmer {
+  from { background-position: -200% center; }
+  to   { background-position:  200% center; }
+}
+
+.admin-skeleton {
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--adm-surface-alt) 25%,
+    color-mix(in srgb, var(--adm-accent) 8%, var(--adm-surface-alt)) 50%,
+    var(--adm-surface-alt) 75%
+  );
+  background-size: 200% 100%;
+  animation: adminShimmer 1.6s var(--adm-ease-soft) infinite;
 }
 
 /* ── Accessibility: sin motion para quienes lo necesitan ── */
@@ -3693,6 +3749,16 @@ body {
   }
   .admin-table tbody tr {
     transition: none !important;
+  }
+  .admin-skeleton {
+    animation: none !important;
+    background: var(--adm-surface-alt) !important;
+  }
+  .admin-card::before,
+  .admin-card::after,
+  .admin-link::after,
+  .btn::after {
+    display: none !important;
   }
 }
 
@@ -3724,8 +3790,9 @@ body {
   --adm-radius-sm:   6px;
   --adm-shadow-sm:   0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   --adm-shadow-md:   0 4px 12px rgba(0,0,0,0.08);
-  --adm-ease:        cubic-bezier(0.16, 1, 0.3, 1);   /* expo-out — decisivo */
-  --adm-ease-soft:   cubic-bezier(0.25, 1, 0.5, 1);   /* quart-out — refinado */
+  --adm-ease:        cubic-bezier(0.16, 1, 0.3, 1);          /* expo-out — decisivo    */
+  --adm-ease-soft:   cubic-bezier(0.25, 1, 0.5, 1);          /* quart-out — refinado   */
+  --adm-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);      /* spring — overshoot     */
   --adm-dur-micro:   120ms;   /* press/toggle */
   --adm-dur-fast:    200ms;   /* hover, input focus */
   --adm-dur-base:    300ms;   /* show/hide, layout */
@@ -3938,7 +4005,7 @@ body {
     0 6px 30px rgba(212,0,122,0.35),
     0 2px 8px rgba(21,101,192,0.4);
   color: #fff;
-  animation: adminFadeInUp 0.4s var(--adm-ease);
+  animation: adminHeaderDrop 400ms var(--adm-ease) both;
   position: relative;
   overflow: hidden;
 }
@@ -4066,7 +4133,7 @@ body {
   box-shadow: 0 1px 8px rgba(0,0,0,0.3);
 }
 
-/* ── Nav links ── */
+/* ── Nav links — ripple + micro feedback ── */
 .admin-link {
   color: rgba(255,255,255,0.92);
   text-decoration: none;
@@ -4078,22 +4145,45 @@ body {
   background: rgba(255,255,255,0.14);
   border: 1px solid rgba(255,255,255,0.18);
   transition:
-    background 150ms var(--adm-ease-soft),
+    background  150ms var(--adm-ease-soft),
     border-color 150ms var(--adm-ease-soft),
-    transform 150ms var(--adm-ease-soft);
+    transform    150ms var(--adm-ease-soft);
   white-space: nowrap;
   backdrop-filter: blur(6px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ripple CSS puro — se expande desde el centro al presionar */
+.admin-link::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 140%;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(255,255,255,0.35) 0%, transparent 65%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 1;
+  pointer-events: none;
+  /* sin transition en estado normal → snap-back instantáneo */
+}
+.admin-link:active::after {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 0;
+  transition: transform 450ms var(--adm-ease), opacity 450ms;
 }
 
 .admin-link:hover {
   background: rgba(255,255,255,0.26);
   border-color: rgba(255,255,255,0.35);
-  transform: scale(1.03);
+  transform: scale(1.04);
 }
 
 .admin-link:active {
-  transform: scale(0.97);
-  transition-duration: 80ms;
+  transform: scale(0.96);
+  transition-duration: var(--adm-dur-micro);
 }
 
 .admin-link:focus-visible {
@@ -4154,20 +4244,31 @@ body {
     0 6px 24px color-mix(in srgb, var(--card-color, var(--adm-accent)) 40%, transparent),
     0 0 48px color-mix(in srgb, var(--card-color, var(--adm-accent)) 18%, transparent);
   cursor: pointer;
+  /* Compositor-only — fixing-motion-performance */
   transition:
-    transform 200ms var(--adm-ease),
-    box-shadow 200ms var(--adm-ease);
+    transform     280ms var(--adm-ease-spring),   /* spring → follow-through natural */
+    box-shadow    220ms var(--adm-ease-soft),
+    filter        220ms var(--adm-ease-soft);
   position: relative;
   overflow: hidden;
+  contain: paint;   /* evita que el glow cause repaint en el resto del layout */
   /* Entrada coreografiada */
-  animation: adminFadeInUp 0.4s var(--adm-ease) backwards;
+  animation: adminFadeInUp 0.45s var(--adm-ease) backwards;
 }
 
+/* Promover layer solo cuando hay animación activa */
 .admin-card:hover {
-  will-change: transform;
+  will-change: transform, filter;
+  transform: translateY(-6px) scale(1.04);
+  filter: brightness(1.08);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--card-color, var(--adm-accent)) 80%, transparent),
+    0 12px 40px color-mix(in srgb, var(--card-color, var(--adm-accent)) 65%, transparent),
+    0 0 80px color-mix(in srgb, var(--card-color, var(--adm-accent)) 35%, transparent),
+    0 0 120px rgba(0, 255, 255, 0.06);  /* cyan aura sutil universal */
 }
 
-/* Forma geométrica 1 — banda diagonal (paralelo al logo Winston) */
+/* Forma geométrica 1 — banda diagonal */
 .admin-card::before {
   content: '';
   position: absolute;
@@ -4178,7 +4279,8 @@ body {
   background: rgba(255,255,255,0.08);
   transform: skewX(-20deg);
   pointer-events: none;
-  transition: transform 0.4s var(--adm-ease), opacity 0.3s;
+  /* Fix: 400ms → 200ms (fixing-motion-performance) */
+  transition: transform 200ms var(--adm-ease), opacity 200ms;
 }
 
 /* Forma geométrica 2 — rombo en esquina */
@@ -4194,24 +4296,18 @@ body {
   pointer-events: none;
 }
 
-.admin-card:hover {
-  transform: translateY(-5px) scale(1.01);
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--card-color, var(--adm-accent)) 70%, transparent),
-    0 8px 32px color-mix(in srgb, var(--card-color, var(--adm-accent)) 55%, transparent),
-    0 0 72px color-mix(in srgb, var(--card-color, var(--adm-accent)) 30%, transparent);
-}
-
 /* Al hover la banda diagonal se desplaza levemente */
 .admin-card:hover::before {
-  transform: skewX(-20deg) translateX(6px);
-  opacity: 0.85;
+  transform: skewX(-20deg) translateX(8px);
+  opacity: 0.9;
 }
 
-/* Presionar — feedback satisfactorio /delight */
+/* Presionar — feedback satisfactorio con spring-like */
 .admin-card:active {
-  transform: translateY(-2px) scale(0.99);
-  transition-duration: 0.1s;
+  transform: translateY(-1px) scale(0.97);
+  filter: brightness(1.0);
+  transition-duration: 100ms;
+  will-change: auto;
 }
 
 /* ── Paleta saturada e institucional ─────────────────────── */
@@ -4696,10 +4792,18 @@ body {
   border: 1.5px solid color-mix(in srgb, var(--adm-purple) 30%, transparent);
   color: var(--adm-purple);
   font-family: var(--adm-font);
-  transition: opacity 0.15s;
+  transition: opacity 150ms var(--adm-ease-soft), transform 120ms var(--adm-ease-soft);
   white-space: nowrap;
 }
-.btn-solicitud-accion:hover:not(:disabled) { opacity: 0.80; }
+.btn-solicitud-accion:hover:not(:disabled) {
+  opacity: 0.82;
+  transform: scale(1.02);
+}
+.btn-solicitud-accion:active:not(:disabled) {
+  transform: scale(0.96);
+  opacity: 0.75;
+  transition-duration: 80ms;
+}
 .btn-solicitud-accion.btn-solicitud-disabled,
 .btn-solicitud-accion:disabled {
   background: var(--adm-surface-alt);
@@ -4728,9 +4832,10 @@ body {
   font-size: 0.75rem;
   cursor: pointer;
   font-family: var(--adm-font);
-  transition: opacity 0.15s;
+  transition: opacity 150ms var(--adm-ease-soft), transform 120ms var(--adm-ease-soft);
 }
-.btn-solicitud-reenviar:hover { opacity: 0.80; }
+.btn-solicitud-reenviar:hover { opacity: 0.82; transform: scale(1.03); }
+.btn-solicitud-reenviar:active { transform: scale(0.96); opacity: 0.7; transition-duration: 80ms; }
 
 /* ── Modal form helpers (/polish) ── */
 .modal-field-label {
@@ -5450,8 +5555,9 @@ body {
 .admin-table tbody tr {
   background: var(--adm-surface);
   transition:
-    background 150ms var(--adm-ease-soft),
-    box-shadow 150ms var(--adm-ease-soft);
+    background   150ms var(--adm-ease-soft),
+    box-shadow   150ms var(--adm-ease-soft),
+    transform    150ms var(--adm-ease-soft);
   border-bottom: 1px solid var(--adm-border);
 }
 
@@ -5459,9 +5565,13 @@ body {
   border-bottom: none;
 }
 
+/* Lift effect — translateY compositor-only, no layout */
 .admin-table tbody tr:hover {
   background: var(--adm-surface-alt);
-  box-shadow: inset 3px 0 0 var(--adm-accent);
+  box-shadow:
+    inset 3px 0 0 var(--adm-accent),
+    0 -2px 8px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
 }
 
 .admin-table td {
