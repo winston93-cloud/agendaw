@@ -3768,13 +3768,16 @@ body {
    dark mode vía prefers-color-scheme.
 ══════════════════════════════════════════════════════════════ */
 :root {
-  --adm-bg:          #f8fafc;
+  /* ── Superficie ─────────────────────────────────────────── */
+  --adm-bg:          #f0f6ff;   /* off-white con tinte azul frío — no gris nublado */
   --adm-surface:     #ffffff;
-  --adm-surface-alt: #f1f5f9;
-  --adm-border:      #e2e8f0;
-  --adm-text:        #1e293b;
-  --adm-text-muted:  #64748b;
-  --adm-text-faint:  #94a3b8;
+  --adm-surface-alt: #eef3fb;   /* ligeramente azulado en lugar de gris plano */
+  --adm-border:      #dde7f4;   /* borde con ligero tinte azul */
+  /* ── Texto ───────────────────────────────────────────────── */
+  --adm-text:        #0f1c35;   /* casi negro con tinte azul — más profundo */
+  --adm-text-muted:  #5a7090;   /* azul-gris en lugar de slate neutro */
+  --adm-text-faint:  #94a8c0;
+  /* ── Accent / semánticos ─────────────────────────────────── */
   --adm-accent:      #1565c0;
   --adm-accent-dark: #1251a3;
   --adm-accent-lt:   #dbeafe;
@@ -3786,10 +3789,12 @@ body {
   --adm-warn-lt:     #fef3c7;
   --adm-purple:      #7c3aed;
   --adm-purple-lt:   #f5f3ff;
+  /* ── Forma ───────────────────────────────────────────────── */
   --adm-radius:      10px;
   --adm-radius-sm:   6px;
-  --adm-shadow-sm:   0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  --adm-shadow-md:   0 4px 12px rgba(0,0,0,0.08);
+  /* Sombras con tinte azul institucional — se siente premium, no gris sucio */
+  --adm-shadow-sm:   0 1px 3px rgba(15,28,53,0.06), 0 4px 16px rgba(21,101,192,0.05);
+  --adm-shadow-md:   0 4px 16px rgba(15,28,53,0.09), 0 1px 4px rgba(21,101,192,0.06);
   --adm-ease:        cubic-bezier(0.16, 1, 0.3, 1);          /* expo-out — decisivo    */
   --adm-ease-soft:   cubic-bezier(0.25, 1, 0.5, 1);          /* quart-out — refinado   */
   --adm-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);      /* spring — overshoot     */
@@ -3818,7 +3823,13 @@ body {
 
 .admin-layout {
   min-height: 100vh;
-  background: var(--adm-bg);
+  /* Gradiente atmosférico light — "mañana clara" sobre azul institucional */
+  /* El dark mode sobreescribe esto con su propio background synthwave */
+  background:
+    radial-gradient(ellipse 120% 55% at 55% -5%,  rgba(21, 101, 192, 0.08) 0%,  transparent 65%),
+    radial-gradient(ellipse  60% 50% at  0% 45%,  rgba(200, 212, 0, 0.04)  0%,  transparent 60%),
+    radial-gradient(ellipse  70% 40% at 100% 80%, rgba(21, 101, 192, 0.04) 0%,  transparent 55%),
+    var(--adm-bg);
   color: var(--adm-text);
   font-family: var(--adm-font);
 }
@@ -3898,7 +3909,7 @@ body {
 /* Sección / tabla: fondo cristal sobre el espacio */
 .admin-layout[data-theme="dark"] .admin-section {
   background: rgba(13, 15, 46, 0.82);
-  border-color: rgba(21, 101, 192, 0.4);
+  border: 1px solid rgba(21, 101, 192, 0.4);
   box-shadow:
     0 0 0 1px rgba(21,101,192,0.2),
     0 8px 32px rgba(0,0,0,0.5),
@@ -3988,6 +3999,8 @@ body {
   padding: 2rem;
   position: relative;
   z-index: 1;
+  /* Garantiza que el contenido siempre esté sobre los pseudo-elementos de fondo */
+  isolation: isolate;
 }
 
 @media (max-width: 768px) {
@@ -4603,12 +4616,17 @@ body {
 }
 
 .admin-section {
-  background: var(--adm-surface);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   color: var(--adm-text);
   border-radius: var(--adm-radius);
   padding: 1.75rem 2rem 2rem;
-  box-shadow: var(--adm-shadow-sm);
-  border: 1.5px solid var(--adm-border);
+  box-shadow:
+    0 1px 3px rgba(15, 28, 53, 0.06),
+    0 8px 28px rgba(21, 101, 192, 0.07),
+    0 0 0 1px rgba(221, 231, 244, 0.9);
+  border: none;
   position: relative;
   overflow: hidden;
   animation: adminFadeInUp 0.4s var(--adm-ease) backwards;
