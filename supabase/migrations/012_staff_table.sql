@@ -27,12 +27,18 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trg_staff_updated_at ON public.staff;
+
 CREATE TRIGGER trg_staff_updated_at
   BEFORE UPDATE ON public.staff
   FOR EACH ROW EXECUTE FUNCTION update_staff_updated_at();
 
 -- RLS: habilitado pero permisivo por ahora (solo admins autenticados pueden leer)
 ALTER TABLE public.staff ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "staff_select_authenticated" ON public.staff;
+DROP POLICY IF EXISTS "staff_insert_authenticated" ON public.staff;
+DROP POLICY IF EXISTS "staff_update_authenticated" ON public.staff;
 
 CREATE POLICY "staff_select_authenticated"
   ON public.staff FOR SELECT
