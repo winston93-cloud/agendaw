@@ -30,10 +30,6 @@ export default async function Home() {
 
             {/* Contenido central */}
             <div className="hero-center-content">
-              <div className="hero-lang-bar">
-                <PublicThemeToggle />
-                <LangSelector currentLocale={locale as 'es' | 'en'} />
-              </div>
               <p className="hero-subtitle hero-intro">
                 {t('intro')}
               </p>
@@ -53,6 +49,16 @@ export default async function Home() {
                 <span className="cta-text">{t('ctaButton')}</span>
                 <span className="cta-arrow">↓</span>
               </ScrollButton>
+              <div className="hero-lang-bar">
+                <div className="hero-lang-group">
+                  <span className="hero-lang-group-label">{t('themeLabel')}</span>
+                  <PublicThemeToggle />
+                </div>
+                <div className="hero-lang-group">
+                  <span className="hero-lang-group-label">{t('langLabel')}</span>
+                  <LangSelector currentLocale={locale as 'es' | 'en'} />
+                </div>
+              </div>
             </div>
 
             {/* Logo derecho + texto */}

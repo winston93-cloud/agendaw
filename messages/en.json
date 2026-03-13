@@ -14,7 +14,9 @@
     "bannerLabel": "Exam fee:",
     "bannerAmount": "$200 MXN",
     "copyright": "© 2026 Instituto Educativo Winston / Winston Churchill",
-    "version": "Admission System v1.0"
+    "version": "Admission System v1.0",
+    "themeLabel": "Skill",
+    "langLabel": "Language"
   },
   "agendar": {
     "back": "← Back to home",
