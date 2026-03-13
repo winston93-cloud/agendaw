@@ -5608,6 +5608,64 @@ body {
   font-style: italic;
 }
 
+/* ── Horarios dark mode ── */
+.admin-layout[data-theme="dark"] .admin-horarios-level {
+  background: var(--adm-surface) !important;
+  border-color: var(--adm-border) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-horarios-level h3 {
+  color: var(--adm-text) !important;
+  border-bottom-color: var(--adm-border) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-horarios-form label {
+  color: var(--adm-text) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-horarios-form input[type="time"] {
+  background: var(--adm-surface-alt) !important;
+  border-color: var(--adm-border) !important;
+  color: var(--adm-text) !important;
+  color-scheme: dark;
+}
+
+.admin-layout[data-theme="dark"] .admin-horarios-list li {
+  background: var(--adm-surface-alt) !important;
+  border-color: var(--adm-border) !important;
+  color: var(--adm-text) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-horarios-list li:hover {
+  background: var(--adm-surface) !important;
+  border-color: var(--adm-accent) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-horarios-list li.admin-empty {
+  border-color: var(--adm-border) !important;
+  color: var(--adm-text-muted) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-blocked-level {
+  background: var(--adm-surface) !important;
+  border-color: var(--adm-border) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-blocked-level h3 {
+  color: var(--adm-text) !important;
+  border-bottom-color: var(--adm-border) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-blocked-level li {
+  background: var(--adm-surface-alt) !important;
+  border-color: var(--adm-border) !important;
+  color: var(--adm-text) !important;
+}
+
+.admin-layout[data-theme="dark"] .admin-blocked-level li:hover {
+  background: var(--adm-surface) !important;
+}
+
 .form-hint.text-soft {
   color: var(--text-secondary);
   font-size: 0.9rem;
