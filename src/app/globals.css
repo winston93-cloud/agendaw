@@ -2556,8 +2556,34 @@ body {
 }
 
 /* Summary / confirm dark mode */
-.public-layout[data-theme="dark"] .summary-card,
-.public-layout[data-theme="dark"] .summary-section,
+.public-layout[data-theme="dark"] .summary-card {
+  background: rgba(255,255,255,0.05) !important;
+  border-color: var(--pub-border) !important;
+  color: var(--pub-text);
+}
+
+.public-layout[data-theme="dark"] .summary-section {
+  border-bottom-color: var(--pub-border) !important;
+  color: var(--pub-text);
+}
+
+.public-layout[data-theme="dark"] .summary-section h3 {
+  color: var(--pub-text) !important;
+}
+
+.public-layout[data-theme="dark"] .summary-section p {
+  color: var(--pub-text-muted) !important;
+}
+
+.public-layout[data-theme="dark"] .summary-section p strong {
+  color: var(--pub-text) !important;
+}
+
+.public-layout[data-theme="dark"] .summary-section.highlight {
+  background: rgba(96,165,250,0.12) !important;
+  border-color: var(--pub-accent) !important;
+}
+
 .public-layout[data-theme="dark"] .summary-row {
   color: var(--pub-text);
 }
@@ -2568,6 +2594,10 @@ body {
 
 .public-layout[data-theme="dark"] .summary-value {
   color: var(--pub-text);
+}
+
+.public-layout[data-theme="dark"] .form-actions-confirm {
+  border-top-color: var(--pub-border) !important;
 }
 
 /* Modal dark mode */
