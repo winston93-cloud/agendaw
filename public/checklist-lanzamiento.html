@@ -38,7 +38,7 @@
 
   /* ── Header ── */
   .page-header {
-    background: #ffffff;
+    background: var(--surface);
     border-bottom: 1px solid var(--border2);
     padding: 1.5rem 2rem;
     position: sticky;
@@ -305,6 +305,106 @@
     .platform-header { padding: 1rem; }
     .item-tag { display: none; }
   }
+
+  /* ── Theme toggle button ── */
+  .theme-toggle {
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 9999px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: var(--font);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: all 150ms ease;
+  }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .theme-toggle .toggle-icon { font-size: 0.9rem; line-height: 1; }
+
+  /* ── Dark mode tokens ── */
+  [data-theme="dark"] {
+    --bg:        #0d1117;
+    --surface:   #161b22;
+    --border:    #30363d;
+    --border2:   #3d444d;
+    --text:      #e6edf3;
+    --muted:     #7d8590;
+    --accent:    #58a6ff;
+    --accent-lt: rgba(88, 166, 255, 0.12);
+    --green:     #3fb950;
+    --green-lt:  rgba(63, 185, 80, 0.12);
+    --orange:    #d29922;
+    --orange-lt: rgba(210, 153, 34, 0.12);
+    --red:       #f85149;
+    --red-lt:    rgba(248, 81, 73, 0.12);
+  }
+
+  /* ── Dark mode overrides ── */
+  [data-theme="dark"] body {
+    color-scheme: dark;
+  }
+  [data-theme="dark"] .page-header {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  [data-theme="dark"] .launch-badge {
+    background: rgba(210,153,34,0.15);
+    border-color: rgba(210,153,34,0.35);
+    color: #e3b341;
+  }
+  [data-theme="dark"] .check-item:hover {
+    background: rgba(255,255,255,0.03);
+  }
+  [data-theme="dark"] .check-item.checked {
+    background: rgba(63, 185, 80, 0.07);
+  }
+  [data-theme="dark"] .checkbox {
+    background: var(--surface);
+  }
+  [data-theme="dark"] .bug-input {
+    background: #0d1117;
+    color: var(--text);
+  }
+  [data-theme="dark"] .platform-1 .platform-icon { background: rgba(88,166,255,0.12); }
+  [data-theme="dark"] .platform-2 .platform-icon { background: rgba(63,185,80,0.12);  }
+  [data-theme="dark"] .platform-3 .platform-icon { background: rgba(210,153,34,0.12); }
+  [data-theme="dark"] .tag-mobile {
+    background: rgba(139,92,246,0.15);
+    color: #a78bfa;
+  }
+  [data-theme="dark"] .celebration {
+    background: linear-gradient(135deg, rgba(6,95,70,0.25) 0%, rgba(4,120,87,0.15) 100%);
+    border-color: #064e3b;
+  }
+  [data-theme="dark"] .celebration h2 { color: #6ee7b7; }
+  [data-theme="dark"] .celebration p  { color: #34d399; }
+  [data-theme="dark"] .progress-track { background: var(--border); }
+  [data-theme="dark"] .erd-wrap  { background: var(--surface); }
+  [data-theme="dark"] .db-card   { background: var(--surface); }
+  [data-theme="dark"] .db-improvements h3 span.badge-v2 {
+    background: rgba(63,185,80,0.15);
+    color: #3fb950;
+  }
+  /* inline tag overrides for db-cards */
+  [data-theme="dark"] .db-card .db-card-tag[style*="fee2e2"] {
+    background: rgba(248,81,73,0.15) !important;
+    color: #f85149 !important;
+  }
+  [data-theme="dark"] .db-card .db-card-tag[style*="d1fae5"] {
+    background: rgba(63,185,80,0.15) !important;
+    color: #3fb950 !important;
+  }
+  [data-theme="dark"] .db-card .db-card-tag[style*="ffedd5"] {
+    background: rgba(210,153,34,0.15) !important;
+    color: #d29922 !important;
+  }
+  [data-theme="dark"] .db-card .db-card-tag[style*="dbeafe"] {
+    background: rgba(88,166,255,0.15) !important;
+    color: #58a6ff !important;
+  }
 </style>
 </head>
 <body>
@@ -317,9 +417,16 @@
       <div>
         <div class="header-title">Checklist de Lanzamiento</div>
         <div class="header-sub">Instituto Winston Churchill · AgendaW</div>
+
       </div>
     </div>
-    <div class="launch-badge">🚀 Lanzamiento: Miér 18 Mar · 10:00 AM</div>
+    <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+      <div class="launch-badge">🚀 Lanzamiento: Miér 18 Mar · 10:00 AM</div>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Cambiar tema">
+        <span class="toggle-icon" id="themeIcon">🌙</span>
+        <span id="themeLabel">Dark</span>
+      </button>
+    </div>
   </div>
 </header>
 
@@ -1400,5 +1507,36 @@ restore();
   </div>
 </div>
 
+<script>
+// ── Theme toggle ──────────────────────────────────────
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const icon  = document.getElementById('themeIcon');
+  const label = document.getElementById('themeLabel');
+  if (theme === 'dark') {
+    icon.textContent  = '☀️';
+    label.textContent = 'Light';
+  } else {
+    icon.textContent  = '🌙';
+    label.textContent = 'Dark';
+  }
+  localStorage.setItem('checklist-theme', theme);
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'light';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+
+// Aplicar tema guardado (o preferencia del sistema) al cargar
+(function() {
+  const saved = localStorage.getItem('checklist-theme');
+  if (saved) {
+    applyTheme(saved);
+  } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    applyTheme('dark');
+  }
+})();
+</script>
 </body>
 </html>
