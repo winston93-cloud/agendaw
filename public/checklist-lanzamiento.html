@@ -969,10 +969,11 @@ restore();
   <div class="erd-wrap">
     <canvas id="erd-canvas"></canvas>
     <div class="erd-legend">
-      <div class="erd-legend-item"><div class="erd-legend-line" style="background:#1565c0;"></div> FK (clave foránea)</div>
-      <div class="erd-legend-item"><div class="erd-legend-line" style="background:#64748b;border-top:2px dashed #64748b;height:0;"></div> Relación lógica (mismo campo level/date)</div>
-      <div class="erd-legend-item"><div style="width:12px;height:12px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:2px;"></div> Tablas activas</div>
-      <div class="erd-legend-item"><div style="width:12px;height:12px;background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:2px;opacity:0.6;"></div> Tablas heredadas (no en uso)</div>
+      <div class="erd-legend-item"><span style="color:#1565c0;font-weight:700;font-size:0.8rem;">🔑</span> PK — clave primaria</div>
+      <div class="erd-legend-item"><span style="color:#7c3aed;font-weight:700;font-size:0.8rem;">🔗</span> FK — clave foránea</div>
+      <div class="erd-legend-item"><div class="erd-legend-line" style="background:#475569;height:2px;"></div> Relación FK real</div>
+      <div class="erd-legend-item"><div class="erd-legend-line" style="border-top:2px dashed #94a3b8;height:0;"></div> Relación lógica (level / date)</div>
+      <div class="erd-legend-item"><div style="width:12px;height:12px;background:#d1fae5;border:1.5px solid #059669;border-radius:2px;"></div> staff — nuevo en v2</div>
     </div>
   </div>
 </div>
@@ -981,7 +982,7 @@ restore();
 (function() {
   const canvas = document.getElementById('erd-canvas');
   const DPR = window.devicePixelRatio || 1;
-  const W = 860, H = 660;
+  const W = 860, H = 750;
   canvas.width  = W * DPR;
   canvas.height = H * DPR;
   canvas.style.width  = W + 'px';
@@ -989,7 +990,6 @@ restore();
   const ctx = canvas.getContext('2d');
   ctx.scale(DPR, DPR);
 
-  // ── Helpers ──────────────────────────────────────────
   const FONT = "'Plus Jakarta Sans', system-ui, sans-serif";
 
   function roundRect(x, y, w, h, r) {
@@ -1007,90 +1007,85 @@ restore();
   }
 
   function drawTable(t) {
-    const { x, y, w, title, cols, color, faded } = t;
+    const { x, y, w, title, cols, color, badge } = t;
     const ROW = 20, PAD = 10, HDR = 28;
     const h = HDR + cols.length * ROW + PAD;
-    t._h = h; t._mid = { x: x + w/2, y: y + h/2 };
+    t._h = h;
 
-    const alpha = faded ? 0.45 : 1;
-    ctx.globalAlpha = alpha;
+    ctx.shadowColor = 'rgba(0,0,0,0.10)';
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetY = 3;
 
-    // Shadow
-    if (!faded) {
-      ctx.shadowColor = 'rgba(0,0,0,0.10)';
-      ctx.shadowBlur = 10;
-      ctx.shadowOffsetY = 3;
-    }
-
-    // Body
     roundRect(x, y, w, h, 8);
-    ctx.fillStyle = faded ? '#f8fafc' : '#ffffff';
+    ctx.fillStyle = '#ffffff';
     ctx.fill();
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
-    ctx.strokeStyle = faded ? '#cbd5e1' : color;
-    ctx.lineWidth = faded ? 1 : 1.5;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // Header
     roundRect(x, y, w, HDR, 8);
-    ctx.fillStyle = faded ? '#f1f5f9' : color;
+    ctx.fillStyle = color;
     ctx.fill();
-    // Clip header corners bottom
     ctx.fillRect(x, y + HDR - 8, w, 8);
 
-    // Title
-    ctx.fillStyle = faded ? '#94a3b8' : '#ffffff';
-    ctx.font = `700 ${faded ? 10 : 11}px ${FONT}`;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `700 11px ${FONT}`;
     ctx.textAlign = 'left';
     ctx.fillText(title, x + 10, y + 18);
 
-    // Columns
     cols.forEach((col, i) => {
       const cy = y + HDR + i * ROW + 14;
       const isPK = col.startsWith('🔑');
       const isFK = col.startsWith('🔗');
-      ctx.fillStyle = isPK ? '#1565c0' : isFK ? '#7c3aed' : (faded ? '#94a3b8' : '#334155');
-      ctx.font = `${isPK || isFK ? '600' : '400'} ${faded ? 9.5 : 10}px ${FONT}`;
-      ctx.fillText(col.replace(/[🔑🔗]/g,'').trim(), x + 10, cy);
+      ctx.fillStyle = isPK ? '#1565c0' : isFK ? '#7c3aed' : '#334155';
+      ctx.font = `${isPK || isFK ? '600' : '400'} 10px ${FONT}`;
+      ctx.fillText(col.replace(/[🔑🔗]/g, '').trim(), x + 10, cy);
       if (i < cols.length - 1) {
         ctx.beginPath();
-        ctx.moveTo(x + 6, y + HDR + (i+1)*ROW + 0.5);
-        ctx.lineTo(x + w - 6, y + HDR + (i+1)*ROW + 0.5);
-        ctx.strokeStyle = faded ? '#e2e8f0' : '#f1f5f9';
+        ctx.moveTo(x + 6, y + HDR + (i + 1) * ROW + 0.5);
+        ctx.lineTo(x + w - 6, y + HDR + (i + 1) * ROW + 0.5);
+        ctx.strokeStyle = '#f1f5f9';
         ctx.lineWidth = 0.5;
         ctx.stroke();
       }
     });
 
-    ctx.globalAlpha = 1;
+    if (badge) {
+      const bw = badge.text.length * 6 + 12, bh = 16, br = 8;
+      const bx = x + w - bw - 8, by = y - 10;
+      roundRect(bx, by, bw, bh, br);
+      ctx.fillStyle = badge.bg;
+      ctx.fill();
+      ctx.fillStyle = badge.color;
+      ctx.font = `700 8px ${FONT}`;
+      ctx.textAlign = 'center';
+      ctx.fillText(badge.text, bx + bw / 2, by + bh - 4);
+    }
   }
 
   function anchor(t, side) {
     const { x, y, _h: h, w } = t;
-    if (side === 'right')  return { x: x + w,   y: y + h/2 };
-    if (side === 'left')   return { x: x,        y: y + h/2 };
-    if (side === 'top')    return { x: x + w/2,  y: y       };
-    if (side === 'bottom') return { x: x + w/2,  y: y + h   };
+    if (side === 'right')  return { x: x + w,      y: y + h / 2 };
+    if (side === 'left')   return { x: x,           y: y + h / 2 };
+    if (side === 'top')    return { x: x + w / 2,   y: y         };
+    if (side === 'bottom') return { x: x + w / 2,   y: y + h     };
   }
 
-  function drawArrow(from, to, color, dashed, label) {
+  function drawArrow(from, to, color, label) {
     const dx = to.x - from.x, dy = to.y - from.y;
-    const len = Math.sqrt(dx*dx + dy*dy);
-    const ux = dx/len, uy = dy/len;
-    // Shorten end
-    const ex = to.x - ux*6, ey = to.y - uy*6;
+    const len = Math.sqrt(dx * dx + dy * dy);
+    const ux = dx / len, uy = dy / len;
+    const ex = to.x - ux * 6, ey = to.y - uy * 6;
 
     ctx.beginPath();
     ctx.moveTo(from.x, from.y);
     ctx.lineTo(ex, ey);
     ctx.strokeStyle = color;
     ctx.lineWidth = 1.5;
-    if (dashed) ctx.setLineDash([5, 4]);
-    else ctx.setLineDash([]);
-    ctx.stroke();
     ctx.setLineDash([]);
+    ctx.stroke();
 
-    // Arrowhead
     const angle = Math.atan2(dy, dx);
     ctx.beginPath();
     ctx.moveTo(to.x, to.y);
@@ -1100,9 +1095,8 @@ restore();
     ctx.fillStyle = color;
     ctx.fill();
 
-    // Multiplicity labels
     if (label) {
-      const mx = (from.x + to.x)/2, my = (from.y + to.y)/2;
+      const mx = (from.x + to.x) / 2, my = (from.y + to.y) / 2;
       ctx.fillStyle = color;
       ctx.font = `600 9px ${FONT}`;
       ctx.textAlign = 'center';
@@ -1111,34 +1105,52 @@ restore();
   }
 
   function drawLogical(from, to, label) {
-    const mx = (from.x + to.x)/2;
-    const cp1x = mx, cp1y = from.y;
-    const cp2x = mx, cp2y = to.y;
-
+    const mx = (from.x + to.x) / 2;
     ctx.beginPath();
     ctx.moveTo(from.x, from.y);
-    ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, to.x, to.y);
+    ctx.bezierCurveTo(mx, from.y, mx, to.y, to.x, to.y);
     ctx.strokeStyle = '#94a3b8';
     ctx.lineWidth = 1.2;
     ctx.setLineDash([5, 4]);
     ctx.stroke();
     ctx.setLineDash([]);
-
     if (label) {
-      const tx = (from.x + to.x)/2, ty = (from.y + to.y)/2 - 8;
       ctx.fillStyle = '#94a3b8';
       ctx.font = `500 9px ${FONT}`;
       ctx.textAlign = 'center';
-      ctx.fillText(label, tx, ty);
+      ctx.fillText(label, (from.x + to.x) / 2, (from.y + to.y) / 2 - 8);
     }
   }
 
-  // ── Definición de tablas ─────────────────────────────
+  function dot(p, color) {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+
+  // ── Layout de tablas ──────────────────────────────────
+  // Col izq (x≈20): schedules, blocked
+  // Col centro (x≈265): appt, tours
+  // Col der (x≈550): expediente, perms, staff (nuevo)
   const T = {
+    schedules: {
+      x: 20, y: 35, w: 200,
+      title: 'admission_schedules',
+      color: '#0d7c5f',
+      cols: [
+        '🔑 id UUID PK',
+        '  level TEXT',
+        '  time_slot TEXT',
+        '  sort_order INT',
+        '  created_at',
+      ]
+    },
     appt: {
-      x: 290, y: 160, w: 210,
+      x: 265, y: 95, w: 215,
       title: 'admission_appointments',
       color: '#1565c0',
+      badge: { text: 'CENTRAL', bg: '#dbeafe', color: '#1565c0' },
       cols: [
         '🔑 id UUID PK',
         '  campus TEXT',
@@ -1154,20 +1166,24 @@ restore();
         '  created_at / updated_at',
       ]
     },
-    schedules: {
-      x: 30, y: 60, w: 200,
-      title: 'admission_schedules',
-      color: '#0d7c5f',
+    expediente: {
+      x: 550, y: 35, w: 215,
+      title: 'expediente_inicial',
+      color: '#7c3aed',
       cols: [
         '🔑 id UUID PK',
-        '  level TEXT',
-        '  time_slot TEXT',
-        '  sort_order INT',
-        '  created_at',
+        '🔗 appointment_id UUID FK',
+        '  nivel / grado / ciclo',
+        '  nombre_alumno TEXT',
+        '  fecha_nacimiento DATE',
+        '  padre / madre nombre',
+        '  padre / madre email',
+        '  datos médicos / conductas',
+        '  created_at / updated_at',
       ]
     },
     blocked: {
-      x: 30, y: 340, w: 200,
+      x: 20, y: 285, w: 200,
       title: 'blocked_dates',
       color: '#c0392b',
       cols: [
@@ -1178,146 +1194,84 @@ restore();
         '  created_at',
       ]
     },
-    expediente: {
-      x: 570, y: 60, w: 215,
-      title: 'expediente_inicial',
-      color: '#7c3aed',
-      cols: [
-        '🔑 id UUID PK',
-        '🔗 appointment_id UUID FK',
-        '  nivel / grado / ciclo',
-        '  nombre_alumno TEXT',
-        '  fecha_nacimiento DATE',
-        '  padre_nombre TEXT',
-        '  padre_email TEXT',
-        '  madre_nombre TEXT',
-        '  datos médicos / conductas',
-        '  created_at / updated_at',
-      ]
-    },
     perms: {
-      x: 570, y: 370, w: 215,
+      x: 550, y: 285, w: 215,
       title: 'permission_requests',
       color: '#b7510a',
       cols: [
         '🔑 id UUID PK',
         '🔗 appointment_id UUID FK',
-        '  type TEXT (reagendar…)',
-        '  level TEXT',
-        '  status TEXT',
+        '🔗 approved_by UUID FK → staff',
+        '  type TEXT',
+        '  level / status',
         '  student_name TEXT',
         '  proposed_date / time',
-        '  psych_message TEXT',
-        '  director_notes TEXT',
+        '  psych / director notes',
         '  created_at / responded_at',
+        '  approved_at TIMESTAMPTZ',
       ]
     },
     tours: {
-      x: 290, y: 520, w: 210,
+      x: 265, y: 455, w: 215,
       title: 'tour_recorridos',
       color: '#0277bd',
+      badge: { text: 'INDEPENDIENTE', bg: '#e0f2fe', color: '#0277bd' },
       cols: [
         '🔑 id UUID PK',
         '  level TEXT',
-        '  tour_date DATE',
-        '  tour_time TEXT',
-        '  (datos del visitante)',
+        '  tour_date / tour_time',
+        '  datos del visitante',
         '  created_at',
+      ]
+    },
+    staff: {
+      x: 550, y: 545, w: 215,
+      title: 'staff',
+      color: '#059669',
+      badge: { text: 'NUEVO v2', bg: '#d1fae5', color: '#059669' },
+      cols: [
+        '🔑 id UUID PK',
+        '🔗 supabase_user_id FK',
+        '  name TEXT',
+        '  role TEXT (psicologa…)',
+        '  level TEXT',
+        '  active BOOLEAN',
+        '  created_at / updated_at',
       ]
     },
   };
 
-  // Legacy (faded)
-  const LEGACY = [
-    { x: 20,  y: 540, w: 120, title: 'users',         color:'#94a3b8', faded:true, cols:['id UUID','email','role'] },
-    { x: 160, y: 540, w: 120, title: 'clients',        color:'#94a3b8', faded:true, cols:['id UUID','user_id FK','phone'] },
-    { x: 300, y: 600, w: 120, title: 'professionals',  color:'#94a3b8', faded:true, cols:['id UUID','user_id FK','specialty'] },
-    { x: 440, y: 600, w: 120, title: 'services',       color:'#94a3b8', faded:true, cols:['id UUID','name','price'] },
-    { x: 580, y: 600, w: 120, title: 'appointments',   color:'#94a3b8', faded:true, cols:['id UUID','status','start_time'] },
-    { x: 710, y: 540, w: 130, title: 'availability',   color:'#94a3b8', faded:true, cols:['id UUID','day_of_week','start_time'] },
-  ];
-
-  // ── Fondo ────────────────────────────────────────────
+  // ── Fondo ─────────────────────────────────────────────
   ctx.fillStyle = '#f8fafc';
   ctx.fillRect(0, 0, W, H);
 
-  // Grid dots decorativos
   ctx.fillStyle = '#e2e8f0';
   for (let gx = 20; gx < W; gx += 24)
-    for (let gy = 20; gy < H; gy += 24)
-      { ctx.beginPath(); ctx.arc(gx, gy, 1, 0, Math.PI*2); ctx.fill(); }
+    for (let gy = 20; gy < H; gy += 24) {
+      ctx.beginPath(); ctx.arc(gx, gy, 1, 0, Math.PI * 2); ctx.fill();
+    }
 
-  // Legacy section label
-  ctx.fillStyle = '#cbd5e1';
-  ctx.font = `600 9px ${FONT}`;
-  ctx.textAlign = 'left';
-  ctx.fillText('TABLAS HEREDADAS — NO EN USO', 22, 530);
-
-  // ── Dibujar tablas ───────────────────────────────────
-  LEGACY.forEach(drawTable);
+  // ── Dibujar tablas ────────────────────────────────────
   Object.values(T).forEach(drawTable);
 
-  // ── Relaciones FK ────────────────────────────────────
-  // expediente → appt
-  drawArrow(
-    anchor(T.expediente, 'left'),
-    anchor(T.appt, 'right'),
-    '#7c3aed', false, 'N:1'
-  );
+  // ── Relaciones FK ─────────────────────────────────────
+  // expediente.appointment_id → appt
+  drawArrow(anchor(T.expediente, 'left'), anchor(T.appt, 'right'), '#7c3aed', 'N:1');
+  dot(anchor(T.expediente, 'left'), '#7c3aed');
+  dot(anchor(T.appt, 'right'), '#7c3aed');
 
-  // perms → appt
-  drawArrow(
-    anchor(T.perms, 'left'),
-    anchor(T.appt, 'right'),
-    '#b7510a', false, 'N:1'
-  );
+  // perms.appointment_id → appt
+  drawArrow(anchor(T.perms, 'left'), anchor(T.appt, 'right'), '#b7510a', 'N:1');
+  dot(anchor(T.perms, 'left'), '#b7510a');
+
+  // perms.approved_by → staff
+  drawArrow(anchor(T.perms, 'bottom'), anchor(T.staff, 'top'), '#059669', 'N:1');
+  dot(anchor(T.perms, 'bottom'), '#059669');
+  dot(anchor(T.staff, 'top'), '#059669');
 
   // ── Relaciones lógicas ────────────────────────────────
-  // schedules ↔ appt (comparten level + time_slot/appointment_time)
-  drawLogical(
-    anchor(T.schedules, 'right'),
-    anchor(T.appt, 'left'),
-    'level + time_slot'
-  );
-
-  // blocked ↔ appt (comparten level + fecha)
-  drawLogical(
-    anchor(T.blocked, 'right'),
-    anchor(T.appt, 'left'),
-    'level + date'
-  );
-
-  // ── Etiquetas de relaciones en los extremos ──────────
-  function dot(p, color) {
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
-    ctx.fillStyle = color;
-    ctx.fill();
-  }
-  dot(anchor(T.expediente, 'left'), '#7c3aed');
-  dot(anchor(T.appt, 'right'),      '#7c3aed');
-  dot(anchor(T.perms, 'left'),      '#b7510a');
-  dot(anchor(T.appt, 'right'),      '#b7510a');
-
-  // ── Badge "Tabla Central" ─────────────────────────────
-  const bc = T.appt;
-  ctx.fillStyle = '#dbeafe';
-  roundRect(bc.x + bc.w/2 - 40, bc.y - 18, 80, 16, 8);
-  ctx.fill();
-  ctx.fillStyle = '#1565c0';
-  ctx.font = `700 9px ${FONT}`;
-  ctx.textAlign = 'center';
-  ctx.fillText('TABLA CENTRAL', bc.x + bc.w/2, bc.y - 6);
-
-  // ── tours standalone badge ────────────────────────────
-  ctx.fillStyle = '#e0f2fe';
-  const bt = T.tours;
-  roundRect(bt.x + bt.w/2 - 38, bt.y - 18, 76, 16, 8);
-  ctx.fill();
-  ctx.fillStyle = '#0277bd';
-  ctx.font = `700 9px ${FONT}`;
-  ctx.textAlign = 'center';
-  ctx.fillText('INDEPENDIENTE', bt.x + bt.w/2, bt.y - 6);
+  drawLogical(anchor(T.schedules, 'right'), anchor(T.appt, 'left'), 'level + time_slot');
+  drawLogical(anchor(T.blocked, 'right'),   anchor(T.appt, 'left'), 'level + date');
 
 })();
 </script>
