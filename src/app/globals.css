@@ -3768,15 +3768,15 @@ body {
    dark mode vía prefers-color-scheme.
 ══════════════════════════════════════════════════════════════ */
 :root {
-  /* ── Superficie ─────────────────────────────────────────── */
-  --adm-bg:          #e8f1fd;   /* azul cielo muy suave — notablemente no-blanco */
+  /* ── Superficie — light mode profesional (#f9fafb base) ──── */
+  --adm-bg:          #f9fafb;
   --adm-surface:     #ffffff;
-  --adm-surface-alt: #eef4fc;
-  --adm-border:      #d8e6f5;
-  /* ── Texto ───────────────────────────────────────────────── */
-  --adm-text:        #0f1c35;   /* casi negro con tinte azul — más profundo */
-  --adm-text-muted:  #5a7090;   /* azul-gris en lugar de slate neutro */
-  --adm-text-faint:  #94a8c0;
+  --adm-surface-alt: #f3f4f6;
+  --adm-border:      #e5e7eb;
+  /* ── Texto — alto contraste ─────────────────────────────── */
+  --adm-text:        #111827;
+  --adm-text-muted:  #4b5563;
+  --adm-text-faint:  #9ca3af;
   /* ── Accent / semánticos ─────────────────────────────────── */
   --adm-accent:      #1565c0;
   --adm-accent-dark: #1251a3;
@@ -3792,9 +3792,9 @@ body {
   /* ── Forma ───────────────────────────────────────────────── */
   --adm-radius:      10px;
   --adm-radius-sm:   6px;
-  /* Sombras con tinte azul institucional — se siente premium, no gris sucio */
-  --adm-shadow-sm:   0 1px 3px rgba(15,28,53,0.06), 0 4px 16px rgba(21,101,192,0.05);
-  --adm-shadow-md:   0 4px 16px rgba(15,28,53,0.09), 0 1px 4px rgba(21,101,192,0.06);
+  /* Sombras limpias — sin tinte de color */
+  --adm-shadow-sm:   0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.04);
+  --adm-shadow-md:   0 4px 12px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.05);
   --adm-ease:        cubic-bezier(0.16, 1, 0.3, 1);          /* expo-out — decisivo    */
   --adm-ease-soft:   cubic-bezier(0.25, 1, 0.5, 1);          /* quart-out — refinado   */
   --adm-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);      /* spring — overshoot     */
@@ -3823,21 +3823,9 @@ body {
 
 .admin-layout {
   min-height: 100vh;
+  background: var(--adm-bg);
   color: var(--adm-text);
   font-family: var(--adm-font);
-  /* Mesh gradient atmosférico — claramente visible, no blanco plano.
-     Dark mode sobreescribe esto con su synthwave. */
-  background-color: var(--adm-bg);
-  background-image:
-    /* Glow azul institucional desde arriba — como cielo de mañana */
-    radial-gradient(ellipse 110% 50% at 50% -2%,  rgba(21, 101, 192, 0.22) 0%,  transparent 65%),
-    /* Acento amarillo-verde (color institucional) en esquina superior izquierda */
-    radial-gradient(ellipse  65% 45% at -5% 20%,  rgba(200, 212, 0, 0.14)  0%,  transparent 55%),
-    /* Suave eco azul en esquina inferior derecha */
-    radial-gradient(ellipse  55% 40% at 108% 90%, rgba(21, 101, 192, 0.12) 0%,  transparent 55%),
-    /* Dot grid sutil — como Linear/Vercel */
-    radial-gradient(circle, rgba(21, 101, 192, 0.10) 1px, transparent 1px);
-  background-size: auto, auto, auto, 26px 26px;
 }
 
 /* ══ SYNTHWAVE MODE — [data-theme="dark"] ════════════════════════
@@ -3923,6 +3911,165 @@ body {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
+
+/* ══════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES — restaura synthwave en todos los
+   elementos que light mode convirtió a estilo clean/minimal.
+   /baseline-ui: solo estos selectores; no afecta light.
+══════════════════════════════════════════════════════════════ */
+
+/* Header: rainbow gradient de vuelta */
+.admin-layout[data-theme="dark"] .admin-header {
+  background: linear-gradient(105deg, #c8d400 0%, #d4007a 38%, #1565c0 70%, #0d0f2e 100%);
+  border: none;
+  box-shadow:
+    0 6px 30px rgba(212,0,122,0.35),
+    0 2px 8px rgba(21,101,192,0.4);
+  color: #fff;
+}
+
+.admin-layout[data-theme="dark"] .admin-header::before {
+  display: block;
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.admin-layout[data-theme="dark"] .admin-header::after {
+  display: block;
+  content: '';
+  position: absolute;
+  right: -20px;
+  top: 0;
+  height: 100%;
+  width: 25%;
+  background: rgba(255,255,255,0.05);
+  transform: skewX(-20deg);
+  pointer-events: none;
+}
+
+.admin-layout[data-theme="dark"] .admin-header h1 {
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.35);
+}
+
+.admin-layout[data-theme="dark"] .admin-header-badge {
+  background: rgba(0,0,0,0.22);
+  border-color: rgba(255,255,255,0.22);
+  color: rgba(255,255,255,0.92);
+  backdrop-filter: blur(6px);
+}
+
+/* Theme toggle: translúcido oscuro */
+.admin-layout[data-theme="dark"] .admin-theme-toggle {
+  background: rgba(0,0,0,0.30);
+  border-color: rgba(255,255,255,0.18);
+  backdrop-filter: blur(8px);
+}
+
+.admin-layout[data-theme="dark"] .admin-theme-btn { color: rgba(255,255,255,0.55); }
+.admin-layout[data-theme="dark"] .admin-theme-btn:hover { color: rgba(255,255,255,0.85); }
+.admin-layout[data-theme="dark"] .admin-theme-btn.active {
+  background: rgba(255,255,255,0.22);
+  color: #fff;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.3);
+}
+
+/* Nav links: translúcido blanco */
+.admin-layout[data-theme="dark"] .admin-link {
+  color: rgba(255,255,255,0.92);
+  background: rgba(255,255,255,0.14);
+  border-color: rgba(255,255,255,0.18);
+  backdrop-filter: blur(6px);
+}
+.admin-layout[data-theme="dark"] .admin-link::after {
+  background: radial-gradient(circle, rgba(255,255,255,0.35) 0%, transparent 65%);
+}
+.admin-layout[data-theme="dark"] .admin-link:hover {
+  background: rgba(255,255,255,0.26);
+  border-color: rgba(255,255,255,0.35);
+  color: #fff;
+}
+.admin-layout[data-theme="dark"] .admin-link:focus-visible {
+  outline-color: rgba(255,255,255,0.8);
+}
+
+/* Cards: synthwave con glow neón */
+.admin-layout[data-theme="dark"] .admin-card {
+  background: color-mix(in srgb, var(--card-color, var(--adm-accent)) 85%, #07091a);
+  border: 1px solid color-mix(in srgb, var(--card-color, var(--adm-accent)) 60%, transparent);
+  border-left: none;
+  color: #fff;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--card-color, var(--adm-accent)) 40%, transparent),
+    0 6px 24px color-mix(in srgb, var(--card-color, var(--adm-accent)) 40%, transparent),
+    0 0 48px color-mix(in srgb, var(--card-color, var(--adm-accent)) 18%, transparent);
+  transition:
+    transform     280ms var(--adm-ease-spring),
+    box-shadow    220ms var(--adm-ease-soft),
+    filter        220ms var(--adm-ease-soft);
+}
+
+.admin-layout[data-theme="dark"] .admin-card::before {
+  display: block;
+  content: '';
+  position: absolute;
+  right: -15%;
+  top: 0;
+  bottom: 0;
+  width: 55%;
+  background: rgba(255,255,255,0.08);
+  transform: skewX(-20deg);
+  pointer-events: none;
+  transition: transform 200ms var(--adm-ease), opacity 200ms;
+}
+
+.admin-layout[data-theme="dark"] .admin-card::after {
+  display: block;
+  content: '';
+  position: absolute;
+  bottom: -24px;
+  right: -24px;
+  width: 72px;
+  height: 72px;
+  background: rgba(255,255,255,0.10);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.admin-layout[data-theme="dark"] .admin-card:hover {
+  will-change: transform, filter;
+  transform: translateY(-6px) scale(1.04);
+  filter: brightness(1.08);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--card-color, var(--adm-accent)) 80%, transparent),
+    0 12px 40px color-mix(in srgb, var(--card-color, var(--adm-accent)) 65%, transparent),
+    0 0 80px color-mix(in srgb, var(--card-color, var(--adm-accent)) 35%, transparent),
+    0 0 120px rgba(0,255,255,0.06);
+}
+
+.admin-layout[data-theme="dark"] .admin-card:hover::before {
+  transform: skewX(-20deg) translateX(8px);
+  opacity: 0.9;
+}
+
+.admin-layout[data-theme="dark"] .admin-card:active {
+  transform: translateY(-1px) scale(0.97);
+  filter: brightness(1.0);
+  transition-duration: 100ms;
+}
+
+.admin-layout[data-theme="dark"] .admin-card-title { color: #fff; }
+.admin-layout[data-theme="dark"] .admin-card-desc  { color: rgba(255,255,255,0.78); }
+.admin-layout[data-theme="dark"] .admin-card-arrow { color: rgba(255,255,255,0.45); opacity: 1; }
+.admin-layout[data-theme="dark"] .admin-card:hover .admin-card-arrow {
+  color: #c8d400;
+  opacity: 1;
+}
+
+.admin-layout[data-theme="dark"] .admin-card-icon-wrap { background: rgba(255,255,255,0.12); }
 
 
 .admin-login-page {
@@ -4015,40 +4162,26 @@ body {
   }
 }
 
+/* ══ HEADER — Light mode: clean white profesional ════════════
+   Dark mode restaura el rainbow en el bloque de overrides abajo.
+═══════════════════════════════════════════════════════════ */
 .admin-header {
-  background: linear-gradient(105deg, #c8d400 0%, #d4007a 38%, #1565c0 70%, #0d0f2e 100%);
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: var(--adm-radius);
-  padding: 1.5rem 2rem;
+  padding: 1.25rem 1.75rem;
   margin-bottom: 2rem;
-  box-shadow:
-    0 6px 30px rgba(212,0,122,0.35),
-    0 2px 8px rgba(21,101,192,0.4);
-  color: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.04);
+  color: #111827;
   animation: adminHeaderDrop 400ms var(--adm-ease) both;
   position: relative;
   overflow: hidden;
 }
 
-/* Brillo interno superior */
-.admin-header::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-/* Banda diagonal  */
+/* Pseudo-elementos decorativos — ocultos en light, restaurados en dark */
+.admin-header::before,
 .admin-header::after {
-  content: '';
-  position: absolute;
-  right: -20px;
-  top: 0;
-  height: 100%;
-  width: 25%;
-  background: rgba(255,255,255,0.05);
-  transform: skewX(-20deg);
-  pointer-events: none;
+  display: none;
 }
 
 /* ══ HEADER INNER — layout flex horizontal ═══════════════════
@@ -4073,23 +4206,23 @@ body {
 }
 
 .admin-header h1 {
-  font-size: clamp(1.55rem, 3vw, 2rem);
-  font-weight: 900;
-  letter-spacing: -0.035em;
-  line-height: 1.05;
+  font-size: clamp(1.4rem, 3vw, 1.85rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
   margin: 0;
-  /* Texto con sombra para legibilidad sobre cualquier fondo */
-  text-shadow: 0 2px 12px rgba(0,0,0,0.35);
+  color: #111827;
+  text-shadow: none;
 }
 
-/* Badge institucional bajo el título */
+/* Badge institucional — light mode: tinte azul sutil */
 .admin-header-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  background: rgba(0,0,0,0.22);
-  border: 1px solid rgba(255,255,255,0.22);
-  color: rgba(255,255,255,0.92);
+  background: rgba(21, 101, 192, 0.08);
+  border: 1px solid rgba(21, 101, 192, 0.18);
+  color: #1565c0;
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.07em;
@@ -4098,7 +4231,7 @@ body {
   border-radius: 9999px;
   width: fit-content;
   margin-top: 0.35rem;
-  backdrop-filter: blur(6px);
+  backdrop-filter: none;
 }
 
 .admin-header p {
@@ -4114,15 +4247,15 @@ body {
   flex-shrink: 0;
 }
 
-/* ── Theme toggle — pill segmentado ─────────────────────── */
+/* ── Theme toggle — pill segmentado (light: gris limpio) ─── */
 .admin-theme-toggle {
   display: flex;
-  background: rgba(0,0,0,0.30);
-  border: 1px solid rgba(255,255,255,0.18);
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
   border-radius: 9999px;
   padding: 3px;
   gap: 2px;
-  backdrop-filter: blur(8px);
+  backdrop-filter: none;
 }
 
 .admin-theme-btn {
@@ -4131,44 +4264,48 @@ body {
   gap: 0.3rem;
   background: transparent;
   border: none;
-  color: rgba(255,255,255,0.55);
+  color: #6b7280;
   font-size: 0.73rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   padding: 0.35rem 0.85rem;
   border-radius: 9999px;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s, transform 0.15s;
+  transition:
+    background 150ms var(--adm-ease-soft),
+    color      150ms var(--adm-ease-soft),
+    transform  120ms var(--adm-ease-soft);
   white-space: nowrap;
 }
 
 .admin-theme-btn:hover {
-  color: rgba(255,255,255,0.85);
+  color: #111827;
 }
 
 .admin-theme-btn.active {
-  background: rgba(255,255,255,0.22);
-  color: #fff;
-  box-shadow: 0 1px 8px rgba(0,0,0,0.3);
+  background: #1565c0;
+  color: #ffffff;
+  box-shadow: 0 1px 4px rgba(21,101,192,0.30);
 }
 
-/* ── Nav links — ripple + micro feedback ── */
+/* ── Nav links — light: gris limpio, dark: translúcido blanco ── */
 .admin-link {
-  color: rgba(255,255,255,0.92);
+  color: #374151;
   text-decoration: none;
   font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   padding: 0.38rem 1rem;
   border-radius: 9999px;
-  background: rgba(255,255,255,0.14);
-  border: 1px solid rgba(255,255,255,0.18);
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
   transition:
-    background  150ms var(--adm-ease-soft),
+    background   150ms var(--adm-ease-soft),
     border-color 150ms var(--adm-ease-soft),
-    transform    150ms var(--adm-ease-soft);
+    transform    150ms var(--adm-ease-soft),
+    color        150ms var(--adm-ease-soft);
   white-space: nowrap;
-  backdrop-filter: blur(6px);
+  backdrop-filter: none;
   position: relative;
   overflow: hidden;
 }
@@ -4181,12 +4318,11 @@ body {
   left: 50%;
   width: 140%;
   aspect-ratio: 1;
-  background: radial-gradient(circle, rgba(255,255,255,0.35) 0%, transparent 65%);
+  background: radial-gradient(circle, rgba(0,0,0,0.08) 0%, transparent 65%);
   border-radius: 50%;
   transform: translate(-50%, -50%) scale(0);
   opacity: 1;
   pointer-events: none;
-  /* sin transition en estado normal → snap-back instantáneo */
 }
 .admin-link:active::after {
   transform: translate(-50%, -50%) scale(1);
@@ -4195,18 +4331,19 @@ body {
 }
 
 .admin-link:hover {
-  background: rgba(255,255,255,0.26);
-  border-color: rgba(255,255,255,0.35);
-  transform: scale(1.04);
+  background: #e5e7eb;
+  border-color: #d1d5db;
+  color: #111827;
+  transform: scale(1.02);
 }
 
 .admin-link:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
   transition-duration: var(--adm-dur-micro);
 }
 
 .admin-link:focus-visible {
-  outline: 2px solid rgba(255,255,255,0.8);
+  outline: 2px solid #1565c0;
   outline-offset: 2px;
 }
 
@@ -4247,83 +4384,54 @@ body {
 .admin-card:nth-child(5) { animation-delay: 0.28s; }
 .admin-card:nth-child(6) { animation-delay: 0.35s; }
 
+/* ══ CARDS — Light mode: white profesional con accent de color ══
+   Dark mode restaura el synthwave en el bloque de overrides abajo.
+═══════════════════════════════════════════════════════════════ */
 .admin-card {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
-  padding: 1.75rem 1.6rem 1.5rem;
-  border-radius: 14px;
-  border: 1px solid color-mix(in srgb, var(--card-color, var(--adm-accent)) 60%, transparent);
-  background: color-mix(in srgb, var(--card-color, var(--adm-accent)) 85%, #07091a);
-  color: #fff;
-  /* Glow neón — la tarjeta emite luz de su propio color */
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--card-color, var(--adm-accent)) 40%, transparent),
-    0 6px 24px color-mix(in srgb, var(--card-color, var(--adm-accent)) 40%, transparent),
-    0 0 48px color-mix(in srgb, var(--card-color, var(--adm-accent)) 18%, transparent);
+  padding: 1.5rem 1.6rem 1.4rem;
+  border-radius: 12px;
+  /* Left accent — el color semántico se expresa sin saturar el fondo */
+  border: 1px solid #e5e7eb;
+  border-left: 3px solid var(--card-color, var(--adm-accent));
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.04);
   cursor: pointer;
   /* Compositor-only — fixing-motion-performance */
   transition:
-    transform     280ms var(--adm-ease-spring),   /* spring → follow-through natural */
+    transform     220ms var(--adm-ease-soft),
     box-shadow    220ms var(--adm-ease-soft),
-    filter        220ms var(--adm-ease-soft);
+    filter        200ms var(--adm-ease-soft);
   position: relative;
   overflow: hidden;
-  contain: paint;   /* evita que el glow cause repaint en el resto del layout */
-  /* Entrada coreografiada */
-  animation: adminFadeInUp 0.45s var(--adm-ease) backwards;
+  contain: paint;
+  animation: adminFadeInUp 0.4s var(--adm-ease) backwards;
 }
 
-/* Promover layer solo cuando hay animación activa */
-.admin-card:hover {
-  will-change: transform, filter;
-  transform: translateY(-6px) scale(1.04);
-  filter: brightness(1.08);
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--card-color, var(--adm-accent)) 80%, transparent),
-    0 12px 40px color-mix(in srgb, var(--card-color, var(--adm-accent)) 65%, transparent),
-    0 0 80px color-mix(in srgb, var(--card-color, var(--adm-accent)) 35%, transparent),
-    0 0 120px rgba(0, 255, 255, 0.06);  /* cyan aura sutil universal */
-}
-
-/* Forma geométrica 1 — banda diagonal */
-.admin-card::before {
-  content: '';
-  position: absolute;
-  right: -15%;
-  top: 0;
-  bottom: 0;
-  width: 55%;
-  background: rgba(255,255,255,0.08);
-  transform: skewX(-20deg);
-  pointer-events: none;
-  /* Fix: 400ms → 200ms (fixing-motion-performance) */
-  transition: transform 200ms var(--adm-ease), opacity 200ms;
-}
-
-/* Forma geométrica 2 — rombo en esquina */
+/* Pseudo-elementos decorativos — ocultos en light, restaurados en dark */
+.admin-card::before,
 .admin-card::after {
-  content: '';
-  position: absolute;
-  bottom: -24px;
-  right: -24px;
-  width: 72px;
-  height: 72px;
-  background: rgba(255,255,255,0.10);
-  transform: rotate(45deg);
-  pointer-events: none;
+  display: none;
 }
 
-/* Al hover la banda diagonal se desplaza levemente */
-.admin-card:hover::before {
-  transform: skewX(-20deg) translateX(8px);
-  opacity: 0.9;
+/* Hover: lift sutil — sin neon, sin glow exagerado */
+.admin-card:hover {
+  will-change: transform, box-shadow;
+  transform: translateY(-3px) scale(1.02);
+  box-shadow:
+    0 4px 16px rgba(0,0,0,0.08),
+    0 8px 32px rgba(0,0,0,0.05),
+    0 0 0 1px color-mix(in srgb, var(--card-color, var(--adm-accent)) 20%, transparent);
+  filter: brightness(1.01);
 }
 
-/* Presionar — feedback satisfactorio con spring-like */
+/* Press — scale down satisfactorio */
 .admin-card:active {
-  transform: translateY(-1px) scale(0.97);
+  transform: translateY(0px) scale(0.98);
   filter: brightness(1.0);
   transition-duration: 100ms;
   will-change: auto;
@@ -4552,18 +4660,18 @@ body {
 }
 
 .admin-card-title {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
-  color: #fff;
-  margin: 0 0 0.4rem;
+  color: #111827;
+  margin: 0 0 0.35rem;
   letter-spacing: -0.01em;
   position: relative;
   z-index: 1;
 }
 
 .admin-card-desc {
-  font-size: 0.85rem;
-  color: rgba(255,255,255,0.78);
+  font-size: 0.84rem;
+  color: #4b5563;
   line-height: 1.5;
   margin: 0 0 1.25rem;
   flex: 1;
@@ -4571,19 +4679,20 @@ body {
   z-index: 1;
 }
 
-/* Flecha institucional amarillo-verde — /colorize */
+/* Flecha — color del accent de la card */
 .admin-card-arrow {
   align-self: flex-end;
   font-size: 1.1rem;
-  color: rgba(255,255,255,0.45);
-  transition: transform 0.35s var(--adm-ease), color 0.25s;
+  color: var(--card-color, var(--adm-accent));
+  opacity: 0.5;
+  transition: transform 220ms var(--adm-ease-soft), opacity 200ms;
   position: relative;
   z-index: 1;
 }
 
 .admin-card:hover .admin-card-arrow {
-  transform: translateX(8px);
-  color: #c8d400; /* amarillo-verde institucional — acento distintivo */
+  transform: translateX(6px);
+  opacity: 1;
 }
 
 .admin-dashboard-content {
