@@ -3769,10 +3769,10 @@ body {
 ══════════════════════════════════════════════════════════════ */
 :root {
   /* ── Superficie ─────────────────────────────────────────── */
-  --adm-bg:          #f0f6ff;   /* off-white con tinte azul frío — no gris nublado */
+  --adm-bg:          #e8f1fd;   /* azul cielo muy suave — notablemente no-blanco */
   --adm-surface:     #ffffff;
-  --adm-surface-alt: #eef3fb;   /* ligeramente azulado en lugar de gris plano */
-  --adm-border:      #dde7f4;   /* borde con ligero tinte azul */
+  --adm-surface-alt: #eef4fc;
+  --adm-border:      #d8e6f5;
   /* ── Texto ───────────────────────────────────────────────── */
   --adm-text:        #0f1c35;   /* casi negro con tinte azul — más profundo */
   --adm-text-muted:  #5a7090;   /* azul-gris en lugar de slate neutro */
@@ -3823,15 +3823,21 @@ body {
 
 .admin-layout {
   min-height: 100vh;
-  /* Gradiente atmosférico light — "mañana clara" sobre azul institucional */
-  /* El dark mode sobreescribe esto con su propio background synthwave */
-  background:
-    radial-gradient(ellipse 120% 55% at 55% -5%,  rgba(21, 101, 192, 0.08) 0%,  transparent 65%),
-    radial-gradient(ellipse  60% 50% at  0% 45%,  rgba(200, 212, 0, 0.04)  0%,  transparent 60%),
-    radial-gradient(ellipse  70% 40% at 100% 80%, rgba(21, 101, 192, 0.04) 0%,  transparent 55%),
-    var(--adm-bg);
   color: var(--adm-text);
   font-family: var(--adm-font);
+  /* Mesh gradient atmosférico — claramente visible, no blanco plano.
+     Dark mode sobreescribe esto con su synthwave. */
+  background-color: var(--adm-bg);
+  background-image:
+    /* Glow azul institucional desde arriba — como cielo de mañana */
+    radial-gradient(ellipse 110% 50% at 50% -2%,  rgba(21, 101, 192, 0.22) 0%,  transparent 65%),
+    /* Acento amarillo-verde (color institucional) en esquina superior izquierda */
+    radial-gradient(ellipse  65% 45% at -5% 20%,  rgba(200, 212, 0, 0.14)  0%,  transparent 55%),
+    /* Suave eco azul en esquina inferior derecha */
+    radial-gradient(ellipse  55% 40% at 108% 90%, rgba(21, 101, 192, 0.12) 0%,  transparent 55%),
+    /* Dot grid sutil — como Linear/Vercel */
+    radial-gradient(circle, rgba(21, 101, 192, 0.10) 1px, transparent 1px);
+  background-size: auto, auto, auto, 26px 26px;
 }
 
 /* ══ SYNTHWAVE MODE — [data-theme="dark"] ════════════════════════
