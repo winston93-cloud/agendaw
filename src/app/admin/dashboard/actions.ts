@@ -259,17 +259,19 @@ export async function respondPermissionRequest(
         cur.setDate(cur.getDate() + 1)
       }
 
-      const rows = dates.map(d => ({
-        block_date: d,
-        level:      req.level,
-        reason:     req.bloqueo_reason ?? null,
-        block_time: req.bloqueo_time ?? null,
-      }))
-
-      await supabase
-        .from('blocked_dates')
-        .insert(rows)
-        .throwOnError()
+      // Insertar cada fecha por separado para que los conflictos (fechas ya bloqueadas)
+      // se ignoren individualmente sin abortar el resto del lote
+      for (const d of dates) {
+        await supabase
+          .from('blocked_dates')
+          .insert({
+            block_date: d,
+            level:      req.level,
+            reason:     req.bloqueo_reason ?? null,
+            block_time: req.bloqueo_time ?? null,
+          })
+        // los errores de constraint único se ignoran silenciosamente
+      }
     }
   }
 
