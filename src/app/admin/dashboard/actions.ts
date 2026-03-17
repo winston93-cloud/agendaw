@@ -49,8 +49,10 @@ export async function createPermissionRequest(data: {
   horario_time_new?: string
   horario_time_old?: string
   // bloqueo
-  bloqueo_date?:   string
-  bloqueo_reason?: string
+  bloqueo_date?:     string
+  bloqueo_date_end?: string
+  bloqueo_time?:     string
+  bloqueo_reason?:   string
   // mensaje
   psych_message?: string
 }) {
@@ -70,9 +72,11 @@ export async function createPermissionRequest(data: {
       horario_action:  data.horario_action,
       horario_time_new: data.horario_time_new,
       horario_time_old: data.horario_time_old,
-      bloqueo_date:    data.bloqueo_date,
-      bloqueo_reason:  data.bloqueo_reason,
-      psych_message:   data.psych_message,
+      bloqueo_date:     data.bloqueo_date,
+      bloqueo_date_end: data.bloqueo_date_end,
+      bloqueo_time:     data.bloqueo_time,
+      bloqueo_reason:   data.bloqueo_reason,
+      psych_message:    data.psych_message,
     }])
     .select()
     .single()
@@ -98,8 +102,13 @@ export async function createPermissionRequest(data: {
         <tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Acción</td><td style="padding:6px 10px;">${data.horario_action === 'agregar' ? 'Agregar' : 'Eliminar'} horario</td></tr>
         <tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Horario</td><td style="padding:6px 10px;">${data.horario_time_new ?? data.horario_time_old ?? '—'}</td></tr>`
     } else {
+      const fechaStr = data.bloqueo_date_end
+        ? `${data.bloqueo_date ?? '—'} al ${data.bloqueo_date_end}`
+        : (data.bloqueo_date ?? '—')
+      const alcanceStr = data.bloqueo_time ? `Solo horario ${data.bloqueo_time}` : 'Día completo'
       detalles = `
-        <tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Fecha</td><td style="padding:6px 10px;">${data.bloqueo_date ?? '—'}</td></tr>
+        <tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Fecha${data.bloqueo_date_end ? 's' : ''}</td><td style="padding:6px 10px;">${fechaStr}</td></tr>
+        <tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Alcance</td><td style="padding:6px 10px;">${alcanceStr}</td></tr>
         <tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Motivo</td><td style="padding:6px 10px;">${data.bloqueo_reason ?? 'Sin motivo especificado'}</td></tr>`
     }
 
@@ -237,13 +246,30 @@ export async function respondPermissionRequest(
     }
 
     if (req.type === 'bloqueo' && req.bloqueo_date) {
+      // Generar todas las fechas del rango (o solo la fecha inicial)
+      const dates: string[] = []
+      const start = new Date(req.bloqueo_date + 'T12:00:00')
+      const end   = req.bloqueo_date_end
+        ? new Date(req.bloqueo_date_end + 'T12:00:00')
+        : start
+
+      const cur = new Date(start)
+      while (cur <= end) {
+        dates.push(cur.toISOString().slice(0, 10))
+        cur.setDate(cur.getDate() + 1)
+      }
+
+      const rows = dates.map(d => ({
+        block_date: d,
+        level:      req.level,
+        reason:     req.bloqueo_reason ?? null,
+        block_time: req.bloqueo_time ?? null,
+      }))
+
       await supabase
         .from('blocked_dates')
-        .insert([{
-          block_date: req.bloqueo_date,
-          level:      req.level,
-          reason:     req.bloqueo_reason ?? null,
-        }])
+        .insert(rows)
+        .throwOnError()
     }
   }
 

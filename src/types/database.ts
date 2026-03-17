@@ -99,6 +99,7 @@ export interface BlockedDate {
   block_date: string
   level: AdmissionLevel
   reason?: string
+  block_time: string | null
   created_at: string
 }
 
@@ -133,8 +134,10 @@ export interface PermissionRequest {
   horario_time_old?: string
 
   // bloqueo
-  bloqueo_date?:   string
-  bloqueo_reason?: string
+  bloqueo_date?:     string
+  bloqueo_date_end?: string
+  bloqueo_time?:     string
+  bloqueo_reason?:   string
 
   psych_message?:  string
   director_notes?: string

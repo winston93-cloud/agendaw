@@ -70,7 +70,8 @@ export default function AgendarPage() {
   const [currentStep, setCurrentStep] = useState<Step>(1)
   const [blockedDates, setBlockedDates] = useState<string[]>([])
   const [scheduleTimes, setScheduleTimes] = useState<string[]>([])
-  const [bookedSlots, setBookedSlots] = useState<string[]>([])
+  const [bookedSlots,   setBookedSlots]   = useState<string[]>([])
+  const [blockedSlots,  setBlockedSlots]  = useState<string[]>([])
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [lastAppointmentId, setLastAppointmentId] = useState<string | null>(null)
   const [emailSent, setEmailSent] = useState(false)
@@ -392,15 +393,29 @@ export default function AgendarPage() {
       .catch(() => setBookedSlots([]))
   }, [formData.appointmentDate, formData.level])
 
-  // Si el horario elegido está ocupado, limpiar selección
+  // Horarios bloqueados administrativamente para esta fecha y nivel
+  useEffect(() => {
+    if (!formData.appointmentDate || !formData.level) {
+      setBlockedSlots([])
+      return
+    }
+    const apiLevel = admissionLevelForApi()
+    if (!apiLevel) { setBlockedSlots([]); return }
+    fetch(`/api/blocked-slots?level=${apiLevel}&date=${formData.appointmentDate}`)
+      .then((res) => res.json())
+      .then((data) => setBlockedSlots(data.blockedTimes || []))
+      .catch(() => setBlockedSlots([]))
+  }, [formData.appointmentDate, formData.level])
+
+  // Si el horario elegido está ocupado o bloqueado, limpiar selección
   useEffect(() => {
     setFormData((prev) => {
-      if (prev.appointmentTime && bookedSlots.includes(prev.appointmentTime)) {
+      if (prev.appointmentTime && (bookedSlots.includes(prev.appointmentTime) || blockedSlots.includes(prev.appointmentTime))) {
         return { ...prev, appointmentTime: '' }
       }
       return prev
     })
-  }, [bookedSlots])
+  }, [bookedSlots, blockedSlots])
 
   // Scroll a "Información del Aspirante" al elegir plantel y nivel
   useEffect(() => {
@@ -759,18 +774,20 @@ export default function AgendarPage() {
                       ) : (
                         <div className="time-slots">
                           {scheduleTimes.map((time) => {
-                            const isBooked = bookedSlots.includes(time)
+                            const isBooked  = bookedSlots.includes(time)
+                            const isBlocked = blockedSlots.includes(time)
+                            const unavailable = isBooked || isBlocked
                             return (
                               <button
                                 key={time}
                                 type="button"
-                                className={`time-slot ${formData.appointmentTime === time ? 'selected' : ''} ${isBooked ? 'time-slot-booked' : ''}`}
-                                onClick={() => !isBooked && updateFormData('appointmentTime', time)}
-                                disabled={isBooked}
-                                title={isBooked ? t('aspirante.slotOccupiedTitle') : undefined}
+                                className={`time-slot ${formData.appointmentTime === time ? 'selected' : ''} ${unavailable ? 'time-slot-booked' : ''}`}
+                                onClick={() => !unavailable && updateFormData('appointmentTime', time)}
+                                disabled={unavailable}
+                                title={isBlocked ? 'Horario no disponible' : isBooked ? t('aspirante.slotOccupiedTitle') : undefined}
                               >
                                 {time}
-                                {isBooked && <span className="time-slot-label"> {t('aspirante.slotOccupied')}</span>}
+                                {unavailable && <span className="time-slot-label"> {t('aspirante.slotOccupied')}</span>}
                               </button>
                             )
                           })}

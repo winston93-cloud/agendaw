@@ -112,8 +112,20 @@ function RequestCard({ req, onRespond }: { req: PermissionRequest; onRespond: ()
 
             {req.type === 'bloqueo' && (<>
               <div className="director-req-detail-item highlight">
-                <span className="drdi-label">Fecha a bloquear</span>
-                <span className="drdi-value">{formatDate(req.bloqueo_date)}</span>
+                <span className="drdi-label">
+                  {req.bloqueo_date_end ? 'Rango de fechas' : 'Fecha a bloquear'}
+                </span>
+                <span className="drdi-value">
+                  {req.bloqueo_date_end
+                    ? `${formatDate(req.bloqueo_date)} al ${formatDate(req.bloqueo_date_end)}`
+                    : formatDate(req.bloqueo_date)}
+                </span>
+              </div>
+              <div className="director-req-detail-item">
+                <span className="drdi-label">Alcance</span>
+                <span className="drdi-value">
+                  {req.bloqueo_time ? `Solo horario ${req.bloqueo_time}` : 'Día completo'}
+                </span>
               </div>
               <div className="director-req-detail-item">
                 <span className="drdi-label">Motivo</span>

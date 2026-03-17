@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createPermissionRequest, getAllRecentRequests } from './dashboard/actions'
-import type { BlockedDate, AdmissionLevel, PermissionRequest } from '@/types/database'
+import type { BlockedDate, AdmissionLevel, AdmissionSchedule, PermissionRequest } from '@/types/database'
 
 const LEVEL_LABELS: Record<AdmissionLevel, string> = {
   maternal_kinder: 'Maternal y Kinder',
@@ -14,6 +14,12 @@ type ReqStatus = 'pendiente' | 'aprobada' | 'rechazada'
 
 function reqKey(level: AdmissionLevel, date: string) {
   return `bloqueo:${level}:${date}`
+}
+
+function formatDate(d: string) {
+  return new Date(d + 'T12:00:00').toLocaleDateString('es-MX', {
+    weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
+  })
 }
 
 function StatusBadge({ status }: { status: ReqStatus }) {
@@ -32,14 +38,24 @@ function StatusBadge({ status }: { status: ReqStatus }) {
   )
 }
 
-export default function AdminBloquear({ blockedDates }: { blockedDates: BlockedDate[] }) {
-  const [level,      setLevel]      = useState<AdmissionLevel>('maternal_kinder')
-  const [block_date, setBlockDate]  = useState('')
-  const [reason,     setReason]     = useState('')
-  const [msg,        setMsg]        = useState('')
-  const [sending,    setSending]    = useState(false)
-  const [showModal,  setShowModal]  = useState(false)
-  const [statusMap,  setStatusMap]  = useState<Record<string, ReqStatus>>({})
+export default function AdminBloquear({
+  blockedDates,
+  schedules,
+}: {
+  blockedDates: BlockedDate[]
+  schedules: AdmissionSchedule[]
+}) {
+  const [level,        setLevel]       = useState<AdmissionLevel>('maternal_kinder')
+  const [blockDate,    setBlockDate]   = useState('')
+  const [blockDateEnd, setBlockDateEnd] = useState('')
+  const [isRange,      setIsRange]     = useState(false)
+  const [blockTime,    setBlockTime]   = useState('')
+  const [useSlot,      setUseSlot]     = useState(false)
+  const [reason,       setReason]      = useState('')
+  const [msg,          setMsg]         = useState('')
+  const [sending,      setSending]     = useState(false)
+  const [showModal,    setShowModal]   = useState(false)
+  const [statusMap,    setStatusMap]   = useState<Record<string, ReqStatus>>({})
 
   useEffect(() => {
     getAllRecentRequests().then((reqs: PermissionRequest[]) => {
@@ -54,20 +70,39 @@ export default function AdminBloquear({ blockedDates }: { blockedDates: BlockedD
     }).catch(() => {})
   }, [])
 
+  // Limpiar horario al cambiar nivel o deshabilitar slot
+  useEffect(() => {
+    setBlockTime('')
+  }, [level, useSlot])
+
+  // Limpiar fecha fin al deshabilitar rango
+  useEffect(() => {
+    if (!isRange) setBlockDateEnd('')
+  }, [isRange])
+
+  const levelTimes = schedules
+    .filter(s => s.level === level)
+    .sort((a, b) => a.sort_order - b.sort_order)
+    .map(s => s.time_slot)
+
   const byLevel = (l: AdmissionLevel) => blockedDates.filter(b => b.level === l)
 
-  const currentKey = level && block_date ? reqKey(level, block_date) : ''
+  const currentKey    = level && blockDate ? reqKey(level, blockDate) : ''
   const currentStatus = currentKey ? statusMap[currentKey] : undefined
+
+  const canSubmit = !!blockDate && (!isRange || (!!blockDateEnd && blockDateEnd >= blockDate)) && (!useSlot || !!blockTime)
 
   const enviar = async () => {
     setSending(true)
     try {
       await createPermissionRequest({
-        type:           'bloqueo',
+        type:            'bloqueo',
         level,
-        bloqueo_date:   block_date,
-        bloqueo_reason: reason.trim() || undefined,
-        psych_message:  msg.trim() || undefined,
+        bloqueo_date:    blockDate,
+        bloqueo_date_end: isRange ? blockDateEnd : undefined,
+        bloqueo_time:    useSlot ? blockTime : undefined,
+        bloqueo_reason:  reason.trim() || undefined,
+        psych_message:   msg.trim() || undefined,
       })
       setStatusMap(prev => ({ ...prev, [currentKey]: 'pendiente' }))
       setShowModal(false)
@@ -87,7 +122,7 @@ export default function AdminBloquear({ blockedDates }: { blockedDates: BlockedD
           <div className="modal-box" onClick={e => e.stopPropagation()}>
             <div className="modal-header modal-header-solicitud">
               <span className="modal-header-icon" aria-hidden="true">📋</span>
-              <h3>Solicitar autorización — Bloqueo de día</h3>
+              <h3>Solicitar autorización — Bloqueo</h3>
             </div>
             <div className="modal-body">
               <div className="modal-info-grid">
@@ -96,9 +131,25 @@ export default function AdminBloquear({ blockedDates }: { blockedDates: BlockedD
                   <span className="modal-info-value">{LEVEL_LABELS[level]}</span>
                 </div>
                 <div className="modal-info-item">
-                  <span className="modal-info-label">Fecha</span>
-                  <span className="modal-info-value">{block_date}</span>
+                  <span className="modal-info-label">{isRange ? 'Rango de fechas' : 'Fecha'}</span>
+                  <span className="modal-info-value">
+                    {isRange
+                      ? `${formatDate(blockDate)} al ${formatDate(blockDateEnd)}`
+                      : formatDate(blockDate)}
+                  </span>
                 </div>
+                {useSlot && blockTime && (
+                  <div className="modal-info-item">
+                    <span className="modal-info-label">Solo horario</span>
+                    <span className="modal-info-value">{blockTime}</span>
+                  </div>
+                )}
+                {!useSlot && (
+                  <div className="modal-info-item">
+                    <span className="modal-info-label">Alcance</span>
+                    <span className="modal-info-value">Día completo</span>
+                  </div>
+                )}
                 {reason && (
                   <div className="modal-info-item">
                     <span className="modal-info-label">Motivo</span>
@@ -124,10 +175,12 @@ export default function AdminBloquear({ blockedDates }: { blockedDates: BlockedD
       )}
 
       <p className="admin-hint">
-        Para bloquear un día, envía una solicitud a la directora. El bloqueo se aplicará automáticamente al ser aprobado.
+        Para bloquear días, envía una solicitud a la directora. El bloqueo se aplicará automáticamente al ser aprobado.
+        Puedes bloquear un día completo, un rango de fechas, o solo un horario específico.
       </p>
 
       <div className="admin-bloquear-form" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        {/* Nivel */}
         <label>
           Nivel
           <select value={level} onChange={e => setLevel(e.target.value as AdmissionLevel)}>
@@ -136,13 +189,69 @@ export default function AdminBloquear({ blockedDates }: { blockedDates: BlockedD
             <option value="secundaria">Secundaria</option>
           </select>
         </label>
+
+        {/* Fecha inicio */}
         <label>
-          Fecha a bloquear
-          <input type="date" value={block_date} onChange={e => setBlockDate(e.target.value)} />
+          {isRange ? 'Fecha inicio' : 'Fecha a bloquear'}
+          <input type="date" value={blockDate} onChange={e => setBlockDate(e.target.value)} />
         </label>
+
+        {/* Toggle rango */}
+        <label style={{ flexDirection: 'row', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={isRange}
+            onChange={e => setIsRange(e.target.checked)}
+            style={{ width: 'auto', cursor: 'pointer' }}
+          />
+          Bloquear rango de fechas
+        </label>
+
+        {/* Fecha fin (solo si rango) */}
+        {isRange && (
+          <label>
+            Fecha fin
+            <input
+              type="date"
+              value={blockDateEnd}
+              min={blockDate || undefined}
+              onChange={e => setBlockDateEnd(e.target.value)}
+            />
+          </label>
+        )}
+
+        {/* Toggle horario específico */}
+        <label style={{ flexDirection: 'row', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={useSlot}
+            onChange={e => setUseSlot(e.target.checked)}
+            style={{ width: 'auto', cursor: 'pointer' }}
+            disabled={isRange}
+            title={isRange ? 'El bloqueo de horario específico no aplica para rangos' : undefined}
+          />
+          <span style={{ opacity: isRange ? 0.45 : 1 }}>
+            Bloquear solo un horario (no el día completo)
+          </span>
+        </label>
+
+        {/* Selector de horario */}
+        {useSlot && !isRange && (
+          <label>
+            Horario a bloquear
+            <select value={blockTime} onChange={e => setBlockTime(e.target.value)}>
+              <option value="">— Selecciona horario —</option>
+              {levelTimes.map(t => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </label>
+        )}
+
+        {/* Motivo */}
         <label>
           Motivo (opcional)
-          <input type="text" value={reason} onChange={e => setReason(e.target.value)} placeholder="Ej: Capacitación" />
+          <input type="text" value={reason} onChange={e => setReason(e.target.value)} placeholder="Ej: Capacitación, Evento escolar" />
         </label>
 
         {/* Botón con estado */}
@@ -154,9 +263,9 @@ export default function AdminBloquear({ blockedDates }: { blockedDates: BlockedD
           ) : (
             <button
               type="button"
-              disabled={!block_date}
+              disabled={!canSubmit}
               onClick={() => { setMsg(''); setShowModal(true) }}
-              className={`btn-solicitud-accion${!block_date ? ' btn-solicitud-disabled' : ''}`}
+              className={`btn-solicitud-accion${!canSubmit ? ' btn-solicitud-disabled' : ''}`}
             >
               Solicitar autorización de bloqueo
             </button>
@@ -187,9 +296,10 @@ export default function AdminBloquear({ blockedDates }: { blockedDates: BlockedD
                   {list.map(b => (
                     <li key={b.id}>
                       <span>
-                        {new Date(b.block_date + 'T12:00:00').toLocaleDateString('es-MX', {
-                          weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
-                        })}
+                        {formatDate(b.block_date)}
+                        {b.block_time
+                          ? ` — solo ${b.block_time}`
+                          : ''}
                         {b.reason && ` – ${b.reason}`}
                       </span>
                     </li>

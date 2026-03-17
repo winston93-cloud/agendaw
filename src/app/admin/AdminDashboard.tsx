@@ -125,7 +125,7 @@ export default function AdminDashboard({
             <p className="admin-hint">
               Si bloqueas un día para un nivel (ej. Secundaria), los otros niveles (Maternal/Kinder, Primaria) siguen pudiendo agendar ese día.
             </p>
-            <AdminBloquear blockedDates={blockedDates} />
+            <AdminBloquear blockedDates={blockedDates} schedules={schedules} />
           </section>
         )}
         {activeSection === 'buscar' && (
