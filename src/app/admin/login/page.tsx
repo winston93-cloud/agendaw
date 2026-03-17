@@ -8,7 +8,7 @@ const ROLES = [
   { value: 'psi_pri', label: 'Primaria',           group: 'Psicología' },
   { value: 'psi_sec', label: 'Secundaria',         group: 'Psicología' },
   { value: 'vin_mk',  label: 'Maternal y Kinder',  group: 'Vinculación' },
-  { value: 'vin_pri', label: 'Primaria',            group: 'Vinculación' },
+  { value: 'vin_pri', label: 'Primaria y Secundaria', group: 'Vinculación' },
 ]
 
 const GROUPS = ['Psicología', 'Vinculación']

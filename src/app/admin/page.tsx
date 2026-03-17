@@ -10,7 +10,7 @@ const ROLE_LABELS: Record<string, string> = {
   psi_pri: 'Psicología – Primaria',
   psi_sec: 'Psicología – Secundaria',
   vin_mk:  'Vinculación – Maternal y Kinder',
-  vin_pri: 'Vinculación – Primaria',
+  vin_pri: 'Vinculación – Primaria y Secundaria',
 }
 
 function hasSupabaseEnv() {

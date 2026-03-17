@@ -9,7 +9,7 @@ export const ADMIN_ROLES: Record<string, { label: string; group: string }> = {
   psi_pri: { label: 'Psicología Primaria',           group: 'Psicología' },
   psi_sec: { label: 'Psicología Secundaria',         group: 'Psicología' },
   vin_mk:  { label: 'Vinculación Maternal y Kinder', group: 'Vinculación' },
-  vin_pri: { label: 'Vinculación Primaria',          group: 'Vinculación' },
+  vin_pri: { label: 'Vinculación Primaria y Secundaria', group: 'Vinculación' },
 }
 
 const PINS: Record<string, string | undefined> = {
