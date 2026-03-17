@@ -126,7 +126,8 @@
       "contacto": "Contacto:",
       "hourPending": "Por confirmar (la escuela te contactará)",
       "backBtn": "← Corregir datos",
-      "submitBtn": "Enviar solicitud"
+      "submitBtn": "Enviar solicitud",
+      "submittingBtn": "Enviando…"
     },
     "success": {
       "icon": "✓",

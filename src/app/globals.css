@@ -1476,9 +1476,36 @@ body {
   margin-top: 1rem;
 }
 
-.btn-large:hover {
+.btn-large:hover:not(:disabled) {
   transform: translateY(-4px);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+.btn-large:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-spinner-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.btn-spinner {
+  display: inline-block;
+  width: 1.1em;
+  height: 1.1em;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: btn-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* FAQ Section */

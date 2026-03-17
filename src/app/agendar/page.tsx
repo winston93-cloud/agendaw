@@ -79,7 +79,8 @@ export default function AgendarPage() {
   const [smsSent, setSmsSent] = useState(false)
   const [showLeaveConfirmModal, setShowLeaveConfirmModal] = useState(false)
   const [pendingLeaveAction, setPendingLeaveAction] = useState<'prevStep' | 'goHome' | null>(null)
-  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [submitError,   setSubmitError]   = useState<string | null>(null)
+  const [isSubmitting,  setIsSubmitting]  = useState(false)
   const allowLeaveWithoutSendRef = useRef(false)
 
   // --- Programa Familia Winston ---
@@ -505,6 +506,7 @@ export default function AgendarPage() {
 
   const handleSubmit = async () => {
     setSubmitError(null)
+    setIsSubmitting(true)
     try {
       const result = await createAdmissionAppointment({
         campus: formData.campus,
@@ -534,6 +536,8 @@ export default function AgendarPage() {
       setShowSuccessModal(true)
     } catch (e) {
       setSubmitError(t('errorMsg'))
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -1031,8 +1035,14 @@ export default function AgendarPage() {
                 type="button"
                 className="btn btn-primary btn-large"
                 onClick={handleSubmit}
+                disabled={isSubmitting}
               >
-                {t('confirm.submitBtn')}
+                {isSubmitting ? (
+                  <span className="btn-spinner-wrap">
+                    <span className="btn-spinner" aria-hidden="true" />
+                    {t('confirm.submittingBtn')}
+                  </span>
+                ) : t('confirm.submitBtn')}
               </button>
             </div>
           </div>

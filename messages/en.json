@@ -126,7 +126,8 @@
       "contacto": "Contact:",
       "hourPending": "To be confirmed (school will contact you)",
       "backBtn": "← Edit details",
-      "submitBtn": "Submit request"
+      "submitBtn": "Submit request",
+      "submittingBtn": "Submitting…"
     },
     "success": {
       "icon": "✓",
