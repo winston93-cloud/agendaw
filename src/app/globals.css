@@ -4158,6 +4158,112 @@ body {
   margin-top: 0.5rem;
 }
 
+/* Login con selector de roles */
+.admin-login-card {
+  max-width: 480px;
+}
+
+.admin-login-header {
+  margin-bottom: 1.5rem;
+}
+
+.admin-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.admin-login-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.admin-login-group-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--adm-text-muted);
+  margin: 0 0 0.4rem;
+}
+
+.admin-login-roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.admin-role-btn {
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--adm-radius-sm);
+  border: 1.5px solid var(--adm-border);
+  background: var(--adm-surface);
+  color: var(--adm-text);
+  font-size: 0.875rem;
+  font-family: var(--adm-font);
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.admin-role-btn:hover {
+  border-color: var(--adm-accent);
+  background: var(--adm-accent-lt);
+}
+
+.admin-role-btn.active {
+  border-color: var(--adm-accent);
+  background: var(--adm-accent);
+  color: #fff;
+}
+
+.admin-login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.admin-login-field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--adm-text);
+  margin: 0;
+}
+
+.admin-pin-input {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border: 1.5px solid var(--adm-border);
+  border-radius: var(--adm-radius-sm);
+  font-size: 1rem;
+  font-family: var(--adm-font);
+  color: var(--adm-text);
+  background: var(--adm-surface);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.admin-pin-input:focus {
+  border-color: var(--adm-accent);
+  box-shadow: 0 0 0 3px var(--adm-accent-lt);
+}
+
+.admin-pin-input:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.admin-login-footer {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--adm-text-muted);
+  margin-top: 1.25rem;
+  margin-bottom: 0;
+}
+
 .admin-dashboard {
   max-width: 1400px;
   margin: 0 auto;

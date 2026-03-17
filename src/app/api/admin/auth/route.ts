@@ -2,22 +2,41 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
 const ADMIN_COOKIE = 'admin_session'
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 7 // 7 días
+const COOKIE_MAX_AGE = 60 * 60 * 12 // 12 horas
+
+export const ADMIN_ROLES: Record<string, { label: string; group: string }> = {
+  psi_mk:  { label: 'Psicología Maternal y Kinder', group: 'Psicología' },
+  psi_pri: { label: 'Psicología Primaria',           group: 'Psicología' },
+  psi_sec: { label: 'Psicología Secundaria',         group: 'Psicología' },
+  vin_mk:  { label: 'Vinculación Maternal y Kinder', group: 'Vinculación' },
+  vin_pri: { label: 'Vinculación Primaria',          group: 'Vinculación' },
+}
+
+const PINS: Record<string, string | undefined> = {
+  psi_mk:  process.env.ADMIN_PIN_PSI_MK,
+  psi_pri: process.env.ADMIN_PIN_PSI_PRI,
+  psi_sec: process.env.ADMIN_PIN_PSI_SEC,
+  vin_mk:  process.env.ADMIN_PIN_VIN_MK,
+  vin_pri: process.env.ADMIN_PIN_VIN_PRI,
+}
 
 export async function POST(request: Request) {
-  const { password } = await request.json()
-  const secret = process.env.ADMIN_SECRET
+  const { role, pin } = await request.json()
 
-  if (!secret) {
-    return NextResponse.json({ error: 'Admin no configurado' }, { status: 500 })
+  if (!role || !(role in PINS)) {
+    return NextResponse.json({ error: 'Rol inválido' }, { status: 400 })
   }
 
-  if (password !== secret) {
-    return NextResponse.json({ error: 'Contraseña incorrecta' }, { status: 401 })
+  if (!PINS[role]) {
+    return NextResponse.json({ error: 'PIN no configurado para este rol' }, { status: 500 })
+  }
+
+  if (pin !== PINS[role]) {
+    return NextResponse.json({ error: 'PIN incorrecto' }, { status: 401 })
   }
 
   const cookieStore = await cookies()
-  cookieStore.set(ADMIN_COOKIE, '1', {
+  cookieStore.set(ADMIN_COOKIE, role, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
@@ -25,7 +44,13 @@ export async function POST(request: Request) {
     path: '/',
   })
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, role })
+}
+
+export async function GET() {
+  const cookieStore = await cookies()
+  const role = cookieStore.get(ADMIN_COOKIE)?.value ?? null
+  return NextResponse.json({ role })
 }
 
 export async function DELETE() {

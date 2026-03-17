@@ -1,8 +1,17 @@
+import { cookies } from 'next/headers'
 import { getAdmissionAppointments, getBlockedDates, getSchedules, getRecorridos } from './actions'
 import AdminDashboard from './AdminDashboard'
 import AdminThemeToggle from './AdminThemeToggle'
 
 export const dynamic = 'force-dynamic'
+
+const ROLE_LABELS: Record<string, string> = {
+  psi_mk:  'Psicología – Maternal y Kinder',
+  psi_pri: 'Psicología – Primaria',
+  psi_sec: 'Psicología – Secundaria',
+  vin_mk:  'Vinculación – Maternal y Kinder',
+  vin_pri: 'Vinculación – Primaria',
+}
 
 function hasSupabaseEnv() {
   const u = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -11,6 +20,10 @@ function hasSupabaseEnv() {
 }
 
 export default async function AdminPage() {
+  const cookieStore = await cookies()
+  const role = cookieStore.get('admin_session')?.value ?? ''
+  const roleLabel = ROLE_LABELS[role] ?? 'Panel Administrativo'
+
   let appointments: Awaited<ReturnType<typeof getAdmissionAppointments>> = []
   let blockedDates: Awaited<ReturnType<typeof getBlockedDates>> = []
   let schedules: Awaited<ReturnType<typeof getSchedules>> = []
@@ -33,7 +46,7 @@ export default async function AdminPage() {
       <header className="admin-header">
         <div className="admin-header-inner">
           <div className="admin-header-brand">
-            <h1>Panel de Psicólogas</h1>
+            <h1>{roleLabel}</h1>
             <span className="admin-header-badge">
               <span aria-hidden="true">🎓</span>
               Citas de examen de admisión
