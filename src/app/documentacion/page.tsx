@@ -13,12 +13,14 @@ const MAX_TOTAL_MB  = 20  // margen conservador vs límite de 25MB del servidor
 function DocumentacionContent() {
   const t = useTranslations('documentacion')
 
-  const DOC_LIST = [
-    { label: t('docs.doc0'), icon: '📝', note: t('docs.doc0note') },
-    { label: t('docs.doc1'), icon: '📊', note: '' },
-    { label: t('docs.doc2'), icon: '📜', note: '' },
-    { label: t('docs.doc3'), icon: '🤝', note: '' },
+  // Índice original preservado para naming de archivos aunque se filtre la lista
+  const DOC_LIST_ALL = [
+    { label: t('docs.doc0'), icon: '📝', note: t('docs.doc0note'), onlyMK: true,  idx: 0, color: '#4f46e5', borderColor: '#818cf8' },
+    { label: t('docs.doc1'), icon: '📊', note: '',                 onlyMK: false, idx: 1, color: '#0891b2', borderColor: '#22d3ee' },
+    { label: t('docs.doc2'), icon: '📜', note: '',                 onlyMK: false, idx: 2, color: '#d97706', borderColor: '#fbbf24' },
+    { label: t('docs.doc3'), icon: '🤝', note: '',                 onlyMK: false, idx: 3, color: '#be185d', borderColor: '#f472b6' },
   ]
+
   const searchParams = useSearchParams()
   const citaId = searchParams.get('cita')
 
@@ -129,6 +131,9 @@ function DocumentacionContent() {
     </div>
   )
 
+  const isMaternalKinder = appointment && ['maternal', 'kinder'].includes(appointment.level)
+  const DOC_LIST = DOC_LIST_ALL.filter(d => !d.onlyMK || isMaternalKinder)
+
   const fileCount    = Object.keys(files).length
   const totalBytes   = Object.values(files).reduce((sum, f) => sum + f.size, 0)
   const totalMB      = totalBytes / (1024 * 1024)
@@ -153,17 +158,17 @@ function DocumentacionContent() {
             {t('docsIntro')}
           </p>
           <ul style={{ color: '#475569', paddingLeft: '1.5rem', lineHeight: '1.8', marginBottom: '1.5rem' }}>
-            {DOC_LIST.map((d, i) => (
-              <li key={i}>{d.label}{d.note && <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}> {d.note}</span>}</li>
+            {DOC_LIST.map(d => (
+              <li key={d.idx}>{d.label}{d.note && <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}> {d.note}</span>}</li>
             ))}
           </ul>
 
-          {DOC_LIST.map((doc, index) => (
-            <div key={index} style={{ marginBottom: '2rem' }}>
+          {DOC_LIST.map(doc => (
+            <div key={doc.idx} style={{ marginBottom: '2rem' }}>
               <label style={{
                 display: 'flex', alignItems: 'center', gap: '0.5rem',
                 fontWeight: '700', marginBottom: '0.75rem',
-                color: ['#4f46e5','#0891b2','#d97706','#be185d'][index],
+                color: doc.color,
               }}>
                 <span style={{ fontSize: '1.4rem' }}>{doc.icon}</span>
                 {doc.label}
@@ -174,23 +179,23 @@ function DocumentacionContent() {
                 <input
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={e => handleFileChange(index, e.target.files?.[0] ?? null)}
+                  onChange={e => handleFileChange(doc.idx, e.target.files?.[0] ?? null)}
                   style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', zIndex: 2 }}
                 />
                 <div style={{
                   padding: '2rem',
-                  background: files[index] ? '#f0fdf4' : 'white',
-                  border: `2px dashed ${files[index] ? '#22c55e' : ['#818cf8','#22d3ee','#fbbf24','#f472b6'][index]}`,
+                  background: files[doc.idx] ? '#f0fdf4' : 'white',
+                  border: `2px dashed ${files[doc.idx] ? '#22c55e' : doc.borderColor}`,
                   borderRadius: '16px', textAlign: 'center',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem',
-                  boxShadow: files[index] ? '0 4px 12px rgba(34,197,94,0.2)' : '0 2px 6px rgba(0,0,0,0.05)',
+                  boxShadow: files[doc.idx] ? '0 4px 12px rgba(34,197,94,0.2)' : '0 2px 6px rgba(0,0,0,0.05)',
                 }}>
-                  <div style={{ fontSize: '2.5rem' }}>{files[index] ? '✅' : '📤'}</div>
-                  {files[index] ? (
+                  <div style={{ fontSize: '2.5rem' }}>{files[doc.idx] ? '✅' : '📤'}</div>
+                  {files[doc.idx] ? (
                     <>
                       <p style={{ color: '#166534', fontWeight: '700', margin: 0 }}>{t('fileReady')}</p>
                       <p style={{ color: '#15803d', fontSize: '0.9rem', margin: 0, background: 'rgba(34,197,94,0.1)', padding: '0.4rem 0.75rem', borderRadius: '8px', wordBreak: 'break-all' }}>
-                        {files[index].name}
+                        {files[doc.idx].name}
                       </p>
                       <p style={{ color: '#16a34a', fontSize: '0.8rem', margin: 0 }}>{t('fileTap')}</p>
                     </>
