@@ -16,16 +16,18 @@ import {
   subMonths,
   isAfter,
 } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { es, enUS } from 'date-fns/locale'
 
 interface ExamDateCalendarProps {
   value: string // YYYY-MM-DD
   onChange: (date: string) => void
   blockedDates?: string[] // YYYY-MM-DD, días bloqueados para este nivel
   isAdmin?: boolean
+  locale?: string
 }
 
-const WEEKDAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+const WEEKDAYS_ES = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+const WEEKDAYS_EN = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 function getMinBookableDate(): Date {
   let d = addDays(new Date(), 2)
@@ -35,7 +37,9 @@ function getMinBookableDate(): Date {
   return d
 }
 
-export default function ExamDateCalendar({ value, onChange, blockedDates = [], isAdmin = false }: ExamDateCalendarProps) {
+export default function ExamDateCalendar({ value, onChange, blockedDates = [], isAdmin = false, locale = 'es' }: ExamDateCalendarProps) {
+  const dateFnsLocale = locale === 'en' ? enUS : es
+  const WEEKDAYS = locale === 'en' ? WEEKDAYS_EN : WEEKDAYS_ES
   const selectedDate = value ? new Date(value + 'T12:00:00') : null
   const minBookable = useMemo(() => getMinBookableDate(), [])
   const [isOpen, setIsOpen] = useState(!value)
@@ -91,7 +95,9 @@ export default function ExamDateCalendar({ value, onChange, blockedDates = [], i
   }
 
   const formattedSelectedDate = value && selectedDate
-    ? format(selectedDate, "EEEE d 'de' MMMM, yyyy", { locale: es })
+    ? locale === 'en'
+      ? format(selectedDate, 'EEEE, MMMM d, yyyy', { locale: dateFnsLocale })
+      : format(selectedDate, "EEEE d 'de' MMMM, yyyy", { locale: dateFnsLocale })
     : ''
 
   const canPrevMonth = (): boolean => {
@@ -104,7 +110,7 @@ export default function ExamDateCalendar({ value, onChange, blockedDates = [], i
     return (
       <div className="exam-calendar-closed">
         <div className="exam-date-selected">
-          <span className="exam-date-label">Fecha del examen:</span>
+          <span className="exam-date-label">{locale === 'en' ? 'Exam date:' : 'Fecha del examen:'}</span>
           <span className="exam-date-value">{formattedSelectedDate}</span>
         </div>
         <button
@@ -112,7 +118,7 @@ export default function ExamDateCalendar({ value, onChange, blockedDates = [], i
           className="exam-date-change"
           onClick={() => setIsOpen(true)}
         >
-          Cambiar fecha
+          {locale === 'en' ? 'Change date' : 'Cambiar fecha'}
         </button>
       </div>
     )
@@ -126,18 +132,18 @@ export default function ExamDateCalendar({ value, onChange, blockedDates = [], i
           className="exam-calendar-nav"
           onClick={() => setViewDate(subMonths(viewDate, 1))}
           disabled={!canPrevMonth()}
-          aria-label="Mes anterior"
+          aria-label={locale === 'en' ? 'Previous month' : 'Mes anterior'}
         >
           ‹
         </button>
         <h3 className="exam-calendar-title">
-          {format(viewDate, 'MMMM yyyy', { locale: es })}
+          {format(viewDate, 'MMMM yyyy', { locale: dateFnsLocale })}
         </h3>
         <button
           type="button"
           className="exam-calendar-nav"
           onClick={() => setViewDate(addMonths(viewDate, 1))}
-          aria-label="Mes siguiente"
+          aria-label={locale === 'en' ? 'Next month' : 'Mes siguiente'}
         >
           ›
         </button>
@@ -169,7 +175,7 @@ export default function ExamDateCalendar({ value, onChange, blockedDates = [], i
       </div>
 
       <p className="exam-calendar-note">
-        Solo días hábiles. Mínimo 2 días de anticipación.
+        {locale === 'en' ? 'Weekdays only. Minimum 2 days in advance.' : 'Solo días hábiles. Mínimo 2 días de anticipación.'}
       </p>
     </div>
   )

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import ExamDateCalendar from '@/components/ExamDateCalendar'
 import PublicThemeToggle from '@/components/PublicThemeToggle'
 import ClientLangSelector from '@/components/ClientLangSelector'
@@ -54,7 +54,8 @@ interface FormData {
 }
 
 export default function AgendarPage() {
-  const t = useTranslations('agendar')
+  const t      = useTranslations('agendar')
+  const locale = useLocale()
 
   const HOW_DID_YOU_HEAR_OPTIONS = [
     { value: '', label: t('aspirante.howPlaceholder') },
@@ -762,6 +763,7 @@ export default function AgendarPage() {
                         value={formData.appointmentDate}
                         onChange={(date) => updateFormData('appointmentDate', date)}
                         blockedDates={blockedDates}
+                        locale={locale}
                       />
                     </div>
                   )}
