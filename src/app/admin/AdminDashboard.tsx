@@ -65,11 +65,13 @@ export default function AdminDashboard({
   blockedDates,
   schedules,
   recorridos,
+  allowedLevels,
 }: {
   appointments: AdmissionAppointment[]
   blockedDates: BlockedDate[]
   schedules: AdmissionSchedule[]
   recorridos: TourRecorrido[]
+  allowedLevels: string[]
 }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -108,7 +110,7 @@ export default function AdminDashboard({
         {activeSection === 'citas' && (
           <section className="admin-section admin-section-citas">
             <h2><span className="admin-section-icon" aria-hidden="true">📅</span> Exámenes programados</h2>
-            <AdminCitas appointments={appointments} />
+            <AdminCitas appointments={appointments} allowedLevels={allowedLevels} />
           </section>
         )}
         {activeSection === 'horarios' && (
@@ -132,7 +134,7 @@ export default function AdminDashboard({
             <p className="admin-hint">
               Busque por nombre del alumno o tutor, por fecha en que se agendó la cita o por fecha del examen. Al seleccionar un resultado verá el registro completo y podrá reagendar.
             </p>
-            <AdminBuscar />
+            <AdminBuscar allowedLevels={allowedLevels} />
           </section>
         )}
         {activeSection === 'recorridos' && (

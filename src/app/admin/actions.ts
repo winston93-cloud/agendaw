@@ -59,7 +59,7 @@ export async function getFullyBookedDates(level: AdmissionLevel, excludeAppointm
   }
 }
 
-export async function getAdmissionAppointments(filters?: { date?: string; level?: string; status?: string }) {
+export async function getAdmissionAppointments(filters?: { date?: string; level?: string; levels?: string[]; status?: string }) {
   let supabase
   try {
     supabase = createAdminClient()
@@ -72,9 +72,15 @@ export async function getAdmissionAppointments(filters?: { date?: string; level?
     .order('appointment_date', { ascending: false })
     .order('appointment_time', { ascending: true })
 
-  if (filters?.date) query = query.eq('appointment_date', filters.date)
-  if (filters?.level) query = query.eq('level', filters.level)
+  if (filters?.date)   query = query.eq('appointment_date', filters.date)
   if (filters?.status) query = query.eq('status', filters.status)
+
+  // levels[] tiene prioridad sobre level string
+  if (filters?.levels && filters.levels.length > 0) {
+    query = query.in('level', filters.levels)
+  } else if (filters?.level) {
+    query = query.eq('level', filters.level)
+  }
 
   const { data, error } = await query
   if (error) throw new Error(error.message)
@@ -86,6 +92,7 @@ export async function searchAdmissionAppointments(params: {
   name?: string
   createdDate?: string
   appointmentDate?: string
+  levels?: string[]
 }) {
   let supabase
   try {
@@ -111,6 +118,9 @@ export async function searchAdmissionAppointments(params: {
   }
   if (params.appointmentDate) {
     query = query.eq('appointment_date', params.appointmentDate)
+  }
+  if (params.levels && params.levels.length > 0) {
+    query = query.in('level', params.levels)
   }
 
   const { data, error } = await query

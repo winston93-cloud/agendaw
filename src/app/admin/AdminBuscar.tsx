@@ -33,7 +33,7 @@ function formatCreatedAt(iso: string): string {
   }
 }
 
-export default function AdminBuscar() {
+export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[] }) {
   const [nameQuery, setNameQuery] = useState('')
   const [createdDate, setCreatedDate] = useState('')
   const [examDate, setExamDate] = useState('')
@@ -69,6 +69,7 @@ export default function AdminBuscar() {
         name: nameQuery.trim() || undefined,
         createdDate: createdDate || undefined,
         appointmentDate: examDate || undefined,
+        levels: allowedLevels.length > 0 ? allowedLevels : undefined,
       })
       setResults(list)
       setSelected(null)

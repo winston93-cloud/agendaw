@@ -50,7 +50,7 @@ function toAdminLevel(level: string) {
   return level
 }
 
-export default function AdminCitas({ appointments }: { appointments: AdmissionAppointment[] }) {
+export default function AdminCitas({ appointments, allowedLevels }: { appointments: AdmissionAppointment[]; allowedLevels: string[] }) {
   const router = useRouter()
 
   const [modal,          setModal]          = useState<ModalState>(null)
@@ -369,18 +369,20 @@ export default function AdminCitas({ appointments }: { appointments: AdmissionAp
 
       {/* ── FILTROS ─────────────────────────────────────────────── */}
       <div className="admin-filters" style={{ alignItems: 'flex-end' }}>
-        <div className="admin-filters-group">
-          <label className="admin-filter-label"><span className="filter-icon" aria-hidden="true">🎓</span> Nivel</label>
-          <div className="filter-input-wrapper">
-            <select value={filterLevel} onChange={e => setFilterLevel(e.target.value)} className="admin-filter-select">
-              <option value="">Todos los niveles</option>
-              <option value="maternal">Maternal</option>
-              <option value="kinder">Kinder</option>
-              <option value="primaria">Primaria</option>
-              <option value="secundaria">Secundaria</option>
-            </select>
+        {allowedLevels.length === 0 && (
+          <div className="admin-filters-group">
+            <label className="admin-filter-label"><span className="filter-icon" aria-hidden="true">🎓</span> Nivel</label>
+            <div className="filter-input-wrapper">
+              <select value={filterLevel} onChange={e => setFilterLevel(e.target.value)} className="admin-filter-select">
+                <option value="">Todos los niveles</option>
+                <option value="maternal">Maternal</option>
+                <option value="kinder">Kinder</option>
+                <option value="primaria">Primaria</option>
+                <option value="secundaria">Secundaria</option>
+              </select>
+            </div>
           </div>
-        </div>
+        )}
         <div className="admin-filters-group">
           <label className="admin-filter-label"><span className="filter-icon" aria-hidden="true">📌</span> Estado</label>
           <div className="filter-input-wrapper">

@@ -13,6 +13,15 @@ const ROLE_LABELS: Record<string, string> = {
   vin_pri: 'Vinculación – Primaria y Secundaria',
 }
 
+// Niveles de BD que puede ver cada rol (admission_appointments.level usa valores atómicos)
+const ROLE_LEVELS: Record<string, string[]> = {
+  psi_mk:  ['maternal', 'kinder'],
+  psi_pri: ['primaria'],
+  psi_sec: ['secundaria'],
+  vin_mk:  ['maternal', 'kinder'],
+  vin_pri: ['primaria', 'secundaria'],
+}
+
 function hasSupabaseEnv() {
   const u = process.env.NEXT_PUBLIC_SUPABASE_URL
   const k = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -23,6 +32,7 @@ export default async function AdminPage() {
   const cookieStore = await cookies()
   const role = cookieStore.get('admin_session')?.value ?? ''
   const roleLabel = ROLE_LABELS[role] ?? 'Panel Administrativo'
+  const allowedLevels = ROLE_LEVELS[role] ?? []
 
   let appointments: Awaited<ReturnType<typeof getAdmissionAppointments>> = []
   let blockedDates: Awaited<ReturnType<typeof getBlockedDates>> = []
@@ -31,7 +41,7 @@ export default async function AdminPage() {
   if (hasSupabaseEnv()) {
     try {
       ;[appointments, blockedDates, schedules, recorridos] = await Promise.all([
-        getAdmissionAppointments(),
+        getAdmissionAppointments(allowedLevels.length > 0 ? { levels: allowedLevels } : undefined),
         getBlockedDates(),
         getSchedules(),
         getRecorridos(),
@@ -61,11 +71,12 @@ export default async function AdminPage() {
       </header>
 
       <main className="admin-main">
-        <        AdminDashboard
+        <AdminDashboard
           appointments={appointments}
           blockedDates={blockedDates}
           schedules={schedules}
           recorridos={recorridos}
+          allowedLevels={allowedLevels}
         />
       </main>
     </div>
