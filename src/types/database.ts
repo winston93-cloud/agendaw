@@ -90,6 +90,7 @@ export interface AdmissionAppointment {
   origin?: string
   legacy_id?: number
   google_event_id?: string
+  alumno_ref?: number
   created_at: string
   updated_at: string
 }
@@ -127,6 +128,7 @@ export interface PermissionRequest {
   appt_time?:      string
   proposed_date?:  string
   proposed_time?:  string
+  proposed_grade?: string
 
   // horario
   horario_action?:   'agregar' | 'eliminar'

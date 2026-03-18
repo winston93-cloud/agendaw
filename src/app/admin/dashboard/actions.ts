@@ -44,6 +44,7 @@ export async function createPermissionRequest(data: {
   current_time?:   string
   proposed_date?:  string
   proposed_time?:  string
+  proposed_grade?: string
   // horario
   horario_action?:   'agregar' | 'eliminar'
   horario_time_new?: string
@@ -69,6 +70,7 @@ export async function createPermissionRequest(data: {
       appt_time:       data.current_time,
       proposed_date:   data.proposed_date,
       proposed_time:   data.proposed_time,
+      proposed_grade:  data.proposed_grade,
       horario_action:  data.horario_action,
       horario_time_new: data.horario_time_new,
       horario_time_old: data.horario_time_old,
@@ -92,11 +94,14 @@ export async function createPermissionRequest(data: {
 
     let detalles = ''
     if (data.type === 'reagendar') {
+      const gradeChangeRow = data.proposed_grade
+        ? `<tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Cambio de grado</td><td style="padding:6px 10px;">${data.proposed_grade}</td></tr>`
+        : ''
       detalles = `
         <tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Alumno</td><td style="padding:6px 10px;">${data.student_name ?? '—'}</td></tr>
         <tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Fecha actual</td><td style="padding:6px 10px;">${data.current_date ?? '—'} ${data.current_time ?? ''}</td></tr>
 
-        <tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Propone</td><td style="padding:6px 10px;">${data.proposed_date ?? '—'} ${data.proposed_time ?? ''}</td></tr>`
+        <tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Propone</td><td style="padding:6px 10px;">${data.proposed_date ?? '—'} ${data.proposed_time ?? ''}</td></tr>${gradeChangeRow}`
     } else if (data.type === 'horario') {
       detalles = `
         <tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Acción</td><td style="padding:6px 10px;">${data.horario_action === 'agregar' ? 'Agregar' : 'Eliminar'} horario</td></tr>
@@ -212,13 +217,17 @@ export async function respondPermissionRequest(
   // 3. Si aprobada, ejecutar la acción
   if (decision === 'aprobada') {
     if (req.type === 'reagendar' && req.appointment_id && req.proposed_date) {
+      const updateData: Record<string, string> = {
+        appointment_date: req.proposed_date,
+        appointment_time: req.proposed_time ?? 'Por confirmar',
+        status: 'confirmed',
+      }
+      if (req.proposed_grade) {
+        updateData.grade_level = req.proposed_grade
+      }
       await supabase
         .from('admission_appointments')
-        .update({
-          appointment_date: req.proposed_date,
-          appointment_time: req.proposed_time ?? 'Por confirmar',
-          status: 'confirmed',
-        })
+        .update(updateData)
         .eq('id', req.appointment_id)
     }
 

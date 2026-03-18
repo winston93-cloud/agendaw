@@ -245,6 +245,7 @@ export async function completeAdmissionAndCreateAlumno(appointmentId: string): P
       .from('admission_appointments')
       .update({ 
         status: 'completed',
+        alumno_ref,
         updated_at: new Date().toISOString(),
       })
       .eq('id', appointmentId)
@@ -329,7 +330,7 @@ export async function completeAdmissionLegacy(appointmentId: string): Promise<{
 
     await supabase
       .from('admission_appointments')
-      .update({ status: 'completed', updated_at: new Date().toISOString() })
+      .update({ status: 'completed', alumno_ref, updated_at: new Date().toISOString() })
       .eq('id', appointmentId)
 
     return { success: true, alumno_ref, message: `✓ Alta exitosa. Alumno creado con referencia: ${alumno_ref}` }

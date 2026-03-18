@@ -20,6 +20,31 @@ const GRADE_LABELS: Record<string, string> = {
   secundaria_7: '7mo (1° Sec.)', secundaria_8: '8vo (2° Sec.)', secundaria_9: '9no (3° Sec.)',
 }
 
+const GRADE_OPTIONS_BY_LEVEL: Record<string, { value: string; label: string }[]> = {
+  maternal: [
+    { value: 'maternal_a', label: 'Maternal A' },
+    { value: 'maternal_b', label: 'Maternal B' },
+  ],
+  kinder: [
+    { value: 'kinder_1', label: 'Kinder 1' },
+    { value: 'kinder_2', label: 'Kinder 2' },
+    { value: 'kinder_3', label: 'Kinder 3' },
+  ],
+  primaria: [
+    { value: 'primaria_1', label: '1° Primaria' },
+    { value: 'primaria_2', label: '2° Primaria' },
+    { value: 'primaria_3', label: '3° Primaria' },
+    { value: 'primaria_4', label: '4° Primaria' },
+    { value: 'primaria_5', label: '5° Primaria' },
+    { value: 'primaria_6', label: '6° Primaria' },
+  ],
+  secundaria: [
+    { value: 'secundaria_7', label: '7mo Grado' },
+    { value: 'secundaria_8', label: '8vo Grado' },
+    { value: 'secundaria_9', label: '9no Grado' },
+  ],
+}
+
 type ReqStatus = 'pendiente' | 'aprobada' | 'rechazada'
 
 type ModalState =
@@ -58,6 +83,7 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
   const [solicitudMsg,   setSolicitudMsg]   = useState('')
   const [solicitudDate,  setSolicitudDate]  = useState('')
   const [solicitudTime,  setSolicitudTime]  = useState('')
+  const [solicitudGrade, setSolicitudGrade] = useState('')
   const [sendingSol,     setSendingSol]     = useState(false)
   const [filterLevel,    setFilterLevel]    = useState('')
   const [filterStatus,   setFilterStatus]   = useState('')
@@ -93,7 +119,7 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
     if (modal?.type !== 'solicitar-reagendar') {
       setCalBlockedDates([]); setCalFullyBooked([])
       setCalScheduleTimes([]); setCalBookedSlots([])
-      setSolicitudDate(''); setSolicitudTime('')
+      setSolicitudDate(''); setSolicitudTime(''); setSolicitudGrade('')
       return
     }
     const apt        = modal.appointment
@@ -168,12 +194,13 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
         current_time:   appointment.appointment_time,
         proposed_date:  solicitudDate || undefined,
         proposed_time:  solicitudTime || undefined,
+        proposed_grade: solicitudGrade || undefined,
         psych_message:  solicitudMsg.trim() || undefined,
       })
       const k = `reagendar:${appointment.id}`
       setStatusMap(prev => ({ ...prev, [k]: 'pendiente' }))
       setModal({ type: 'result', ok: true, message: '✅ Solicitud enviada a la directora. Recibirás respuesta por correo.' })
-      setSolicitudMsg(''); setSolicitudDate(''); setSolicitudTime('')
+      setSolicitudMsg(''); setSolicitudDate(''); setSolicitudTime(''); setSolicitudGrade('')
     } catch (e) {
       setModal({ type: 'result', ok: false, message: (e as Error).message })
     } finally {
@@ -282,6 +309,22 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
                 <textarea value={solicitudMsg} onChange={e => setSolicitudMsg(e.target.value)} rows={2}
                   placeholder="Explica el motivo de la reagendación..."
                   className="modal-textarea" />
+              </div>
+
+              <div style={{ marginTop: '1rem' }}>
+                <label className="modal-field-label">Cambio de grado (opcional)</label>
+                <select value={solicitudGrade} onChange={e => setSolicitudGrade(e.target.value)}
+                  className="modal-select" style={{ width: '100%' }}>
+                  <option value="">— Sin cambio —</option>
+                  {GRADE_OPTIONS_BY_LEVEL[modal.appointment.level]?.map(g => (
+                    <option key={g.value} value={g.value}>{g.label}</option>
+                  ))}
+                </select>
+                {solicitudGrade && solicitudGrade !== modal.appointment.grade_level && (
+                  <p style={{ fontSize: '0.75rem', color: '#f59e0b', marginTop: '0.35rem', lineHeight: '1.4' }}>
+                    ⚠️ Se solicitará cambio de <strong>{GRADE_LABELS[modal.appointment.grade_level] || modal.appointment.grade_level}</strong> a <strong>{GRADE_LABELS[solicitudGrade]}</strong>
+                  </p>
+                )}
               </div>
             </div>
             <div className="modal-footer">
@@ -486,6 +529,11 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
                         <option value="cancelled">Cancelada</option>
                         <option value="completed">Completada</option>
                       </select>
+                      {a.status === 'completed' && a.alumno_ref && (
+                        <div style={{ marginTop: '0.35rem', fontSize: '0.7rem', fontWeight: '600', color: '#1565c0' }}>
+                          # {a.alumno_ref}
+                        </div>
+                      )}
                     </td>
                     <td>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
@@ -493,7 +541,7 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
                         {/* Reagendar */}
                         <button type="button"
                           className="admin-btn-action admin-btn-reagendar"
-                          onClick={() => { setSolicitudDate(''); setSolicitudTime(''); setSolicitudMsg(''); setModal({ type: 'solicitar-reagendar', appointment: a }) }}
+                          onClick={() => { setSolicitudDate(''); setSolicitudTime(''); setSolicitudGrade(''); setSolicitudMsg(''); setModal({ type: 'solicitar-reagendar', appointment: a }) }}
                         >
                           <span aria-hidden="true">📋</span> Reagendar
                         </button>

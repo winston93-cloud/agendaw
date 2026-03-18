@@ -97,6 +97,12 @@ function RequestCard({ req, onRespond }: { req: PermissionRequest; onRespond: ()
                 <span className="drdi-label">Propone cambiar a</span>
                 <span className="drdi-value">{formatDate(req.proposed_date)} · {req.proposed_time ?? '—'}</span>
               </div>
+              {req.proposed_grade && (
+                <div className="director-req-detail-item highlight">
+                  <span className="drdi-label">Cambio de grado</span>
+                  <span className="drdi-value">{req.proposed_grade}</span>
+                </div>
+              )}
             </>)}
 
             {req.type === 'horario' && (<>

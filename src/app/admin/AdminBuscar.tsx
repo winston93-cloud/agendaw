@@ -13,6 +13,39 @@ const LEVEL_LABELS: Record<string, string> = {
   secundaria: 'Secundaria',
 }
 
+const GRADE_LABELS: Record<string, string> = {
+  maternal_a: 'Maternal A', maternal_b: 'Maternal B',
+  kinder_1: 'Kinder 1', kinder_2: 'Kinder 2', kinder_3: 'Kinder 3',
+  primaria_1: '1° Primaria', primaria_2: '2° Primaria', primaria_3: '3° Primaria',
+  primaria_4: '4° Primaria', primaria_5: '5° Primaria', primaria_6: '6° Primaria',
+  secundaria_7: '7mo (1° Sec.)', secundaria_8: '8vo (2° Sec.)', secundaria_9: '9no (3° Sec.)',
+}
+
+const GRADE_OPTIONS_BY_LEVEL: Record<string, { value: string; label: string }[]> = {
+  maternal: [
+    { value: 'maternal_a', label: 'Maternal A' },
+    { value: 'maternal_b', label: 'Maternal B' },
+  ],
+  kinder: [
+    { value: 'kinder_1', label: 'Kinder 1' },
+    { value: 'kinder_2', label: 'Kinder 2' },
+    { value: 'kinder_3', label: 'Kinder 3' },
+  ],
+  primaria: [
+    { value: 'primaria_1', label: '1° Primaria' },
+    { value: 'primaria_2', label: '2° Primaria' },
+    { value: 'primaria_3', label: '3° Primaria' },
+    { value: 'primaria_4', label: '4° Primaria' },
+    { value: 'primaria_5', label: '5° Primaria' },
+    { value: 'primaria_6', label: '6° Primaria' },
+  ],
+  secundaria: [
+    { value: 'secundaria_7', label: '7mo Grado' },
+    { value: 'secundaria_8', label: '8vo Grado' },
+    { value: 'secundaria_9', label: '9no Grado' },
+  ],
+}
+
 function apiLevel(level: string): string {
   if (level === 'maternal' || level === 'kinder') return 'maternal_kinder'
   if (level === 'primaria') return 'primaria'
@@ -58,6 +91,7 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
   const [editDate,        setEditDate]        = useState('')
   const [editTime,        setEditTime]        = useState('')
   const [editLevel,       setEditLevel]       = useState('')
+  const [editGrade,       setEditGrade]       = useState('')
   const [editBlockedDates, setEditBlockedDates] = useState<string[]>([])
   const [editScheduleTimes, setEditScheduleTimes] = useState<string[]>([])
   const [editBookedSlots, setEditBookedSlots] = useState<string[]>([])
@@ -161,6 +195,7 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
     setEditDate(a.appointment_date)
     setEditTime(a.appointment_time)
     setEditLevel(a.level)
+    setEditGrade('')
   }
 
   const cancelReagendar = () => setReagendarId(null)
@@ -190,6 +225,7 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
         current_time:   apt.appointment_time,
         proposed_date:  editDate,
         proposed_time:  editTime?.trim() || 'Por confirmar',
+        proposed_grade: editGrade || undefined,
         psych_message:  solMsg.trim() || undefined,
       })
       setStatusMap(prev => ({ ...prev, [apt.id]: 'pendiente' }))
@@ -247,6 +283,22 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
                   placeholder="Motivo de la reagendación..."
                   className="modal-textarea"
                 />
+              </div>
+
+              <div style={{ marginTop: '1rem' }}>
+                <label className="modal-field-label">Cambio de grado (opcional)</label>
+                <select value={editGrade} onChange={e => setEditGrade(e.target.value)}
+                  className="modal-select" style={{ width: '100%' }}>
+                  <option value="">— Sin cambio —</option>
+                  {GRADE_OPTIONS_BY_LEVEL[activeApt.level]?.map(g => (
+                    <option key={g.value} value={g.value}>{g.label}</option>
+                  ))}
+                </select>
+                {editGrade && editGrade !== activeApt.grade_level && (
+                  <p style={{ fontSize: '0.75rem', color: '#f59e0b', marginTop: '0.35rem', lineHeight: '1.4' }}>
+                    ⚠️ Se solicitará cambio de <strong>{GRADE_LABELS[activeApt.grade_level] || activeApt.grade_level}</strong> a <strong>{GRADE_LABELS[editGrade]}</strong>
+                  </p>
+                )}
               </div>
             </div>
             <div className="modal-footer">
