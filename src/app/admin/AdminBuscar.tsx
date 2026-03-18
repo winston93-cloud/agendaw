@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { searchAdmissionAppointments, updateAppointment } from './actions'
+import { searchAdmissionAppointments } from './actions'
+import { createPermissionRequest, getAllRecentRequests } from './dashboard/actions'
 import ExamDateCalendar from '@/components/ExamDateCalendar'
-import type { AdmissionAppointment } from '@/types/database'
+import type { AdmissionAppointment, PermissionRequest } from '@/types/database'
 
 const LEVEL_LABELS: Record<string, string> = {
   maternal: 'Maternal',
@@ -22,35 +23,53 @@ function apiLevel(level: string): string {
 function formatCreatedAt(iso: string): string {
   try {
     return new Date(iso).toLocaleDateString('es-MX', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+      day: 'numeric', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
     })
-  } catch {
-    return iso
-  }
+  } catch { return iso }
+}
+
+type ReqStatus = 'pendiente' | 'aprobada' | 'rechazada'
+
+function StatusBadge({ status }: { status: ReqStatus }) {
+  const cfg = {
+    pendiente: { bg: '#fef3c7', color: '#92400e', label: '⏳ Reagendación pendiente' },
+    aprobada:  { bg: '#d1fae5', color: '#065f46', label: '✅ Reagendación aprobada'  },
+    rechazada: { bg: '#fee2e2', color: '#991b1b', label: '❌ Solicitud rechazada'    },
+  }[status]
+  return (
+    <span style={{
+      fontSize: '0.8rem', fontWeight: '700', padding: '0.35rem 0.85rem',
+      borderRadius: '20px', background: cfg.bg, color: cfg.color,
+    }}>
+      {cfg.label}
+    </span>
+  )
 }
 
 export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[] }) {
-  const [nameQuery, setNameQuery] = useState('')
-  const [createdDate, setCreatedDate] = useState('')
-  const [examDate, setExamDate] = useState('')
-  const [results, setResults] = useState<AdmissionAppointment[]>([])
-  const [loading, setLoading] = useState(false)
-  const [selected, setSelected] = useState<AdmissionAppointment | null>(null)
-  const [reagendarId, setReagendarId] = useState<string | null>(null)
-  const [editDate, setEditDate] = useState('')
-  const [editTime, setEditTime] = useState('')
-  const [editLevel, setEditLevel] = useState('')
+  const [nameQuery,       setNameQuery]       = useState('')
+  const [createdDate,     setCreatedDate]     = useState('')
+  const [examDate,        setExamDate]        = useState('')
+  const [results,         setResults]         = useState<AdmissionAppointment[]>([])
+  const [loading,         setLoading]         = useState(false)
+  const [selected,        setSelected]        = useState<AdmissionAppointment | null>(null)
+  const [reagendarId,     setReagendarId]     = useState<string | null>(null)
+  const [editDate,        setEditDate]        = useState('')
+  const [editTime,        setEditTime]        = useState('')
+  const [editLevel,       setEditLevel]       = useState('')
   const [editBlockedDates, setEditBlockedDates] = useState<string[]>([])
   const [editScheduleTimes, setEditScheduleTimes] = useState<string[]>([])
   const [editBookedSlots, setEditBookedSlots] = useState<string[]>([])
-  const resultsRef = useRef<HTMLDivElement>(null)
-  const selectedCardRef = useRef<HTMLDivElement>(null)
-  const nameInputRef = useRef<HTMLInputElement>(null)
-  const reagendarRef = useRef<HTMLDivElement>(null)
+  const [statusMap,       setStatusMap]       = useState<Record<string, ReqStatus>>({})
+  const [showModal,       setShowModal]       = useState(false)
+  const [solMsg,          setSolMsg]          = useState('')
+  const [sending,         setSending]         = useState(false)
+
+  const resultsRef       = useRef<HTMLDivElement>(null)
+  const selectedCardRef  = useRef<HTMLDivElement>(null)
+  const nameInputRef     = useRef<HTMLInputElement>(null)
+  const reagendarRef     = useRef<HTMLDivElement>(null)
   const reagendarTimeRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -58,11 +77,19 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
     return () => clearTimeout(t)
   }, [])
 
+  // Cargar estados de solicitudes recientes
+  useEffect(() => {
+    getAllRecentRequests().then((reqs: PermissionRequest[]) => {
+      const map: Record<string, ReqStatus> = {}
+      reqs.filter(r => r.type === 'reagendar' && r.appointment_id).forEach(r => {
+        if (!map[r.appointment_id!]) map[r.appointment_id!] = r.status as ReqStatus
+      })
+      setStatusMap(map)
+    }).catch(() => {})
+  }, [])
+
   const runSearch = useCallback(async () => {
-    if (!nameQuery.trim() && !createdDate && !examDate) {
-      setResults([])
-      return
-    }
+    if (!nameQuery.trim() && !createdDate && !examDate) { setResults([]); return }
     setLoading(true)
     try {
       const list = await searchAdmissionAppointments({
@@ -87,32 +114,25 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
   }, [runSearch])
 
   useEffect(() => {
-    if (!loading && results.length > 0 && resultsRef.current) {
+    if (!loading && results.length > 0 && resultsRef.current)
       resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
   }, [loading, results.length])
 
   useEffect(() => {
     if (!selected) return
-    const t = setTimeout(() => {
-      selectedCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    }, 100)
+    const t = setTimeout(() => selectedCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100)
     return () => clearTimeout(t)
   }, [selected])
 
   useEffect(() => {
     if (!reagendarId) return
-    const t = setTimeout(() => {
-      reagendarRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 150)
+    const t = setTimeout(() => reagendarRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150)
     return () => clearTimeout(t)
   }, [reagendarId])
 
   useEffect(() => {
     if (!reagendarId || !editDate || !editTime) return
-    const t = setTimeout(() => {
-      reagendarTimeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    }, 100)
+    const t = setTimeout(() => reagendarTimeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100)
     return () => clearTimeout(t)
   }, [reagendarId, editDate, editTime])
 
@@ -120,8 +140,8 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
     if (!reagendarId || !editLevel) return
     const level = apiLevel(editLevel)
     Promise.all([
-      fetch(`/api/blocked-dates?level=${level}`).then((r) => r.json()).then((d) => d.dates || []).catch(() => []),
-      fetch(`/api/schedules?level=${level}`).then((r) => r.json()).then((d) => d.times || []).catch(() => []),
+      fetch(`/api/blocked-dates?level=${level}`).then(r => r.json()).then(d => d.dates || []).catch(() => []),
+      fetch(`/api/schedules?level=${level}`).then(r => r.json()).then(d => d.times || []).catch(() => []),
     ]).then(([dates, times]) => {
       setEditBlockedDates(dates)
       setEditScheduleTimes(times)
@@ -129,13 +149,10 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
   }, [reagendarId, editLevel])
 
   useEffect(() => {
-    if (!reagendarId || !editDate || !editLevel) {
-      setEditBookedSlots([])
-      return
-    }
+    if (!reagendarId || !editDate || !editLevel) { setEditBookedSlots([]); return }
     fetch(`/api/booked-slots?level=${editLevel}&date=${editDate}&exclude_id=${reagendarId}`)
-      .then((r) => r.json())
-      .then((d) => setEditBookedSlots(d.times || []))
+      .then(r => r.json())
+      .then(d => setEditBookedSlots(d.times || []))
       .catch(() => setEditBookedSlots([]))
   }, [reagendarId, editDate, editLevel])
 
@@ -146,33 +163,105 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
     setEditLevel(a.level)
   }
 
-  const saveReagendar = async () => {
-    if (!reagendarId) return
+  const cancelReagendar = () => setReagendarId(null)
+
+  // Abrir modal de confirmación antes de enviar solicitud
+  const openSolicitudModal = () => {
     if (editScheduleTimes.length > 0 && !editTime?.trim()) {
       alert('Elige un horario de la lista.')
       return
     }
+    setSolMsg('')
+    setShowModal(true)
+  }
+
+  // Enviar la solicitud a la directora
+  const enviarSolicitud = async () => {
+    if (!reagendarId || !selected) return
+    setSending(true)
     try {
-      await updateAppointment(reagendarId, {
-        appointment_date: editDate,
-        appointment_time: (editTime?.trim() || 'Por confirmar'),
+      const apt = results.find(r => r.id === reagendarId) ?? selected
+      await createPermissionRequest({
+        type:           'reagendar',
+        level:          apiLevel(apt.level) as 'maternal_kinder' | 'primaria' | 'secundaria',
+        appointment_id: apt.id,
+        student_name:   studentDisplay(apt),
+        current_date:   apt.appointment_date,
+        current_time:   apt.appointment_time,
+        proposed_date:  editDate,
+        proposed_time:  editTime?.trim() || 'Por confirmar',
+        psych_message:  solMsg.trim() || undefined,
       })
+      setStatusMap(prev => ({ ...prev, [apt.id]: 'pendiente' }))
+      setShowModal(false)
       setReagendarId(null)
-      runSearch()
     } catch (e) {
-      alert((e as Error).message)
+      alert('Error: ' + (e as Error).message)
+    } finally {
+      setSending(false)
     }
   }
 
-  const cancelReagendar = () => setReagendarId(null)
+  const studentDisplay = (a: AdmissionAppointment) =>
+    [a.student_name, a.student_last_name_p, a.student_last_name_m].filter(Boolean).join(' ')
 
-  const studentDisplay = (a: AdmissionAppointment) => {
-    const parts = [a.student_name, a.student_last_name_p, a.student_last_name_m].filter(Boolean)
-    return parts.join(' ')
-  }
+  // Cita activa en el modal
+  const activeApt = reagendarId ? (results.find(r => r.id === reagendarId) ?? selected) : null
 
   return (
     <div className="admin-buscar">
+
+      {/* ── Modal de confirmación solicitud ──────────────────────────── */}
+      {showModal && activeApt && (
+        <div className="modal-overlay" onClick={() => !sending && setShowModal(false)}>
+          <div className="modal-box" onClick={e => e.stopPropagation()}>
+            <div className="modal-header modal-header-solicitud">
+              <span className="modal-header-icon" aria-hidden="true">📋</span>
+              <h3>Solicitar autorización — Reagendación</h3>
+            </div>
+            <div className="modal-body">
+              <div className="modal-info-grid">
+                <div className="modal-info-item">
+                  <span className="modal-info-label">Alumno</span>
+                  <span className="modal-info-value">{studentDisplay(activeApt)}</span>
+                </div>
+                <div className="modal-info-item">
+                  <span className="modal-info-label">Cita actual</span>
+                  <span className="modal-info-value">
+                    {new Date(activeApt.appointment_date + 'T12:00:00').toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} · {activeApt.appointment_time}
+                  </span>
+                </div>
+                <div className="modal-info-item">
+                  <span className="modal-info-label">Propone cambiar a</span>
+                  <span className="modal-info-value">
+                    {new Date(editDate + 'T12:00:00').toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} · {editTime || 'Por confirmar'}
+                  </span>
+                </div>
+              </div>
+              <div style={{ marginTop: '1rem' }}>
+                <label className="modal-field-label">Mensaje para la directora (opcional)</label>
+                <textarea
+                  value={solMsg}
+                  onChange={e => setSolMsg(e.target.value)}
+                  rows={3}
+                  placeholder="Motivo de la reagendación..."
+                  className="modal-textarea"
+                />
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)} disabled={sending}>
+                Cancelar
+              </button>
+              <button type="button" className="btn btn-primary" onClick={enviarSolicitud} disabled={sending}>
+                {sending ? 'Enviando…' : 'Enviar solicitud'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Caja de búsqueda ─────────────────────────────────────────── */}
       <div className="admin-buscar-box">
         <div className="admin-buscar-box-inner">
           <h3 className="admin-buscar-title">
@@ -188,7 +277,7 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
                 type="text"
                 placeholder="Escriba para buscar..."
                 value={nameQuery}
-                onChange={(e) => setNameQuery(e.target.value)}
+                onChange={e => setNameQuery(e.target.value)}
                 onFocus={() => setNameQuery('')}
                 className="admin-input"
                 autoComplete="off"
@@ -201,10 +290,9 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
                 id="admin-buscar-created"
                 type="date"
                 value={createdDate}
-                onChange={(e) => setCreatedDate(e.target.value)}
+                onChange={e => setCreatedDate(e.target.value)}
                 onFocus={() => setCreatedDate('')}
                 className="admin-input"
-                aria-label="Fecha de agendación (cuando registró la cita)"
               />
             </div>
             <div className="admin-buscar-field admin-buscar-field-date">
@@ -213,10 +301,9 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
                 id="admin-buscar-exam"
                 type="date"
                 value={examDate}
-                onChange={(e) => setExamDate(e.target.value)}
+                onChange={e => setExamDate(e.target.value)}
                 onFocus={() => setExamDate('')}
                 className="admin-input"
-                aria-label="Fecha de examen"
               />
             </div>
           </div>
@@ -245,7 +332,7 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
 
       {!loading && results.length > 0 && (
         <div ref={resultsRef} className="admin-buscar-results" role="list">
-          {results.map((a, index) => (
+          {results.map(a => (
             <div
               key={a.id}
               ref={selected?.id === a.id ? selectedCardRef : null}
@@ -266,6 +353,7 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
                 </span>
                 <span className="admin-buscar-card-arrow">{selected?.id === a.id ? '▼' : '▶'}</span>
               </button>
+
               {selected?.id === a.id && (
                 <div id={`admin-buscar-card-body-${a.id}`} className="admin-buscar-card-body" role="region" aria-labelledby={`admin-buscar-card-${a.id}`}>
                   <div className="admin-buscar-detail">
@@ -275,12 +363,13 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
                     <p><strong>Cita:</strong> {new Date(a.appointment_date + 'T12:00:00').toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · {a.appointment_time}</p>
                     <p><strong>Estado:</strong> <span className={`status-pill status-${a.status}`}>{a.status}</span></p>
                   </div>
+
                   {reagendarId === a.id ? (
                     <div ref={reagendarRef} className="admin-buscar-reagendar">
                       <h4>Reagendar cita</h4>
                       <div className="admin-buscar-calendar">
                         <label>Nueva fecha</label>
-                        <ExamDateCalendar value={editDate} onChange={setEditDate} blockedDates={editBlockedDates} />
+                        <ExamDateCalendar value={editDate} onChange={setEditDate} blockedDates={editBlockedDates} isAdmin />
                       </div>
                       {editDate && (
                         <div className="admin-buscar-time">
@@ -289,14 +378,14 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
                             <input
                               type="text"
                               value={editTime}
-                              onChange={(e) => setEditTime(e.target.value)}
+                              onChange={e => setEditTime(e.target.value)}
                               className="admin-input"
                               placeholder="Ej: 09:00"
                               aria-label="Horario de la cita"
                             />
                           ) : (
                             <div className="time-slots time-slots-admin" role="group" aria-label="Elegir horario">
-                              {editScheduleTimes.map((time) => {
+                              {editScheduleTimes.map(time => {
                                 const isBooked = editBookedSlots.includes(time)
                                 return (
                                   <button
@@ -319,15 +408,38 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
                         </div>
                       )}
                       <div ref={reagendarTimeRef} className="admin-buscar-actions">
-                        <button type="button" className="btn btn-primary" onClick={saveReagendar}>Guardar</button>
-                        <button type="button" className="btn btn-secondary" onClick={cancelReagendar}>Cancelar</button>
+                        <button
+                          type="button"
+                          className="btn-solicitud-accion"
+                          onClick={openSolicitudModal}
+                          disabled={!editDate}
+                        >
+                          Solicitar autorización
+                        </button>
+                        <button type="button" className="btn btn-secondary" onClick={cancelReagendar}>
+                          Cancelar
+                        </button>
                       </div>
                     </div>
                   ) : (
                     <div className="admin-buscar-actions">
-                      <button type="button" className="btn btn-primary" onClick={() => startReagendar(a)}>
-                        Reagendar cita
-                      </button>
+                      {statusMap[a.id] === 'pendiente' ? (
+                        <StatusBadge status="pendiente" />
+                      ) : statusMap[a.id] === 'aprobada' ? (
+                        <StatusBadge status="aprobada" />
+                      ) : (
+                        <button type="button" className="btn btn-primary" onClick={() => startReagendar(a)}>
+                          Reagendar cita
+                        </button>
+                      )}
+                      {statusMap[a.id] === 'rechazada' && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          <StatusBadge status="rechazada" />
+                          <button type="button" className="btn btn-primary" onClick={() => startReagendar(a)}>
+                            Reagendar de nuevo
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
