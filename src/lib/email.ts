@@ -321,6 +321,87 @@ const RECORRIDO_DIRECTOR_BY_LEVEL: Record<string, string> = {
   secundaria: 'direccion.secundaria@winston93.edu.mx',
 }
 
+const PSICOLOGA_BY_LEVEL: Record<string, string> = {
+  maternal: 'psicologia.kinder@winston93.edu.mx',
+  kinder: 'psicologia.kinder@winston93.edu.mx',
+  primaria: 'psicologia.primaria@winston93.edu.mx',
+  secundaria: 'psicologia.secundaria@winston93.edu.mx',
+}
+
+export type NewAdmissionNotificationData = {
+  studentName: string
+  parentName: string
+  parentPhone: string
+  parentEmail: string
+  appointmentDate: string
+  appointmentTime: string
+  levelLabel: string
+  gradeLevel: string
+  campusName: string
+}
+
+/** Notificación a psicóloga cuando un papá agenda cita de admisión */
+export async function sendAdmissionNotificationToPsicologa(
+  level: 'maternal' | 'kinder' | 'primaria' | 'secundaria',
+  data: NewAdmissionNotificationData
+): Promise<{ ok: boolean; error?: string }> {
+  const from = process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx'
+  const to = PSICOLOGA_BY_LEVEL[level]
+  if (!to) return { ok: false, error: 'Nivel no válido para notificación a psicóloga' }
+  const dateFormatted = formatDate(data.appointmentDate)
+  const footerName = getInstitutionalFooter(level)
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nueva cita de admisión programada</title>
+</head>
+<body style="margin:0; padding:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 560px; margin: 0 auto; padding: 24px 16px;">
+    ${buildEmailHeader('Nueva cita de admisión', level)}
+    <tr>
+      <td style="background: #ffffff; padding: 28px 24px; border-radius: 0 0 16px 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; border-top: none;">
+        <p style="margin: 0 0 20px; color: #475569; font-size: 0.95rem; line-height: 1.6;">Se ha programado una nueva cita de examen de admisión:</p>
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+          <tr>
+            <td style="padding: 20px;">
+              <p style="margin: 0 0 8px; color: #64748b; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Aspirante</p>
+              <p style="margin: 0; color: #1e293b; font-size: 1.05rem; font-weight: 600;">${escapeHtml(data.studentName)}</p>
+              <p style="margin: 4px 0 0; color: #64748b; font-size: 0.9rem;">${escapeHtml(data.campusName)} · ${escapeHtml(data.levelLabel)}</p>
+              <p style="margin: 4px 0 0; color: #64748b; font-size: 0.9rem;">Grado: ${escapeHtml(data.gradeLevel)}</p>
+              <p style="margin: 16px 0 0; color: #64748b; font-size: 0.8rem;">Fecha del examen</p>
+              <p style="margin: 4px 0 0; color: #1e293b; font-size: 1.05rem; font-weight: 600;">${escapeHtml(dateFormatted)}</p>
+              <p style="margin: 4px 0 0; color: #475569; font-size: 0.95rem;">Hora: <strong>${escapeHtml(data.appointmentTime)}</strong></p>
+              <p style="margin: 16px 0 0; color: #64748b; font-size: 0.8rem;">Contacto del tutor</p>
+              <p style="margin: 4px 0 0; color: #1e293b; font-size: 0.95rem; font-weight: 600;">${escapeHtml(data.parentName)}</p>
+              <p style="margin: 4px 0 0; color: #1e293b; font-size: 0.9rem;">${escapeHtml(data.parentEmail)}</p>
+              <p style="margin: 4px 0 0; color: #1e293b; font-size: 0.9rem;">${escapeHtml(data.parentPhone)}</p>
+            </td>
+          </tr>
+        </table>
+        <p style="margin: 24px 0 0; color: #475569; font-size: 0.9rem; line-height: 1.6;">Saludos cordiales,<br><strong>Sistema de Admisión - ${footerName}</strong></p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`
+  try {
+    await transporter.sendMail({
+      from: `"${footerName}" <${from}>`,
+      to,
+      subject: `Nueva cita de admisión - ${data.studentName} - ${dateFormatted}`,
+      html,
+    })
+    return { ok: true }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Error al enviar el correo a psicóloga'
+    return { ok: false, error: message }
+  }
+}
+
 export type RecorridoDirectorData = {
   parentName: string
   parentPhone: string

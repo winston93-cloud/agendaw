@@ -1,7 +1,7 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/server'
-import { sendAdmissionConfirmation, sendSecundariaTemarios } from '@/lib/email'
+import { sendAdmissionConfirmation, sendSecundariaTemarios, sendAdmissionNotificationToPsicologa } from '@/lib/email'
 import { sendAdmissionSms } from '@/lib/sms'
 import {
   createCalendarEvent,
@@ -129,6 +129,23 @@ export async function createAdmissionAppointment(data: {
     } catch (e) {
       console.warn('[sms]', e)
     }
+  }
+
+  // Notificar a la psicóloga del nivel correspondiente
+  try {
+    await sendAdmissionNotificationToPsicologa(data.level as 'maternal' | 'kinder' | 'primaria' | 'secundaria', {
+      studentName: studentName || data.student_name,
+      parentName: data.parent_name,
+      parentPhone: data.parent_phone,
+      parentEmail: data.parent_email,
+      appointmentDate: data.appointment_date,
+      appointmentTime: data.appointment_time || 'Por confirmar',
+      levelLabel,
+      gradeLevel: data.grade_level,
+      campusName,
+    })
+  } catch (e) {
+    console.warn('[email psicóloga]', e)
   }
 
   if (data.level === 'secundaria' && data.grade_level) {
