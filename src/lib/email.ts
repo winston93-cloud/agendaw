@@ -346,8 +346,12 @@ export async function sendAdmissionNotificationToPsicologa(
   data: NewAdmissionNotificationData
 ): Promise<{ ok: boolean; error?: string }> {
   const from = process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx'
-  const to = PSICOLOGA_BY_LEVEL[level]
-  if (!to) return { ok: false, error: 'Nivel no válido para notificación a psicóloga' }
+  const psicologaEmail = PSICOLOGA_BY_LEVEL[level]
+  if (!psicologaEmail) return { ok: false, error: 'Nivel no válido para notificación a psicóloga' }
+  
+  // Enviar a psicóloga del nivel + copia a coordinación
+  const recipients = [psicologaEmail, 'isc.escobedo@gmail.com']
+  
   const dateFormatted = formatDate(data.appointmentDate)
   const footerName = getInstitutionalFooter(level)
   const html = `
@@ -391,7 +395,7 @@ export async function sendAdmissionNotificationToPsicologa(
   try {
     await transporter.sendMail({
       from: `"${footerName}" <${from}>`,
-      to,
+      to: recipients.join(', '),
       subject: `Nueva cita de admisión - ${data.studentName} - ${dateFormatted}`,
       html,
     })
