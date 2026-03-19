@@ -530,7 +530,16 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
                         <option value="completed">Completada</option>
                       </select>
                       {a.status === 'completed' && a.alumno_ref && (
-                        <div style={{ marginTop: '0.35rem', fontSize: '0.7rem', fontWeight: '600', color: '#1565c0' }}>
+                        <div style={{ 
+                          marginTop: '0.5rem', 
+                          textAlign: 'center',
+                          fontSize: '0.85rem', 
+                          fontWeight: '700', 
+                          color: '#1565c0',
+                          background: '#e3f2fd',
+                          padding: '0.3rem 0.5rem',
+                          borderRadius: '4px',
+                        }}>
                           # {a.alumno_ref}
                         </div>
                       )}
