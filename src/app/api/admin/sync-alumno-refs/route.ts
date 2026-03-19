@@ -4,7 +4,7 @@
  */
 
 import { NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase-admin'
+import { createAdminClient } from '@/lib/supabase/server'
 import { checkAlumnoExists } from '@/lib/mysql'
 
 export async function POST(req: Request) {
