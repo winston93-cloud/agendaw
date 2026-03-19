@@ -21,6 +21,24 @@ const GRADE_LABELS: Record<string, string> = {
   secundaria_7: '7mo (1° Sec.)', secundaria_8: '8vo (2° Sec.)', secundaria_9: '9no (3° Sec.)',
 }
 
+// Todos los grados disponibles en orden ascendente
+const ALL_GRADES = [
+  { value: 'maternal_a', label: 'Maternal A', nivel: 'Maternal' },
+  { value: 'maternal_b', label: 'Maternal B', nivel: 'Maternal' },
+  { value: 'kinder_1', label: 'Kinder 1', nivel: 'Kinder' },
+  { value: 'kinder_2', label: 'Kinder 2', nivel: 'Kinder' },
+  { value: 'kinder_3', label: 'Kinder 3', nivel: 'Kinder' },
+  { value: 'primaria_1', label: '1° Primaria', nivel: 'Primaria' },
+  { value: 'primaria_2', label: '2° Primaria', nivel: 'Primaria' },
+  { value: 'primaria_3', label: '3° Primaria', nivel: 'Primaria' },
+  { value: 'primaria_4', label: '4° Primaria', nivel: 'Primaria' },
+  { value: 'primaria_5', label: '5° Primaria', nivel: 'Primaria' },
+  { value: 'primaria_6', label: '6° Primaria', nivel: 'Primaria' },
+  { value: 'secundaria_7', label: '7mo Grado', nivel: 'Secundaria' },
+  { value: 'secundaria_8', label: '8vo Grado', nivel: 'Secundaria' },
+  { value: 'secundaria_9', label: '9no Grado', nivel: 'Secundaria' },
+]
+
 const GRADE_OPTIONS_BY_LEVEL: Record<string, { value: string; label: string }[]> = {
   maternal: [
     { value: 'maternal_a', label: 'Maternal A' },
@@ -290,8 +308,10 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
                 <select value={editGrade} onChange={e => setEditGrade(e.target.value)}
                   className="modal-select" style={{ width: '100%' }}>
                   <option value="">— Sin cambio —</option>
-                  {GRADE_OPTIONS_BY_LEVEL[activeApt.level]?.map(g => (
-                    <option key={g.value} value={g.value}>{g.label}</option>
+                  {ALL_GRADES.map(g => (
+                    <option key={g.value} value={g.value}>
+                      {g.label} ({g.nivel})
+                    </option>
                   ))}
                 </select>
                 {editGrade && editGrade !== activeApt.grade_level && (
