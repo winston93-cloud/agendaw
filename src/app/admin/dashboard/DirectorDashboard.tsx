@@ -72,6 +72,11 @@ function RequestCard({ req, onRespond }: { req: PermissionRequest; onRespond: ()
           <strong>{info.label}</strong>
         </div>
         <div className="director-req-meta">
+          {req.requested_by && (
+            <span style={{ fontSize: '0.8rem', color: '#64748b', marginRight: '0.5rem' }}>
+              👤 {req.requested_by}
+            </span>
+          )}
           <span className={`director-req-status-pill status-${req.status}`}>
             {req.status === 'pendiente' ? '⏳ Pendiente' : req.status === 'aprobada' ? '✅ Aprobada' : '❌ Rechazada'}
           </span>

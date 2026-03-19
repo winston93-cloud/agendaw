@@ -142,6 +142,7 @@ export interface PermissionRequest {
   bloqueo_reason?:   string
 
   psych_message?:  string
+  requested_by?:   string
   director_notes?: string
 
   created_at:   string

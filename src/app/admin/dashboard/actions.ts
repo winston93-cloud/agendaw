@@ -2,6 +2,7 @@
 
 import { createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
 import nodemailer from 'nodemailer'
 import type { AdmissionLevel, PermissionRequest } from '@/types/database'
 
@@ -21,6 +22,20 @@ const TYPE_LABELS: Record<string, string> = {
   reagendar: 'Reagendación de cita',
   horario:   'Cambio de horario',
   bloqueo:   'Bloqueo de día',
+}
+
+const ROLE_LABELS: Record<string, string> = {
+  psi_mk:  'Psicología – Maternal y Kinder',
+  psi_pri: 'Psicología – Primaria',
+  psi_sec: 'Psicología – Secundaria',
+  vin_mk:  'Vinculación – Maternal y Kinder',
+  vin_pri: 'Vinculación – Primaria y Secundaria',
+}
+
+export function getUserRoleLabel(): string {
+  const cookieStore = cookies()
+  const role = cookieStore.get('admin_session')?.value ?? ''
+  return role ? (ROLE_LABELS[role] ?? role) : 'Sistema'
 }
 
 function makeTransporter() {
@@ -56,8 +71,12 @@ export async function createPermissionRequest(data: {
   bloqueo_reason?:   string
   // mensaje
   psych_message?: string
+  requested_by?:  string
 }) {
   const supabase = createAdminClient()
+
+  // Si no se pasó requested_by, obtenerlo de la sesión actual
+  const requestedBy = data.requested_by ?? getUserRoleLabel()
 
   const { data: inserted, error } = await supabase
     .from('permission_requests')
@@ -79,6 +98,7 @@ export async function createPermissionRequest(data: {
       bloqueo_time:     data.bloqueo_time,
       bloqueo_reason:   data.bloqueo_reason,
       psych_message:    data.psych_message,
+      requested_by:     requestedBy,
     }])
     .select()
     .single()
@@ -128,7 +148,7 @@ export async function createPermissionRequest(data: {
   </div>
   <div style="background:#f8fafc;padding:1.75rem 2rem;border-radius:0 0 12px 12px;border:1px solid #e2e8f0;">
     <p style="margin:0 0 1rem;">Estimada Directora,</p>
-    <p>La psicóloga del nivel <strong>${nivel}</strong> solicita su autorización para:</p>
+    <p><strong>${requestedBy}</strong> solicita su autorización para:</p>
     <div style="background:#eff6ff;border-left:4px solid #3b82f6;border-radius:6px;padding:0.85rem 1.25rem;margin:1rem 0;">
       <strong style="font-size:1.1rem;">🔑 ${tipo}</strong>
     </div>
