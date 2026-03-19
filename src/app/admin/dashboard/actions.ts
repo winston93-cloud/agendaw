@@ -33,9 +33,14 @@ const ROLE_LABELS: Record<string, string> = {
 }
 
 export async function getUserRoleLabel(): Promise<string> {
-  const cookieStore = await cookies()
-  const role = cookieStore.get('admin_session')?.value ?? ''
-  return role ? (ROLE_LABELS[role] ?? role) : 'Sistema'
+  try {
+    const cookieStore = await cookies()
+    const role = cookieStore.get('admin_session')?.value ?? ''
+    return role ? (ROLE_LABELS[role] ?? role) : 'Sistema'
+  } catch (error) {
+    console.error('[getUserRoleLabel] Error:', error)
+    return 'Sistema'
+  }
 }
 
 function makeTransporter() {
@@ -76,7 +81,15 @@ export async function createPermissionRequest(data: {
   const supabase = createAdminClient()
 
   // Si no se pasó requested_by, obtenerlo de la sesión actual
-  const requestedBy = data.requested_by ?? await getUserRoleLabel()
+  let requestedBy = data.requested_by
+  if (!requestedBy) {
+    try {
+      requestedBy = await getUserRoleLabel()
+    } catch (error) {
+      console.error('[createPermissionRequest] Error getting user role:', error)
+      requestedBy = 'Sistema'
+    }
+  }
 
   const { data: inserted, error } = await supabase
     .from('permission_requests')
