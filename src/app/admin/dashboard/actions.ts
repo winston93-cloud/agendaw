@@ -32,8 +32,8 @@ const ROLE_LABELS: Record<string, string> = {
   vin_pri: 'Vinculación – Primaria y Secundaria',
 }
 
-export function getUserRoleLabel(): string {
-  const cookieStore = cookies()
+export async function getUserRoleLabel(): Promise<string> {
+  const cookieStore = await cookies()
   const role = cookieStore.get('admin_session')?.value ?? ''
   return role ? (ROLE_LABELS[role] ?? role) : 'Sistema'
 }
@@ -76,7 +76,7 @@ export async function createPermissionRequest(data: {
   const supabase = createAdminClient()
 
   // Si no se pasó requested_by, obtenerlo de la sesión actual
-  const requestedBy = data.requested_by ?? getUserRoleLabel()
+  const requestedBy = data.requested_by ?? await getUserRoleLabel()
 
   const { data: inserted, error } = await supabase
     .from('permission_requests')
