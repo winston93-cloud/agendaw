@@ -352,7 +352,7 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
               <button type="button"
                 className="btn btn-primary"
                 onClick={() => enviarSolicitudReagendar(modal.appointment)}
-                disabled={sendingSol || (!solicitudDate && !solicitudGrade) || (solicitudDate && calScheduleTimes.length > 0 && !solicitudTime)}>
+                disabled={Boolean(sendingSol || (!solicitudDate && !solicitudGrade) || (solicitudDate && calScheduleTimes.length > 0 && !solicitudTime))}>
                 {sendingSol ? 'Enviando…' : 'Enviar solicitud'}
               </button>
             </div>
