@@ -6841,7 +6841,35 @@ body {
 .expediente-check input {
   width: 1.1rem;
   height: 1.1rem;
-  accent-color: #6366f1;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: 2px solid #94a3b8;
+  border-radius: 4px;
+  background: #fff;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.expediente-check input:hover {
+  border-color: #6366f1;
+}
+
+.expediente-check input:checked {
+  background: #6366f1;
+  border-color: #6366f1;
+}
+
+.expediente-check input:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
 .expediente-familiares {
