@@ -4960,7 +4960,10 @@ body {
   box-shadow: 0 16px 48px rgba(0,0,0,0.18);
   width: 100%;
   max-width: 440px;
+  max-height: calc(100vh - 2rem);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
   animation: modalPop 0.2s var(--adm-ease);
 }
 
@@ -4975,6 +4978,7 @@ body {
   gap: 0.75rem;
   padding: 1.25rem 1.5rem;
   color: #fff;
+  flex-shrink: 0;
 }
 
 .modal-header-confirm { background: var(--adm-accent); }
@@ -4995,6 +4999,29 @@ body {
 
 .modal-body {
   padding: 1.5rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Scrollbar personalizado para modal-body */
+.modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: var(--adm-surface-alt);
+  border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: var(--adm-border);
+  border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: var(--adm-text-faint);
 }
 
 .modal-body-subtitle {
@@ -5060,6 +5087,7 @@ body {
   justify-content: flex-end;
   gap: 0.75rem;
   padding: 0 1.5rem 1.5rem;
+  flex-shrink: 0;
 }
 
 /* ── /extract — Tokens de solicitud de autorización ──────────────
