@@ -552,7 +552,11 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
                           className="admin-btn-action admin-btn-reagendar"
                           onClick={() => { setSolicitudDate(''); setSolicitudTime(''); setSolicitudGrade(''); setSolicitudMsg(''); setModal({ type: 'solicitar-reagendar', appointment: a }) }}
                         >
-                          <span aria-hidden="true">📋</span> Reagendar
+                          <span aria-hidden="true">📋</span> 
+                          <div style={{ lineHeight: '1.3' }}>
+                            <div>Reagendar</div>
+                            <div style={{ fontSize: '0.75em', opacity: 0.9 }}>y cambiar grado</div>
+                          </div>
                         </button>
 
                         {/* Estado última solicitud */}

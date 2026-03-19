@@ -480,15 +480,21 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
                       ) : statusMap[a.id] === 'aprobada' ? (
                         <StatusBadge status="aprobada" />
                       ) : (
-                        <button type="button" className="btn btn-primary" onClick={() => startReagendar(a)}>
-                          Reagendar cita
+                        <button type="button" className="btn btn-primary" onClick={() => startReagendar(a)} style={{ textAlign: 'center' }}>
+                          <div style={{ lineHeight: '1.3' }}>
+                            <div>Reagendar cita</div>
+                            <div style={{ fontSize: '0.85em', opacity: 0.9 }}>y cambiar grado</div>
+                          </div>
                         </button>
                       )}
                       {statusMap[a.id] === 'rechazada' && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                           <StatusBadge status="rechazada" />
-                          <button type="button" className="btn btn-primary" onClick={() => startReagendar(a)}>
-                            Reagendar de nuevo
+                          <button type="button" className="btn btn-primary" onClick={() => startReagendar(a)} style={{ textAlign: 'center' }}>
+                            <div style={{ lineHeight: '1.3' }}>
+                              <div>Reagendar de nuevo</div>
+                              <div style={{ fontSize: '0.85em', opacity: 0.9 }}>y cambiar grado</div>
+                            </div>
                           </button>
                         </div>
                       )}

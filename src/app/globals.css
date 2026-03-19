@@ -5919,7 +5919,15 @@ body {
 .admin-btn-action:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* Variantes semánticas */
-.admin-btn-reagendar  { background: var(--adm-purple-lt); border: 1px solid color-mix(in srgb, var(--adm-purple) 28%, transparent); color: var(--adm-purple); }
+.admin-btn-reagendar  { 
+  background: var(--adm-purple); 
+  border: 1px solid var(--adm-purple); 
+  color: #fff; 
+  font-weight: 600;
+}
+.admin-btn-reagendar:hover { 
+  background: color-mix(in srgb, var(--adm-purple) 85%, #000); 
+}
 .admin-btn-aprobar    { background: var(--adm-success); color: #fff; }
 .admin-btn-expediente { background: var(--adm-accent);  color: #fff; }
 
