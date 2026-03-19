@@ -119,11 +119,16 @@ export async function createPermissionRequest(data: {
       const gradeChangeRow = data.proposed_grade
         ? `<tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Cambio de grado</td><td style="padding:6px 10px;">${data.proposed_grade}</td></tr>`
         : ''
+      
+      // Si hay cambio de fecha/hora
+      const dateChangeRow = data.proposed_date
+        ? `<tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Propone</td><td style="padding:6px 10px;">${data.proposed_date ?? '—'} ${data.proposed_time ?? ''}</td></tr>`
+        : ''
+      
       detalles = `
         <tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Alumno</td><td style="padding:6px 10px;">${data.student_name ?? '—'}</td></tr>
         <tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Fecha actual</td><td style="padding:6px 10px;">${data.current_date ?? '—'} ${data.current_time ?? ''}</td></tr>
-
-        <tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Propone</td><td style="padding:6px 10px;">${data.proposed_date ?? '—'} ${data.proposed_time ?? ''}</td></tr>${gradeChangeRow}`
+        ${dateChangeRow}${gradeChangeRow}`
     } else if (data.type === 'horario') {
       detalles = `
         <tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Acción</td><td style="padding:6px 10px;">${data.horario_action === 'agregar' ? 'Agregar' : 'Eliminar'} horario</td></tr>
@@ -238,15 +243,21 @@ export async function respondPermissionRequest(
 
   // 3. Si aprobada, ejecutar la acción
   if (decision === 'aprobada') {
-    if (req.type === 'reagendar' && req.appointment_id && req.proposed_date) {
-      const updateData: Record<string, string> = {
-        appointment_date: req.proposed_date,
-        appointment_time: req.proposed_time ?? 'Por confirmar',
-        status: 'confirmed',
+    if (req.type === 'reagendar' && req.appointment_id && (req.proposed_date || req.proposed_grade)) {
+      const updateData: Record<string, string> = {}
+      
+      // Si hay cambio de fecha/hora
+      if (req.proposed_date) {
+        updateData.appointment_date = req.proposed_date
+        updateData.appointment_time = req.proposed_time ?? 'Por confirmar'
+        updateData.status = 'confirmed'
       }
+      
+      // Si hay cambio de grado
       if (req.proposed_grade) {
         updateData.grade_level = req.proposed_grade
       }
+      
       await supabase
         .from('admission_appointments')
         .update(updateData)
