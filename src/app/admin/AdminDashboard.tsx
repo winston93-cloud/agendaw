@@ -8,12 +8,13 @@ import AdminHorarios from './AdminHorarios'
 import AdminBuscar from './AdminBuscar'
 import AdminRecorridos from './AdminRecorridos'
 import AdminMigracion from './AdminMigracion'
+import AdminSyncRefs from './AdminSyncRefs'
 import type { AdmissionAppointment } from '@/types/database'
 import type { BlockedDate } from '@/types/database'
 import type { AdmissionSchedule } from '@/types/database'
 import type { TourRecorrido } from '@/types/database'
 
-type Section = 'citas' | 'horarios' | 'bloquear' | 'buscar' | 'recorridos' | 'migracion' | null
+type Section = 'citas' | 'horarios' | 'bloquear' | 'buscar' | 'recorridos' | 'migracion' | 'sync-refs' | null
 
 const CARDS: { id: Section; icon: string; title: string; description: string; accent: string }[] = [
   {
@@ -57,6 +58,13 @@ const CARDS: { id: Section; icon: string; title: string; description: string; ac
     title: 'Migración sistema anterior',
     description: 'Importar alumnos pendientes del ciclo 2025-2026 y 2026-2027',
     accent: 'migracion',
+  },
+  {
+    id: 'sync-refs',
+    icon: '🔄',
+    title: 'Sincronizar números de control',
+    description: 'Vincular números de control de MySQL a citas completadas',
+    accent: 'sync',
   },
 ]
 
@@ -147,6 +155,11 @@ export default function AdminDashboard({
           <section className="admin-section admin-section-migracion">
             <h2><span className="admin-section-icon" aria-hidden="true">🗃️</span> Migración sistema anterior</h2>
             <AdminMigracion />
+          </section>
+        )}
+        {activeSection === 'sync-refs' && (
+          <section className="admin-section admin-section-sync">
+            <AdminSyncRefs />
           </section>
         )}
       </div>
