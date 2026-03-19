@@ -80,17 +80,6 @@ export async function createPermissionRequest(data: {
 }) {
   const supabase = createAdminClient()
 
-  // Si no se pasó requested_by, obtenerlo de la sesión actual
-  let requestedBy = data.requested_by
-  if (!requestedBy) {
-    try {
-      requestedBy = await getUserRoleLabel()
-    } catch (error) {
-      console.error('[createPermissionRequest] Error getting user role:', error)
-      requestedBy = 'Sistema'
-    }
-  }
-
   const { data: inserted, error } = await supabase
     .from('permission_requests')
     .insert([{
@@ -111,7 +100,7 @@ export async function createPermissionRequest(data: {
       bloqueo_time:     data.bloqueo_time,
       bloqueo_reason:   data.bloqueo_reason,
       psych_message:    data.psych_message,
-      requested_by:     requestedBy,
+      // requested_by:     requestedBy, // Temporalmente comentado hasta aplicar migración
     }])
     .select()
     .single()
@@ -161,7 +150,7 @@ export async function createPermissionRequest(data: {
   </div>
   <div style="background:#f8fafc;padding:1.75rem 2rem;border-radius:0 0 12px 12px;border:1px solid #e2e8f0;">
     <p style="margin:0 0 1rem;">Estimada Directora,</p>
-    <p><strong>${requestedBy}</strong> solicita su autorización para:</p>
+    <p>Se ha recibido una nueva solicitud de autorización para:</p>
     <div style="background:#eff6ff;border-left:4px solid #3b82f6;border-radius:6px;padding:0.85rem 1.25rem;margin:1rem 0;">
       <strong style="font-size:1.1rem;">🔑 ${tipo}</strong>
     </div>
