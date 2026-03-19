@@ -225,13 +225,22 @@ export async function completeAdmissionAndCreateAlumno(appointmentId: string): P
       return rawCiclo
     })()
 
+    // Extraer grado numérico de grade_level (ej. 'kinder_2' → '2', 'maternal_a' → '1')
+    // Priorizar grade_level de la cita (puede haber sido actualizado por reagendación)
+    const gradeRaw = appointment.grade_level || expediente.grado || ''
+    const gradeMatch = gradeRaw.match(/(\d+)$/)
+    const gradeLetter = gradeRaw.match(/_([ab])$/i)
+    const alumno_grado_parsed = gradeMatch 
+      ? gradeMatch[1] 
+      : (gradeLetter ? (gradeLetter[1].toUpperCase() === 'A' ? '1' : '2') : '1')
+
     // Crear alumno en MySQL
     const alumnoData: AlumnoData = {
       alumno_app: expediente.apellido_paterno_alumno || appointment.student_last_name_p || '',
       alumno_apm: expediente.apellido_materno_alumno || appointment.student_last_name_m || '',
       alumno_nombre: expediente.nombre_alumno || appointment.student_name || '',
       alumno_nivel: nivelMap[appointment.level] || '1',
-      alumno_grado: expediente.grado || '',
+      alumno_grado: alumno_grado_parsed,
       alumno_grupo: '',
       alumno_status: '2',
       alumno_nuevo_ingreso: '1', // Nuevo ingreso de agenda
