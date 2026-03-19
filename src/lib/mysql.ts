@@ -35,8 +35,8 @@ export function getMySQLPool() {
 }
 
 export type AlumnoData = {
-  alumno_app: string // Del app (ej: "maternal_a", "primaria_1")
-  alumno_apm: string // Apellido paterno
+  alumno_app: string // Apellido paterno
+  alumno_apm: string // Apellido materno
   alumno_nombre: string // Nombre completo
   alumno_nivel: string // 1= Maternal, 2= Kinder, 3= Primaria, 4= Secundaria
   alumno_grado: string // Grado dentro del nivel
@@ -90,12 +90,12 @@ export async function createAlumnoInMySQL(data: AlumnoData): Promise<number> {
 }
 
 /**
- * Verifica si un alumno ya existe por nombre y apellido
+ * Verifica si un alumno ya existe por nombre y apellido paterno
  */
 export async function checkAlumnoExists(nombre: string, apellido: string): Promise<number | null> {
   const pool = getMySQLPool()
   const [rows] = await pool.query<mysql.RowDataPacket[]>(
-    'SELECT alumno_ref FROM alumno WHERE alumno_nombre = ? AND alumno_apm = ? LIMIT 1',
+    'SELECT alumno_ref FROM alumno WHERE alumno_nombre = ? AND alumno_app = ? LIMIT 1',
     [nombre, apellido]
   )
   return rows[0]?.alumno_ref || null
