@@ -191,11 +191,12 @@ function VerExpedienteContent() {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
                 {v.conductas.map((c: string, i: number) => (
                   <span key={i} style={{
-                    padding: '0.25rem 0.75rem',
-                    background: 'rgba(99, 102, 241, 0.2)',
-                    color: '#c7d2fe',
+                    padding: '0.4rem 0.9rem',
+                    background: '#6366f1',
+                    color: '#ffffff',
                     borderRadius: '1rem',
-                    fontSize: '0.875rem'
+                    fontSize: '0.875rem',
+                    fontWeight: '500'
                   }}>
                     {c}
                   </span>
