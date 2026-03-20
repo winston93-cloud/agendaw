@@ -77,6 +77,17 @@ function buildNotes(row: AgAlumnoRow): string {
   return parts.join(' | ')
 }
 
+function normalizeTime(legacyTime: string): string {
+  if (!legacyTime) return 'Por confirmar'
+  // Sistema anterior: '11.00', '9.00', etc. → normalizar a '11:00', '09:00'
+  let time = legacyTime.trim().replace('.', ':')
+  // Si solo tiene 1 dígito de hora, agregar cero inicial
+  if (/^\d:\d{2}$/.test(time)) time = '0' + time
+  // Si no tiene minutos, agregar :00
+  if (/^\d{1,2}$/.test(time)) time = time.padStart(2, '0') + ':00'
+  return time || 'Por confirmar'
+}
+
 // GET: Preview — cuántos registros hay pendientes de migrar
 export async function GET() {
   try {
@@ -156,7 +167,7 @@ export async function POST(req: NextRequest) {
         parent_phone: row.telefono?.trim() ?? 'N/D',
         relationship: 'Padre/Madre',
         appointment_date: appointmentDate,
-        appointment_time: row.h_exa?.trim() || 'Por confirmar',
+        appointment_time: normalizeTime(row.h_exa),
         status: 'confirmed',
         school_cycle: row.ciclo === 22 ? '2025-2026' : '2026-2027',
         notes: buildNotes(row),
