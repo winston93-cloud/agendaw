@@ -385,15 +385,15 @@ export default function AgendarPage() {
 
   // Horarios ya reservados para esta fecha y nivel (evitar doble reserva)
   useEffect(() => {
-    if (!formData.appointmentDate || !formData.level) {
+    if (!formData.appointmentDate || !formData.level || !formData.gradeLevel) {
       setBookedSlots([])
       return
     }
-    fetch(`/api/booked-slots?level=${formData.level}&date=${formData.appointmentDate}`)
+    fetch(`/api/booked-slots?level=${formData.level}&date=${formData.appointmentDate}&grade_level=${formData.gradeLevel}`)
       .then((res) => res.json())
       .then((data) => setBookedSlots(data.times || []))
       .catch(() => setBookedSlots([]))
-  }, [formData.appointmentDate, formData.level])
+  }, [formData.appointmentDate, formData.level, formData.gradeLevel])
 
   // Horarios bloqueados administrativamente para esta fecha y nivel
   useEffect(() => {

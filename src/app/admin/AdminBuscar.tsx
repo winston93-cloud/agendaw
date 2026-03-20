@@ -202,11 +202,14 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
 
   useEffect(() => {
     if (!reagendarId || !editDate || !editLevel) { setEditBookedSlots([]); return }
-    fetch(`/api/booked-slots?level=${editLevel}&date=${editDate}&exclude_id=${reagendarId}`)
+    const apt = results.find(r => r.id === reagendarId)
+    const targetGrade = editGrade || apt?.grade_level || ''
+    if (!targetGrade) { setEditBookedSlots([]); return }
+    fetch(`/api/booked-slots?level=${editLevel}&date=${editDate}&grade_level=${targetGrade}&exclude_id=${reagendarId}`)
       .then(r => r.json())
       .then(d => setEditBookedSlots(d.times || []))
       .catch(() => setEditBookedSlots([]))
-  }, [reagendarId, editDate, editLevel])
+  }, [reagendarId, editDate, editLevel, editGrade, results])
 
   const startReagendar = (a: AdmissionAppointment) => {
     setReagendarId(a.id)

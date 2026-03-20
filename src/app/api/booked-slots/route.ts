@@ -7,6 +7,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const level = searchParams.get('level')
   const date  = searchParams.get('date')
+  const gradeLevel = searchParams.get('grade_level')
 
   if (!level || !VALID_LEVELS.includes(level)) {
     return NextResponse.json(
@@ -28,6 +29,12 @@ export async function GET(request: Request) {
       .eq('appointment_date', date)
       .eq('level', level)
       .neq('status', 'cancelled')
+    
+    // Filtrar por grade_level específico si se proporciona
+    if (gradeLevel) {
+      query = query.eq('grade_level', gradeLevel)
+    }
+    
     if (excludeId) query = query.neq('id', excludeId)
     const { data, error } = await query
 

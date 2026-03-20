@@ -167,13 +167,14 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
     const apt   = modal.appointment
     setCalLoadingSlots(true)
     setSolicitudTime('')    // resetear hora al cambiar fecha
-    // Usar nivel exacto para que solo bloquee horarios del mismo nivel
-    fetch(`/api/booked-slots?level=${apt.level}&date=${solicitudDate}&exclude_id=${apt.id}`)
+    // Usar grade_level para que solo bloquee horarios del mismo grado específico
+    const targetGrade = solicitudGrade || apt.grade_level
+    fetch(`/api/booked-slots?level=${apt.level}&date=${solicitudDate}&grade_level=${targetGrade}&exclude_id=${apt.id}`)
       .then(r => r.json())
       .then(d => setCalBookedSlots(d.times || []))
       .catch(() => setCalBookedSlots([]))
       .finally(() => setCalLoadingSlots(false))
-  }, [solicitudDate, modal])
+  }, [solicitudDate, solicitudGrade, modal])
 
   useEffect(() => {
     getAllRecentRequests().then((reqs: PermissionRequest[]) => {
