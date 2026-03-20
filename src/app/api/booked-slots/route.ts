@@ -3,11 +3,18 @@ import { createAdminClient } from '@/lib/supabase/server'
 
 const VALID_LEVELS = ['maternal', 'kinder', 'primaria', 'secundaria']
 
+// Mapeo de nivel individual a nivel agrupado (por psicóloga)
+function mapToGroupLevel(level: string): string[] {
+  if (level === 'maternal' || level === 'kinder') return ['maternal', 'kinder']
+  if (level === 'primaria') return ['primaria']
+  if (level === 'secundaria') return ['secundaria']
+  return [level]
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const level = searchParams.get('level')
   const date  = searchParams.get('date')
-  const gradeLevel = searchParams.get('grade_level')
 
   if (!level || !VALID_LEVELS.includes(level)) {
     return NextResponse.json(
@@ -23,17 +30,15 @@ export async function GET(request: Request) {
 
   try {
     const supabase = createAdminClient()
+    // Maternal y Kinder comparten psicóloga → bloquear horarios de ambos niveles
+    const groupLevels = mapToGroupLevel(level)
+    
     let query = supabase
       .from('admission_appointments')
       .select('appointment_time')
       .eq('appointment_date', date)
-      .eq('level', level)
+      .in('level', groupLevels)
       .neq('status', 'cancelled')
-    
-    // Filtrar por grade_level específico si se proporciona
-    if (gradeLevel) {
-      query = query.eq('grade_level', gradeLevel)
-    }
     
     if (excludeId) query = query.neq('id', excludeId)
     const { data, error } = await query
