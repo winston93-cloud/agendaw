@@ -5,6 +5,11 @@ import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import nodemailer from 'nodemailer'
 import type { AdmissionLevel, PermissionRequest } from '@/types/database'
+import {
+  getAllCalendarIdsForLevel,
+  updateCalendarEvent,
+  buildAdmisionEventDescription,
+} from '@/lib/googleCalendar'
 
 const DIRECTOR_EMAILS: Record<AdmissionLevel, string> = {
   maternal_kinder: 'direccion.kinder@winston93.edu.mx',
@@ -255,6 +260,13 @@ export async function respondPermissionRequest(
   // 3. Si aprobada, ejecutar la acción
   if (decision === 'aprobada') {
     if (req.type === 'reagendar' && req.appointment_id && (req.proposed_date || req.proposed_grade)) {
+      // Obtener datos actuales de la cita
+      const { data: currentAppt } = await supabase
+        .from('admission_appointments')
+        .select('*')
+        .eq('id', req.appointment_id)
+        .single()
+      
       const updateData: Record<string, string> = {}
       
       // Si hay cambio de fecha/hora
@@ -273,6 +285,49 @@ export async function respondPermissionRequest(
         .from('admission_appointments')
         .update(updateData)
         .eq('id', req.appointment_id)
+      
+      // Actualizar eventos en Google Calendar si hay cambio de fecha/hora y tiene event IDs
+      if (req.proposed_date && req.proposed_time && req.proposed_time !== 'Por confirmar' && currentAppt) {
+        const calendars = getAllCalendarIdsForLevel(currentAppt.level)
+        if (calendars) {
+          try {
+            const studentName = [currentAppt.student_name, currentAppt.student_last_name_p, currentAppt.student_last_name_m]
+              .filter(Boolean).join(' ')
+            
+            const eventData = {
+              summary: `Examen admisión: ${studentName} (${currentAppt.level})`,
+              description: buildAdmisionEventDescription({
+                studentName,
+                level: currentAppt.level,
+                gradeLevel: updateData.grade_level || currentAppt.grade_level,
+                parentName: currentAppt.parent_name,
+                parentPhone: currentAppt.parent_phone,
+                parentEmail: currentAppt.parent_email,
+                campus: currentAppt.campus,
+              }),
+              date: req.proposed_date,
+              time: req.proposed_time,
+            }
+
+            // Actualizar evento de psicóloga
+            if (currentAppt.google_event_id) {
+              await updateCalendarEvent(calendars.psicologa, currentAppt.google_event_id, eventData)
+            }
+
+            // Si es primaria, actualizar también control escolar e inglés
+            if (currentAppt.level === 'primaria') {
+              if (calendars.controlEscolar && currentAppt.google_event_id_control_escolar) {
+                await updateCalendarEvent(calendars.controlEscolar, currentAppt.google_event_id_control_escolar, eventData)
+              }
+              if (calendars.ingles && currentAppt.google_event_id_ingles) {
+                await updateCalendarEvent(calendars.ingles, currentAppt.google_event_id_ingles, eventData)
+              }
+            }
+          } catch (e) {
+            console.warn('[respondPermissionRequest] Error actualizando eventos de calendar:', e)
+          }
+        }
+      }
     }
 
     if (req.type === 'horario') {
