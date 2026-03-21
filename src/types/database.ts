@@ -90,6 +90,8 @@ export interface AdmissionAppointment {
   origin?: string
   legacy_id?: number
   google_event_id?: string
+  google_event_id_control_escolar?: string
+  google_event_id_ingles?: string
   alumno_ref?: number
   created_at: string
   updated_at: string

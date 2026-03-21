@@ -23,6 +23,24 @@ export function getPsicologaCalendarId(level: string): string | null {
   return null
 }
 
+/** Retorna TODOS los Calendar IDs para un nivel (primaria tiene 3, otros solo 1) */
+export function getAllCalendarIdsForLevel(level: string): { psicologa: string; controlEscolar?: string; ingles?: string } | null {
+  const psicologaId = getPsicologaCalendarId(level)
+  if (!psicologaId) return null
+
+  // Primaria: agregar calendars de control escolar e inglés
+  if (level === 'primaria') {
+    return {
+      psicologa: psicologaId,
+      controlEscolar: process.env.GOOGLE_CALENDAR_CONTROL_ESCOLAR_PRIMARIA ?? undefined,
+      ingles: process.env.GOOGLE_CALENDAR_INGLES_PRIMARIA ?? undefined,
+    }
+  }
+
+  // Otros niveles: solo psicóloga
+  return { psicologa: psicologaId }
+}
+
 /** Retorna el Calendar ID (correo) de vinculación según el nivel educativo */
 export function getVinculacionCalendarId(level: string): string | null {
   if (level === 'maternal' || level === 'kinder') {

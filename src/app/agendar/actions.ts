@@ -6,6 +6,7 @@ import { sendAdmissionSms } from '@/lib/sms'
 import {
   createCalendarEvent,
   getPsicologaCalendarId,
+  getAllCalendarIdsForLevel,
   buildAdmisionEventDescription,
 } from '@/lib/googleCalendar'
 
@@ -162,11 +163,13 @@ export async function createAdmissionAppointment(data: {
     }
   }
 
-  // Crear evento en Google Calendar de la psicóloga correspondiente
-  const calendarId = getPsicologaCalendarId(data.level)
-  if (calendarId && appointmentId && data.appointment_time !== 'Por confirmar') {
+  // Crear evento(s) en Google Calendar
+  // Para primaria: 3 calendars (psicóloga, control escolar, inglés)
+  // Para otros niveles: 1 calendar (psicóloga)
+  const calendars = getAllCalendarIdsForLevel(data.level)
+  if (calendars && appointmentId && data.appointment_time !== 'Por confirmar') {
     try {
-      const calResult = await createCalendarEvent(calendarId, {
+      const eventData = {
         summary: `Examen admisión: ${studentName || data.student_name} (${LEVEL_LABELS[data.level] ?? data.level})`,
         description: buildAdmisionEventDescription({
           studentName: studentName || data.student_name,
@@ -179,14 +182,38 @@ export async function createAdmissionAppointment(data: {
         }),
         date: data.appointment_date,
         time: data.appointment_time,
-      })
-      if (calResult.ok && calResult.eventId) {
+      }
+
+      // Crear evento en calendar de psicóloga (siempre)
+      const psicologaResult = await createCalendarEvent(calendars.psicologa, eventData)
+      
+      const updates: Record<string, string> = {}
+      if (psicologaResult.ok && psicologaResult.eventId) {
+        updates.google_event_id = psicologaResult.eventId
+      }
+
+      // Si es primaria, crear también en control escolar e inglés
+      if (data.level === 'primaria') {
+        if (calendars.controlEscolar) {
+          const controlResult = await createCalendarEvent(calendars.controlEscolar, eventData)
+          if (controlResult.ok && controlResult.eventId) {
+            updates.google_event_id_control_escolar = controlResult.eventId
+          }
+        }
+        if (calendars.ingles) {
+          const inglesResult = await createCalendarEvent(calendars.ingles, eventData)
+          if (inglesResult.ok && inglesResult.eventId) {
+            updates.google_event_id_ingles = inglesResult.eventId
+          }
+        }
+      }
+
+      // Guardar todos los event IDs
+      if (Object.keys(updates).length > 0) {
         await createAdminClient()
           .from('admission_appointments')
-          .update({ google_event_id: calResult.eventId })
+          .update(updates)
           .eq('id', appointmentId)
-      } else {
-        console.warn('[googleCalendar] No se pudo crear el evento:', calResult.error)
       }
     } catch (e) {
       console.warn('[googleCalendar]', e)
