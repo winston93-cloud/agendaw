@@ -198,6 +198,11 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
   const updateSchoolCycle = async (id: string, school_cycle: string) => {
     try {
       await updateAppointment(id, { school_cycle })
+      setModal({
+        type: 'result',
+        ok: true,
+        message: `✅ Ciclo escolar actualizado a ${school_cycle}`,
+      })
       router.refresh()
     } catch (e) {
       setModal({ type: 'error', message: (e as Error).message })
