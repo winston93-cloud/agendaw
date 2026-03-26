@@ -130,6 +130,21 @@ export async function createPermissionRequest(data: {
     const nivel   = LEVEL_LABELS[data.level]
     const tipo    = TYPE_LABELS[data.type]
 
+    // Para solicitudes de reagendación/cambio de grado, mostrar fecha de nacimiento del alumno.
+    let studentBirthDate: string | null = null
+    if (data.type === 'reagendar' && data.appointment_id) {
+      try {
+        const { data: apptRow } = await supabase
+          .from('admission_appointments')
+          .select('student_birth_date')
+          .eq('id', data.appointment_id)
+          .single()
+        studentBirthDate = apptRow?.student_birth_date ?? null
+      } catch {
+        studentBirthDate = null
+      }
+    }
+
     let detalles = ''
     if (data.type === 'reagendar') {
       const gradeChangeRow = data.proposed_grade
@@ -143,6 +158,7 @@ export async function createPermissionRequest(data: {
       
       detalles = `
         <tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Alumno</td><td style="padding:6px 10px;">${data.student_name ?? '—'}</td></tr>
+        <tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Fecha de nacimiento</td><td style="padding:6px 10px;">${studentBirthDate ?? '—'}</td></tr>
         <tr><td style="padding:6px 10px;color:#64748b;font-weight:600;">Fecha actual</td><td style="padding:6px 10px;">${data.current_date ?? '—'} ${data.current_time ?? ''}</td></tr>
         ${dateChangeRow}${gradeChangeRow}`
     } else if (data.type === 'horario') {
@@ -229,7 +245,28 @@ export async function getPermissionRequests(level: AdmissionLevel) {
     .order('created_at', { ascending: false })
 
   if (error) throw new Error(error.message)
-  return (data ?? []) as PermissionRequest[]
+
+  const requests = (data ?? []) as PermissionRequest[]
+
+  // En solicitudes de reagendar/cambio de grado, traemos fecha de nacimiento desde admission_appointments.
+  const appointmentIds = requests
+    .map(r => r.appointment_id)
+    .filter((id): id is string => Boolean(id))
+
+  if (appointmentIds.length === 0) return requests
+
+  const { data: appts } = await supabase
+    .from('admission_appointments')
+    .select('id, student_birth_date')
+    .in('id', appointmentIds)
+
+  const birthById = new Map<string, string | null>()
+  ;(appts ?? []).forEach(a => birthById.set(a.id, a.student_birth_date ?? null))
+
+  return requests.map(r => {
+    if (!r.appointment_id) return r
+    return { ...r, student_birth_date: birthById.get(r.appointment_id) ?? undefined }
+  })
 }
 
 // ─── RESPONDER SOLICITUD ─────────────────────────────────────────────────

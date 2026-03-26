@@ -126,6 +126,7 @@ export interface PermissionRequest {
   // reagendar
   appointment_id?: string
   student_name?:   string
+  student_birth_date?: string
   appt_date?:      string
   appt_time?:      string
   proposed_date?:  string

@@ -95,6 +95,10 @@ function RequestCard({ req, onRespond }: { req: PermissionRequest; onRespond: ()
                 <span className="drdi-value">{req.student_name ?? '—'}</span>
               </div>
               <div className="director-req-detail-item">
+                <span className="drdi-label">Fecha de nacimiento</span>
+                <span className="drdi-value">{req.student_birth_date ?? '—'}</span>
+              </div>
+              <div className="director-req-detail-item">
                 <span className="drdi-label">Cita actual</span>
                 <span className="drdi-value">{formatDate(req.appt_date)} · {req.appt_time ?? '—'}</span>
               </div>
