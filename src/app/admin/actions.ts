@@ -131,7 +131,14 @@ export async function searchAdmissionAppointments(params: {
 
 export async function updateAppointment(
   id: string,
-  updates: { appointment_date?: string; appointment_time?: string; status?: string; notes?: string }
+  updates: {
+    appointment_date?: string
+    appointment_time?: string
+    status?: string
+    notes?: string
+    // Cambio directo de ciclo escolar (sin autorización)
+    school_cycle?: string | null
+  }
 ) {
   const supabase = createAdminClient()
 
@@ -254,7 +261,9 @@ export async function completeAdmissionAndCreateAlumno(appointmentId: string): P
     }
 
     // Convertir ciclo "2025-2026" → "22", "2026-2027" → "23" (año final - 2004)
-    const rawCiclo = expediente.ciclo_escolar || appointment.school_cycle || ''
+    // Priorizamos el ciclo editable en admin (appointment.school_cycle) para que el cambio
+    // de las psicólogas se refleje sin pedir autorización.
+    const rawCiclo = appointment.school_cycle || expediente.ciclo_escolar || ''
     const parsedCiclo = (() => {
       const parts = rawCiclo.split('-')
       if (parts.length >= 2) {

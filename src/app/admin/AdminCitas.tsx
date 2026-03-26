@@ -195,6 +195,15 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
     }
   }
 
+  const updateSchoolCycle = async (id: string, school_cycle: string) => {
+    try {
+      await updateAppointment(id, { school_cycle })
+      router.refresh()
+    } catch (e) {
+      setModal({ type: 'error', message: (e as Error).message })
+    }
+  }
+
   const enviarSolicitudReagendar = async (appointment: AdmissionAppointment) => {
     setSendingSol(true)
     try {
@@ -524,7 +533,20 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
                     </td>
                     <td style={{ whiteSpace: 'nowrap' }}>{a.appointment_time}</td>
                     <td style={{ whiteSpace: 'nowrap' }}>{LEVEL_LABELS[a.level] || a.level}</td>
-                    <td style={{ whiteSpace: 'nowrap', fontSize: '0.82rem' }}>{a.school_cycle || '—'}</td>
+                    <td style={{ whiteSpace: 'nowrap', fontSize: '0.82rem' }}>
+                      <select
+                        value={a.school_cycle || ''}
+                        onChange={(e) => updateSchoolCycle(a.id, e.target.value)}
+                        disabled={a.status === 'completed'}
+                        className="admin-filter-select"
+                        style={{ minWidth: '120px' }}
+                        aria-label="Cambiar ciclo escolar"
+                      >
+                        <option value="">{a.school_cycle ? a.school_cycle : '—'}</option>
+                        <option value="2025-2026">2025-2026</option>
+                        <option value="2026-2027">2026-2027</option>
+                      </select>
+                    </td>
                     <td>
                       <strong>{`${a.student_name} ${a.student_last_name_p || ''} ${a.student_last_name_m || ''}`.trim()}</strong>
                       {a.origin === 'legacy' && (
