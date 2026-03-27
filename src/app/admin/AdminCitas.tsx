@@ -546,9 +546,8 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
                           if (!v) return
                           updateSchoolCycle(a.id, v)
                         }}
-                        disabled={a.status === 'completed'}
                         className="admin-filter-select"
-                        style={{ minWidth: '120px' }}
+                        style={{ minWidth: '120px', position: 'relative', zIndex: 3, pointerEvents: 'auto' }}
                         aria-label="Cambiar ciclo escolar"
                       >
                         <option value="2025-2026">2025-2026</option>
