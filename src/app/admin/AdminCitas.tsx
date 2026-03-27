@@ -68,6 +68,7 @@ type ReqStatus = 'pendiente' | 'aprobada' | 'rechazada'
 type ModalState =
   | { type: 'solicitar-reagendar'; appointment: AdmissionAppointment }
   | { type: 'confirm-aprobar';     appointment: AdmissionAppointment }
+  | { type: 'editar-nombre';       appointment: AdmissionAppointment }
   | { type: 'result';  ok: boolean; message: string }
   | { type: 'error';   message: string }
   | null
@@ -116,6 +117,9 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
   const [calScheduleTimes,  setCalScheduleTimes]  = useState<string[]>([])
   const [calBookedSlots,    setCalBookedSlots]    = useState<string[]>([])
   const [calLoadingSlots,   setCalLoadingSlots]   = useState(false)
+  const [editStudentName,   setEditStudentName]   = useState('')
+  const [editLastNameP,     setEditLastNameP]     = useState('')
+  const [editLastNameM,     setEditLastNameM]     = useState('')
 
   const filtered = appointments.filter(a => {
     if (filterLevel  && a.level  !== filterLevel)  return false
@@ -442,6 +446,65 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
         </div>
       )}
 
+      {/* ── MODAL EDITAR NOMBRE/APELLIDOS ────────────────────────── */}
+      {modal?.type === 'editar-nombre' && (
+        <div className="modal-overlay" onClick={() => setModal(null)}>
+          <div className="modal-box" style={{ maxWidth: '520px' }} onClick={e => e.stopPropagation()}>
+            <div className="modal-header modal-header-confirm" style={{ background: 'var(--adm-blue)' }}>
+              <span className="modal-header-icon" aria-hidden="true">✏️</span>
+              <h3>Editar nombre del alumno</h3>
+            </div>
+            <div className="modal-body">
+              <div style={{ display: 'grid', gap: '0.8rem' }}>
+                <div>
+                  <label className="modal-field-label">Nombre(s)</label>
+                  <input
+                    type="text"
+                    value={editStudentName}
+                    onChange={(e) => setEditStudentName(e.target.value)}
+                    className="modal-time-input"
+                    placeholder="Ej. María Fernanda"
+                  />
+                </div>
+                <div>
+                  <label className="modal-field-label">Apellido paterno</label>
+                  <input
+                    type="text"
+                    value={editLastNameP}
+                    onChange={(e) => setEditLastNameP(e.target.value)}
+                    className="modal-time-input"
+                    placeholder="Ej. López"
+                  />
+                </div>
+                <div>
+                  <label className="modal-field-label">Apellido materno (opcional)</label>
+                  <input
+                    type="text"
+                    value={editLastNameM}
+                    onChange={(e) => setEditLastNameM(e.target.value)}
+                    className="modal-time-input"
+                    placeholder="Ej. Hernández"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={() => setModal(null)}>Cancelar</button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={async () => {
+                  await updateStudentName(modal.appointment, editStudentName, editLastNameP, editLastNameM)
+                }}
+                disabled={!editStudentName.trim()}
+              >
+                Guardar cambios
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── MODAL RESULTADO ─────────────────────────────────────── */}
       {modal?.type === 'result' && (
         <div className="modal-overlay" onClick={() => { setModal(null); if (modal.ok) window.location.reload() }}>
@@ -591,17 +654,11 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
                         </strong>
                         <button
                           type="button"
-                          onClick={async () => {
-                            const currentFullName = `${a.student_name} ${a.student_last_name_p || ''} ${a.student_last_name_m || ''}`.trim()
-                            const newStudentName = window.prompt('Nombre(s) del alumno:', a.student_name || '')
-                            if (newStudentName === null) return
-                            const newLastNameP = window.prompt('Apellido paterno:', a.student_last_name_p || '')
-                            if (newLastNameP === null) return
-                            const newLastNameM = window.prompt('Apellido materno (opcional):', a.student_last_name_m || '')
-                            if (newLastNameM === null) return
-                            const nextFullName = `${newStudentName} ${newLastNameP} ${newLastNameM}`.trim()
-                            if (nextFullName === currentFullName) return
-                            await updateStudentName(a, newStudentName, newLastNameP, newLastNameM)
+                          onClick={() => {
+                            setEditStudentName(a.student_name || '')
+                            setEditLastNameP(a.student_last_name_p || '')
+                            setEditLastNameM(a.student_last_name_m || '')
+                            setModal({ type: 'editar-nombre', appointment: a })
                           }}
                           title="Editar nombre del alumno"
                           aria-label="Editar nombre del alumno"
