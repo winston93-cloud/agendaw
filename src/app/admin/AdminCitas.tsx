@@ -680,10 +680,6 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
                         <span className="badge-legacy" style={{ marginLeft: '0.4rem' }}>Sistema anterior</span>
                       )}
                       <small>{a.grade_level} · {a.student_age}</small>
-                      <small style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {a.parent_email}
-                      </small>
-                      <small>{a.parent_phone}</small>
                     </td>
                     <td style={{ overflow: 'hidden' }}>
                       <span style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
