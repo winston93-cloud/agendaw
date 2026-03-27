@@ -209,6 +209,36 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
     }
   }
 
+  const updateStudentName = async (
+    appointment: AdmissionAppointment,
+    studentName: string,
+    lastNameP: string,
+    lastNameM: string
+  ) => {
+    try {
+      const cleanName = studentName.trim()
+      const cleanLastNameP = lastNameP.trim()
+      const cleanLastNameM = lastNameM.trim()
+      if (!cleanName) {
+        setModal({ type: 'error', message: 'El nombre del alumno es obligatorio.' })
+        return
+      }
+      await updateAppointment(appointment.id, {
+        student_name: cleanName,
+        student_last_name_p: cleanLastNameP || null,
+        student_last_name_m: cleanLastNameM || null,
+      })
+      setModal({
+        type: 'result',
+        ok: true,
+        message: '✅ Nombre del alumno actualizado correctamente.',
+      })
+      router.refresh()
+    } catch (e) {
+      setModal({ type: 'error', message: (e as Error).message })
+    }
+  }
+
   const enviarSolicitudReagendar = async (appointment: AdmissionAppointment) => {
     setSendingSol(true)
     try {
@@ -506,7 +536,7 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
               <col style={{ width: '140px' }} />  {/* Fecha examen */}
               <col style={{ width: '65px' }} />   {/* Hora */}
               <col style={{ width: '80px' }} />   {/* Nivel */}
-              <col style={{ width: '90px' }} />   {/* Ciclo */}
+              <col style={{ width: '100px' }} />  {/* Ciclo */}
               <col style={{ width: '170px' }} />  {/* Aspirante */}
               <col style={{ width: '175px' }} />  {/* Tutor */}
               <col style={{ width: '145px' }} />  {/* Estado */}
@@ -547,7 +577,7 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
                           updateSchoolCycle(a.id, v)
                         }}
                         className="admin-filter-select"
-                        style={{ minWidth: '120px', position: 'relative', zIndex: 3, pointerEvents: 'auto' }}
+                        style={{ width: '96px', minWidth: '96px', fontSize: '0.78rem', position: 'relative', zIndex: 3, pointerEvents: 'auto' }}
                         aria-label="Cambiar ciclo escolar"
                       >
                         <option value="2025-2026">2025-2026</option>
@@ -555,11 +585,48 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
                       </select>
                     </td>
                     <td>
-                      <strong>{`${a.student_name} ${a.student_last_name_p || ''} ${a.student_last_name_m || ''}`.trim()}</strong>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <strong style={{ lineHeight: '1.25' }}>
+                          {`${a.student_name} ${a.student_last_name_p || ''} ${a.student_last_name_m || ''}`.trim()}
+                        </strong>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const currentFullName = `${a.student_name} ${a.student_last_name_p || ''} ${a.student_last_name_m || ''}`.trim()
+                            const newStudentName = window.prompt('Nombre(s) del alumno:', a.student_name || '')
+                            if (newStudentName === null) return
+                            const newLastNameP = window.prompt('Apellido paterno:', a.student_last_name_p || '')
+                            if (newLastNameP === null) return
+                            const newLastNameM = window.prompt('Apellido materno (opcional):', a.student_last_name_m || '')
+                            if (newLastNameM === null) return
+                            const nextFullName = `${newStudentName} ${newLastNameP} ${newLastNameM}`.trim()
+                            if (nextFullName === currentFullName) return
+                            await updateStudentName(a, newStudentName, newLastNameP, newLastNameM)
+                          }}
+                          title="Editar nombre del alumno"
+                          aria-label="Editar nombre del alumno"
+                          style={{
+                            border: '1px solid var(--adm-border)',
+                            background: 'var(--adm-surface-alt)',
+                            color: 'var(--adm-text)',
+                            borderRadius: '4px',
+                            fontSize: '0.72rem',
+                            lineHeight: 1,
+                            padding: '0.18rem 0.32rem',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          ✏️
+                        </button>
+                      </div>
                       {a.origin === 'legacy' && (
                         <span className="badge-legacy" style={{ marginLeft: '0.4rem' }}>Sistema anterior</span>
                       )}
-                      <br /><small>{a.grade_level} · {a.student_age}</small>
+                      <small>{a.grade_level} · {a.student_age}</small>
+                      <small style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {a.parent_email}
+                      </small>
+                      <small>{a.parent_phone}</small>
                     </td>
                     <td style={{ overflow: 'hidden' }}>
                       <span style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

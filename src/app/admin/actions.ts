@@ -138,6 +138,9 @@ export async function updateAppointment(
     notes?: string
     // Cambio directo de ciclo escolar (sin autorización)
     school_cycle?: string | null
+    student_name?: string
+    student_last_name_p?: string | null
+    student_last_name_m?: string | null
   }
 ) {
   const supabase = createAdminClient()
