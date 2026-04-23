@@ -5988,6 +5988,25 @@ body {
 }
 .admin-btn-aprobar    { background: var(--adm-success); color: #fff; }
 .admin-btn-expediente { background: var(--adm-accent);  color: #fff; }
+.admin-btn-pdf {
+  background: #0f172a;
+  color: #fff;
+  border: 1px solid color-mix(in srgb, #ffffff 18%, transparent);
+}
+.admin-btn-pdf:hover {
+  background: color-mix(in srgb, #0f172a 88%, #000);
+}
+
+/* "Ver expediente" + "PDF" sin empalmarse */
+.admin-expediente-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.admin-expediente-row .admin-btn-action {
+  flex: 1 1 auto;
+  min-width: 110px;
+}
 
 /* Indicadores de estado de solicitud */
 .req-badge {

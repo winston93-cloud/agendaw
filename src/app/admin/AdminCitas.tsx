@@ -748,11 +748,24 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
                         )}
 
                         {expedientesMap[a.id] && (<>
-                          <button type="button"
-                            className="admin-btn-action admin-btn-expediente"
-                            onClick={() => window.open(`/expediente_inicial/ver?cita=${a.id}`, '_blank')}>
-                            Ver expediente
-                          </button>
+                          <div className="admin-expediente-row">
+                            <button
+                              type="button"
+                              className="admin-btn-action admin-btn-expediente"
+                              onClick={() => window.open(`/expediente_inicial/ver?cita=${a.id}`, '_blank')}
+                            >
+                              Ver expediente
+                            </button>
+                            <button
+                              type="button"
+                              className="admin-btn-action admin-btn-pdf"
+                              onClick={() => window.open(`/expediente_inicial/pdf?cita=${a.id}`, '_blank')}
+                              aria-label="Generar PDF del expediente inicial"
+                              title="Generar PDF"
+                            >
+                              PDF
+                            </button>
+                          </div>
                           {a.status !== 'completed' && a.origin !== 'legacy' && (
                             <button type="button"
                               className="admin-btn-action admin-btn-aprobar"
