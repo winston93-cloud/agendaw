@@ -90,15 +90,24 @@ export default function ExpedientePdfPage() {
           doc.setFillColor(15, 23, 42) // slate-900
           doc.rect(0, 0, pageW, 92, 'F')
 
+          const gutter = 18
+          const leftMaxW = Math.floor(pageW * 0.62) - margin // reserva espacio al nombre
+          const rightMaxW = pageW - margin - (margin + leftMaxW) - gutter
+
           doc.setTextColor(255, 255, 255)
           doc.setFont('helvetica', 'bold')
           doc.setFontSize(16)
-          doc.text('Instituto Educativo Winston / Winston Churchill', margin, 34)
+          const instLines = doc.splitTextToSize('Instituto Educativo Winston / Winston Churchill', Math.max(220, leftMaxW))
+          doc.text(instLines, margin, 32)
 
           doc.setFont('helvetica', 'normal')
           doc.setFontSize(11)
           doc.setTextColor(226, 232, 240) // slate-200
-          doc.text(isContinuation ? 'Expediente Inicial (continuación)' : 'Expediente Inicial del Aspirante', margin, 56)
+          doc.text(
+            isContinuation ? 'Expediente Inicial (continuación)' : 'Expediente Inicial del Aspirante',
+            margin,
+            62
+          )
 
           // Meta
           const appt = payload.appointment
@@ -106,10 +115,20 @@ export default function ExpedientePdfPage() {
           const nombre = buildNombreCompleto(appt, exp)
 
           const rightX = pageW - margin
+          // Nombre: se envuelve para no empalmarse con el título institucional.
+          // Ajuste dinámico a 1-2 líneas usando rightMaxW.
           doc.setFont('helvetica', 'bold')
-          doc.setFontSize(12)
           doc.setTextColor(255, 255, 255)
-          doc.text(nombre, rightX, 34, { align: 'right' })
+          let nameSize = 12
+          doc.setFontSize(nameSize)
+          let nameLines = doc.splitTextToSize(nombre, Math.max(160, rightMaxW))
+          while (nameLines.length > 2 && nameSize > 9) {
+            nameSize -= 1
+            doc.setFontSize(nameSize)
+            nameLines = doc.splitTextToSize(nombre, Math.max(160, rightMaxW))
+          }
+          if (nameLines.length > 2) nameLines = nameLines.slice(0, 2)
+          doc.text(nameLines, rightX, 28, { align: 'right' })
 
           doc.setFont('helvetica', 'normal')
           doc.setFontSize(10)
@@ -117,8 +136,9 @@ export default function ExpedientePdfPage() {
           const citaStr = appt?.appointment_date
             ? `${formatDateISO(appt.appointment_date)} · ${safe(appt.appointment_time)}`
             : 'Cita: —'
-          doc.text(citaStr, rightX, 52, { align: 'right' })
-          doc.text(`ID cita: ${cita}`, rightX, 68, { align: 'right' })
+          const metaY = nameLines.length > 1 ? 58 : 48
+          doc.text(citaStr, rightX, metaY, { align: 'right' })
+          doc.text(`ID cita: ${cita}`, rightX, metaY + 16, { align: 'right' })
         }
 
         const drawSectionTitle = (title: string) => {
