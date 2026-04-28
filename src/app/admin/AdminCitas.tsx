@@ -251,7 +251,7 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
         primaria: 'primaria', secundaria: 'secundaria',
       }
       const studentName = `${appointment.student_name} ${appointment.student_last_name_p ?? ''} ${appointment.student_last_name_m ?? ''}`.trim()
-      await createPermissionRequest({
+      const res = await createPermissionRequest({
         type:           'reagendar',
         level:          levelMap[appointment.level] ?? 'primaria',
         appointment_id: appointment.id,
@@ -263,6 +263,7 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
         proposed_grade: solicitudGrade || undefined,
         psych_message:  solicitudMsg.trim() || undefined,
       })
+      if (!res?.ok) throw new Error(res?.error || 'No se pudo enviar la solicitud.')
       const k = `reagendar:${appointment.id}`
       setStatusMap(prev => ({ ...prev, [k]: 'pendiente' }))
       setModal({ type: 'result', ok: true, message: '✅ Solicitud enviada a la directora. Recibirás respuesta por correo.' })

@@ -68,7 +68,7 @@ export default function AdminHorarios({ schedules }: { schedules: AdmissionSched
     if (!modal) return
     setSending(true)
     try {
-      await createPermissionRequest({
+      const res = await createPermissionRequest({
         type:  'horario',
         level: modal.level,
         horario_action:   modal.action,
@@ -76,6 +76,7 @@ export default function AdminHorarios({ schedules }: { schedules: AdmissionSched
         horario_time_old: modal.action === 'eliminar' ? modal.time : undefined,
         psych_message:    msg.trim() || undefined,
       })
+      if (!res?.ok) throw new Error(res?.error || 'No se pudo enviar la solicitud.')
       const k = reqKey(modal.level, modal.action, modal.time)
       setStatusMap(prev => ({ ...prev, [k]: 'pendiente' }))
       setModal(null)

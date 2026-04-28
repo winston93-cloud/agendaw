@@ -234,7 +234,7 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
     setSending(true)
     try {
       const apt = results.find(r => r.id === reagendarId) ?? selected
-      await createPermissionRequest({
+      const res = await createPermissionRequest({
         type:           'reagendar',
         level:          apiLevel(apt.level) as 'maternal_kinder' | 'primaria' | 'secundaria',
         appointment_id: apt.id,
@@ -246,6 +246,7 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
         proposed_grade: editGrade || undefined,
         psych_message:  solMsg.trim() || undefined,
       })
+      if (!res?.ok) throw new Error(res?.error || 'No se pudo enviar la solicitud.')
       setStatusMap(prev => ({ ...prev, [apt.id]: 'pendiente' }))
       setShowModal(false)
       setReagendarId(null)

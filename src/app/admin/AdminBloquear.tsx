@@ -95,7 +95,7 @@ export default function AdminBloquear({
   const enviar = async () => {
     setSending(true)
     try {
-      await createPermissionRequest({
+      const res = await createPermissionRequest({
         type:            'bloqueo',
         level,
         bloqueo_date:    blockDate,
@@ -104,6 +104,7 @@ export default function AdminBloquear({
         bloqueo_reason:  reason.trim() || undefined,
         psych_message:   msg.trim() || undefined,
       })
+      if (!res?.ok) throw new Error(res?.error || 'No se pudo enviar la solicitud.')
       setStatusMap(prev => ({ ...prev, [currentKey]: 'pendiente' }))
       setShowModal(false)
       setMsg('')

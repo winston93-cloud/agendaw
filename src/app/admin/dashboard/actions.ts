@@ -83,67 +83,69 @@ export async function createPermissionRequest(data: {
   psych_message?: string
   requested_by?:  string
 }) {
-  const supabase = createAdminClient()
-
-  // Si no se pasó requested_by, obtenerlo de la sesión actual
-  let requestedBy = data.requested_by
-  if (!requestedBy) {
-    try {
-      requestedBy = await getUserRoleLabel()
-    } catch (error) {
-      console.error('[createPermissionRequest] Error getting user role:', error)
-      requestedBy = 'Sistema'
-    }
-  }
-
-  const { data: inserted, error } = await supabase
-    .from('permission_requests')
-    .insert([{
-      type:  data.type,
-      level: data.level,
-      appointment_id:  data.appointment_id,
-      student_name:    data.student_name,
-      appt_date:       data.current_date,
-      appt_time:       data.current_time,
-      proposed_date:   data.proposed_date,
-      proposed_time:   data.proposed_time,
-      proposed_grade:  data.proposed_grade,
-      horario_action:  data.horario_action,
-      horario_time_new: data.horario_time_new,
-      horario_time_old: data.horario_time_old,
-      bloqueo_date:     data.bloqueo_date,
-      bloqueo_date_end: data.bloqueo_date_end,
-      bloqueo_time:     data.bloqueo_time,
-      bloqueo_reason:   data.bloqueo_reason,
-      psych_message:    data.psych_message,
-      requested_by:     requestedBy,
-    }])
-    .select()
-    .single()
-
-  if (error) throw new Error(error.message)
-
-  // Notificar a la directora por correo
   try {
-    const trans   = makeTransporter()
-    const destino = DIRECTOR_EMAILS[data.level]
-    const nivel   = LEVEL_LABELS[data.level]
-    const tipo    = TYPE_LABELS[data.type]
+    const supabase = createAdminClient()
 
-    // Para solicitudes de reagendación/cambio de grado, mostrar fecha de nacimiento del alumno.
-    let studentBirthDate: string | null = null
-    if (data.type === 'reagendar' && data.appointment_id) {
+    // Si no se pasó requested_by, obtenerlo de la sesión actual
+    let requestedBy = data.requested_by
+    if (!requestedBy) {
       try {
-        const { data: apptRow } = await supabase
-          .from('admission_appointments')
-          .select('student_birth_date')
-          .eq('id', data.appointment_id)
-          .single()
-        studentBirthDate = apptRow?.student_birth_date ?? null
-      } catch {
-        studentBirthDate = null
+        requestedBy = await getUserRoleLabel()
+      } catch (error) {
+        console.error('[createPermissionRequest] Error getting user role:', error)
+        requestedBy = 'Sistema'
       }
     }
+
+    const { data: inserted, error } = await supabase
+      .from('permission_requests')
+      .insert([{
+        type:  data.type,
+        level: data.level,
+        appointment_id:  data.appointment_id,
+        student_name:    data.student_name,
+        appt_date:       data.current_date,
+        appt_time:       data.current_time,
+        proposed_date:   data.proposed_date,
+        proposed_time:   data.proposed_time,
+        proposed_grade:  data.proposed_grade,
+        horario_action:  data.horario_action,
+        horario_time_new: data.horario_time_new,
+        horario_time_old: data.horario_time_old,
+        bloqueo_date:     data.bloqueo_date,
+        bloqueo_date_end: data.bloqueo_date_end,
+        bloqueo_time:     data.bloqueo_time,
+        bloqueo_reason:   data.bloqueo_reason,
+        psych_message:    data.psych_message,
+        requested_by:     requestedBy,
+      }])
+      .select()
+      .single()
+
+    if (error) return { ok: false as const, error: error.message }
+    if (!inserted?.id) return { ok: false as const, error: 'No se pudo crear la solicitud.' }
+
+    // Notificar a la directora por correo
+    try {
+      const trans   = makeTransporter()
+      const destino = DIRECTOR_EMAILS[data.level]
+      const nivel   = LEVEL_LABELS[data.level]
+      const tipo    = TYPE_LABELS[data.type]
+
+      // Para solicitudes de reagendación/cambio de grado, mostrar fecha de nacimiento del alumno.
+      let studentBirthDate: string | null = null
+      if (data.type === 'reagendar' && data.appointment_id) {
+        try {
+          const { data: apptRow } = await supabase
+            .from('admission_appointments')
+            .select('student_birth_date')
+            .eq('id', data.appointment_id)
+            .single()
+          studentBirthDate = apptRow?.student_birth_date ?? null
+        } catch {
+          studentBirthDate = null
+        }
+      }
 
     let detalles = ''
     if (data.type === 'reagendar') {
@@ -207,20 +209,25 @@ export async function createPermissionRequest(data: {
 </body>
 </html>`
 
-    await trans.sendMail({
-      from:    `"Sistema de Admisión" <${process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx'}>`,
-      to:      destino,
-      cc:      process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx',
-      subject: `[Solicitud de Autorización] ${tipo} — ${nivel}`,
-      html,
-    })
-  } catch (emailErr) {
-    console.error('Error enviando email a directora:', emailErr)
-    // No interrumpir el flujo si el email falla
-  }
+      await trans.sendMail({
+        from:    `"Sistema de Admisión" <${process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx'}>`,
+        to:      destino,
+        cc:      process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx',
+        subject: `[Solicitud de Autorización] ${tipo} — ${nivel}`,
+        html,
+      })
+    } catch (emailErr) {
+      console.error('Error enviando email a directora:', emailErr)
+      // No interrumpir el flujo si el email falla
+    }
 
-  revalidatePath('/admin/dashboard')
-  return { ok: true, id: inserted.id }
+    revalidatePath('/admin/dashboard')
+    return { ok: true as const, id: inserted.id }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Error inesperado creando la solicitud.'
+    console.error('[createPermissionRequest] Fatal:', e)
+    return { ok: false as const, error: msg }
+  }
 }
 
 // ─── OBTENER SOLICITUDES (para el panel psicólogas) ──────────────────────
