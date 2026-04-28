@@ -11,6 +11,8 @@ import {
   buildAdmisionEventDescription,
 } from '@/lib/googleCalendar'
 
+const PERMISSION_TABLE = 'admission_permission_requests'
+
 const DIRECTOR_EMAILS: Record<AdmissionLevel, string> = {
   maternal_kinder: 'direccion.kinder@winston93.edu.mx',
   primaria:        'direccion.primaria@winston93.edu.mx',
@@ -98,7 +100,7 @@ export async function createPermissionRequest(data: {
     }
 
     const { data: inserted, error } = await supabase
-      .from('permission_requests')
+      .from(PERMISSION_TABLE)
       .insert([{
         type:  data.type,
         level: data.level,
@@ -235,7 +237,7 @@ export async function getAllRecentRequests() {
   const supabase = createAdminClient()
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
   const { data } = await supabase
-    .from('permission_requests')
+    .from(PERMISSION_TABLE)
     .select('*')
     .gte('created_at', since)
     .order('created_at', { ascending: false })
@@ -246,7 +248,7 @@ export async function getAllRecentRequests() {
 export async function getPermissionRequests(level: AdmissionLevel) {
   const supabase = createAdminClient()
   const { data, error } = await supabase
-    .from('permission_requests')
+    .from(PERMISSION_TABLE)
     .select('*')
     .eq('level', level)
     .order('created_at', { ascending: false })
@@ -286,7 +288,7 @@ export async function respondPermissionRequest(
 
   // 1. Obtener la solicitud
   const { data: req, error: fetchErr } = await supabase
-    .from('permission_requests')
+    .from(PERMISSION_TABLE)
     .select('*')
     .eq('id', id)
     .single()
@@ -295,7 +297,7 @@ export async function respondPermissionRequest(
 
   // 2. Actualizar estado
   const { error: updateErr } = await supabase
-    .from('permission_requests')
+    .from(PERMISSION_TABLE)
     .update({ status: decision, director_notes, responded_at: new Date().toISOString() })
     .eq('id', id)
 
