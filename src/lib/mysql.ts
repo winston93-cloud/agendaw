@@ -8,6 +8,17 @@ import mysql from 'mysql2/promise'
 
 let pool: mysql.Pool | null = null
 
+function normalizeAlumnoText(input: string): string {
+  // Requisito legacy (PHPMyAdmin / tabla alumno): MAYÚSCULAS y sin acentos/diacríticos.
+  // También normalizamos espacios para evitar duplicados por diferencias de formato.
+  return (input ?? '')
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // diacríticos
+    .replace(/\s+/g, ' ')
+    .toUpperCase()
+}
+
 export function getMySQLPool() {
   if (!pool) {
     const host = process.env.MYSQL_HOST
@@ -70,9 +81,9 @@ export async function createAlumnoInMySQL(data: AlumnoData): Promise<number> {
 
   const insertData = {
     alumno_ref,
-    alumno_app: data.alumno_app || '',
-    alumno_apm: data.alumno_apm || '',
-    alumno_nombre: data.alumno_nombre || '',
+    alumno_app: normalizeAlumnoText(data.alumno_app || ''),
+    alumno_apm: normalizeAlumnoText(data.alumno_apm || ''),
+    alumno_nombre: normalizeAlumnoText(data.alumno_nombre || ''),
     alumno_nivel: data.alumno_nivel || '',
     alumno_grado: data.alumno_grado || '',
     alumno_grupo: data.alumno_grupo || '',
@@ -94,9 +105,11 @@ export async function createAlumnoInMySQL(data: AlumnoData): Promise<number> {
  */
 export async function checkAlumnoExists(nombre: string, apellido: string): Promise<number | null> {
   const pool = getMySQLPool()
+  const nombreNorm = normalizeAlumnoText(nombre || '')
+  const apellidoNorm = normalizeAlumnoText(apellido || '')
   const [rows] = await pool.query<mysql.RowDataPacket[]>(
     'SELECT alumno_ref FROM alumno WHERE alumno_nombre = ? AND alumno_app = ? LIMIT 1',
-    [nombre, apellido]
+    [nombreNorm, apellidoNorm]
   )
   return rows[0]?.alumno_ref || null
 }

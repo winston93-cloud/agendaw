@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import type { AdmissionLevel } from '@/types/database'
 import { createAlumnoInMySQL, checkAlumnoExists as checkAlumnoExistsInMySQL, type AlumnoData } from '@/lib/mysql'
 import { sendRecorridoConfirmationToParent, sendRecorridoNotificationToDirector, sendRecorridoReagendacionToParent, sendRecorridoReagendacionToDirector } from '@/lib/email'
+import nodemailer from 'nodemailer'
 import {
   createCalendarEvent,
   updateCalendarEvent,
@@ -13,6 +14,65 @@ import {
   getAllCalendarIdsForLevel,
   buildRecorridoEventDescription,
 } from '@/lib/googleCalendar'
+
+const INTERNAL_APPROVAL_EMAIL = 'sistemas.desarrollo@winston93.edu.mx'
+
+function makeInternalTransporter() {
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx',
+      pass: process.env.MAIL_PASS,
+    },
+  })
+}
+
+async function notifyInternalAlumnoApproved(input: {
+  alumno_ref: number
+  alumnoNombre: string
+  alumnoApp: string
+  alumnoApm: string
+  nivel: string
+  grado: string
+  ciclo: string
+  appointmentId: string
+  appointmentDate?: string | null
+  appointmentTime?: string | null
+}) {
+  // Notificación 100% interna: no afecta UX si falla.
+  try {
+    const trans = makeInternalTransporter()
+    const fullName = [input.alumnoNombre, input.alumnoApp, input.alumnoApm].filter(Boolean).join(' ').trim()
+    const when = [input.appointmentDate, input.appointmentTime].filter(Boolean).join(' · ')
+    const subject = `[Admisión] Aprobado y creado en alumno — ref ${input.alumno_ref}`
+    const html = `<!doctype html>
+<html>
+<body style="font-family:Arial,sans-serif;color:#0f172a;max-width:720px;margin:0 auto;padding:16px;">
+  <h2 style="margin:0 0 10px;">Aprobación de ingreso (interno)</h2>
+  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;">
+    <p style="margin:0 0 8px;"><strong>Alumno:</strong> ${fullName || '—'}</p>
+    <p style="margin:0 0 8px;"><strong>alumno_ref:</strong> ${input.alumno_ref}</p>
+    <p style="margin:0 0 8px;"><strong>Nivel / grado:</strong> ${input.nivel || '—'} / ${input.grado || '—'}</p>
+    <p style="margin:0 0 8px;"><strong>Ciclo:</strong> ${input.ciclo || '—'}</p>
+    <p style="margin:0 0 8px;"><strong>Cita:</strong> ${when || '—'}</p>
+    <p style="margin:0;"><strong>Appointment ID:</strong> ${input.appointmentId}</p>
+  </div>
+  <p style="margin:12px 0 0;color:#64748b;font-size:12px;">
+    Enviado automáticamente por AgendaW. (Sin notificación al usuario final)
+  </p>
+</body>
+</html>`
+
+    await trans.sendMail({
+      from: `"AgendaW (interno)" <${process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx'}>`,
+      to: INTERNAL_APPROVAL_EMAIL,
+      subject,
+      html,
+    })
+  } catch (e) {
+    console.warn('[notifyInternalAlumnoApproved] Error enviando correo interno:', e)
+  }
+}
 
 // Verificar disponibilidad completa
 export async function getFullyBookedDates(level: AdmissionLevel, excludeAppointmentId?: string): Promise<string[]> {
@@ -310,6 +370,20 @@ export async function completeAdmissionAndCreateAlumno(appointmentId: string): P
       })
       .eq('id', appointmentId)
 
+    // Notificación interna (no interrumpe el flujo)
+    await notifyInternalAlumnoApproved({
+      alumno_ref,
+      alumnoNombre: expediente.nombre_alumno || appointment.student_name || '',
+      alumnoApp: expediente.apellido_paterno_alumno || appointment.student_last_name_p || '',
+      alumnoApm: expediente.apellido_materno_alumno || appointment.student_last_name_m || '',
+      nivel: appointment.level || '',
+      grado: appointment.grade_level || '',
+      ciclo: appointment.school_cycle || expediente.ciclo_escolar || '',
+      appointmentId,
+      appointmentDate: appointment.appointment_date ?? null,
+      appointmentTime: appointment.appointment_time ?? null,
+    })
+
     return {
       success: true,
       alumno_ref,
@@ -392,6 +466,20 @@ export async function completeAdmissionLegacy(appointmentId: string): Promise<{
       .from('admission_appointments')
       .update({ status: 'completed', alumno_ref, updated_at: new Date().toISOString() })
       .eq('id', appointmentId)
+
+    // Notificación interna (no interrumpe el flujo)
+    await notifyInternalAlumnoApproved({
+      alumno_ref,
+      alumnoNombre: appointment.student_name || '',
+      alumnoApp: appointment.student_last_name_p || '',
+      alumnoApm: appointment.student_last_name_m || '',
+      nivel: appointment.level || '',
+      grado: appointment.grade_level || '',
+      ciclo: appointment.school_cycle || '',
+      appointmentId,
+      appointmentDate: appointment.appointment_date ?? null,
+      appointmentTime: appointment.appointment_time ?? null,
+    })
 
     return { success: true, alumno_ref, message: `✓ Alta exitosa. Alumno creado con referencia: ${alumno_ref}` }
   } catch (error) {
