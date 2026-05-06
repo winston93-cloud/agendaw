@@ -515,6 +515,48 @@ export async function checkExpedienteExists(appointmentId: string): Promise<bool
   return !!data
 }
 
+export async function createManualExpedienteForAppointment(appointmentId: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const supabase = createAdminClient()
+
+    // Si ya existe, no hacer nada (idempotente)
+    const { data: existing } = await supabase
+      .from('expediente_inicial')
+      .select('id')
+      .eq('appointment_id', appointmentId)
+      .maybeSingle()
+    if (existing?.id) return { ok: true }
+
+    const { data: appt, error: apptErr } = await supabase
+      .from('admission_appointments')
+      .select('*')
+      .eq('id', appointmentId)
+      .single()
+
+    if (apptErr || !appt) return { ok: false, error: apptErr?.message ?? 'No se encontró la cita' }
+
+    const row = {
+      appointment_id: appointmentId,
+      nivel: appt.level ?? null,
+      grado: appt.grade_level ?? null,
+      ciclo_escolar: appt.school_cycle ?? null,
+      nombre_alumno: appt.student_name ?? null,
+      apellido_paterno_alumno: appt.student_last_name_p ?? null,
+      apellido_materno_alumno: appt.student_last_name_m ?? null,
+      telefono_principal: appt.parent_phone ?? null,
+      updated_at: new Date().toISOString(),
+    }
+
+    const { error } = await supabase.from('expediente_inicial').insert(row)
+    if (error) return { ok: false, error: error.message }
+
+    revalidatePath('/admin')
+    return { ok: true }
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : 'Error creando expediente manual' }
+  }
+}
+
 export async function getBlockedDates(level?: AdmissionLevel) {
   let supabase
   try {

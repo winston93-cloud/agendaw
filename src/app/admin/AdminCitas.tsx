@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { updateAppointment, completeAdmissionAndCreateAlumno, completeAdmissionLegacy, checkExpedientesBatch, getFullyBookedDates } from './actions'
+import { updateAppointment, completeAdmissionAndCreateAlumno, completeAdmissionLegacy, checkExpedientesBatch, getFullyBookedDates, createManualExpedienteForAppointment } from './actions'
 import { createPermissionRequest, getAllRecentRequests } from './dashboard/actions'
 import ExamDateCalendar from '@/components/ExamDateCalendar'
 import type { AdmissionAppointment, PermissionRequest } from '@/types/database'
@@ -745,6 +745,24 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
                               else { alert('Error: ' + res.message) }
                             }}>
                             Aprobar ingreso
+                          </button>
+                        )}
+
+                        {!expedientesMap[a.id] && a.status !== 'completed' && a.origin !== 'legacy' && (
+                          <button
+                            type="button"
+                            className="admin-btn-action admin-btn-expediente"
+                            onClick={async () => {
+                              if (!confirm(`¿Marcar expediente impreso para ${a.student_name}? Esto habilitará "Aprobar ingreso".`)) return
+                              const res = await createManualExpedienteForAppointment(a.id)
+                              if (!res.ok) { alert('Error: ' + (res.error || 'No se pudo crear el expediente')) }
+                              else {
+                                setExpedientesMap(prev => ({ ...prev, [a.id]: true }))
+                                router.refresh()
+                              }
+                            }}
+                          >
+                            Marcar expediente impreso
                           </button>
                         )}
 
