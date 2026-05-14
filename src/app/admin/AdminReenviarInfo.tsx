@@ -152,24 +152,33 @@ export default function AdminReenviarInfo({
           placeholder="Escribe al menos 2 letras…"
           autoComplete="off"
           aria-autocomplete="list"
+          aria-controls="reenviar-suggest-listbox"
           aria-expanded={openList && suggestions.length > 0}
         />
         {openList && suggestions.length > 0 && (
-          <ul className="admin-reenviar-suggest-list" role="listbox">
+          <ul className="admin-reenviar-suggest-list" role="listbox" id="reenviar-suggest-listbox">
             {suggestions.map((a) => (
-              <li key={a.id} role="option">
-                <button
-                  type="button"
-                  className="admin-reenviar-suggest-item-btn"
+              <li key={a.id} role="presentation" className="admin-reenviar-suggest-li">
+                <div
+                  role="option"
+                  tabIndex={0}
+                  aria-selected={selected?.id === a.id}
+                  className="admin-reenviar-suggest-item"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => pick(a)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      pick(a)
+                    }
+                  }}
                 >
                   <div className="admin-reenviar-suggest-name">{fullStudentName(a) || a.student_name}</div>
                   <div className="admin-reenviar-suggest-sub">
                     {LEVEL_LABELS[a.level] || a.level} · {GRADE_LABELS[a.grade_level] || a.grade_level} ·{' '}
                     {formatExamDate(a.appointment_date)} {a.appointment_time}
                   </div>
-                </button>
+                </div>
               </li>
             ))}
           </ul>
