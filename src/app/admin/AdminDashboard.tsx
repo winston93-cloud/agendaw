@@ -9,12 +9,13 @@ import AdminBuscar from './AdminBuscar'
 import AdminRecorridos from './AdminRecorridos'
 import AdminMigracion from './AdminMigracion'
 import AdminSyncRefs from './AdminSyncRefs'
+import AdminReenviarInfo from './AdminReenviarInfo'
 import type { AdmissionAppointment } from '@/types/database'
 import type { BlockedDate } from '@/types/database'
 import type { AdmissionSchedule } from '@/types/database'
 import type { TourRecorrido } from '@/types/database'
 
-type Section = 'citas' | 'horarios' | 'bloquear' | 'buscar' | 'recorridos' | 'migracion' | 'sync-refs' | null
+type Section = 'citas' | 'horarios' | 'bloquear' | 'buscar' | 'recorridos' | 'migracion' | 'sync-refs' | 'reenviar-info' | null
 
 const CARDS: { id: Section; icon: string; title: string; description: string; accent: string }[] = [
   {
@@ -65,6 +66,13 @@ const CARDS: { id: Section; icon: string; title: string; description: string; ac
     title: 'Sincronizar números de control',
     description: 'Vincular números de control de MySQL a citas completadas',
     accent: 'sync',
+  },
+  {
+    id: 'reenviar-info',
+    icon: '✉️',
+    title: 'Reenviar información',
+    description: 'Reenviar correo de confirmación con enlace a documentos y expediente',
+    accent: 'reenviar',
   },
 ]
 
@@ -160,6 +168,17 @@ export default function AdminDashboard({
         {activeSection === 'sync-refs' && (
           <section className="admin-section admin-section-sync">
             <AdminSyncRefs />
+          </section>
+        )}
+        {activeSection === 'reenviar-info' && (
+          <section className="admin-section admin-section-reenviar">
+            <h2>
+              <span className="admin-section-icon" aria-hidden="true">
+                ✉️
+              </span>{' '}
+              Reenviar información
+            </h2>
+            <AdminReenviarInfo appointments={appointments} allowedLevels={allowedLevels} />
           </section>
         )}
       </div>

@@ -66,7 +66,8 @@ function buildEmailFooter(institutionalName: string): string {
 
 export async function sendAdmissionConfirmation(
   to: string,
-  data: AdmissionConfirmationData
+  data: AdmissionConfirmationData,
+  options?: { cc?: string }
 ): Promise<{ ok: boolean; error?: string }> {
   const from = process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx'
   const dateFormatted = formatDate(data.appointmentDate)
@@ -130,6 +131,7 @@ export async function sendAdmissionConfirmation(
     await transporter.sendMail({
       from: `"${footerName}" <${from}>`,
       to,
+      ...(options?.cc ? { cc: options.cc } : {}),
       subject: 'Confirmación de cita de admisión',
       html,
     })
@@ -157,7 +159,8 @@ export type SecundariaTemariosData = {
 
 export async function sendSecundariaTemarios(
   to: string,
-  data: SecundariaTemariosData
+  data: SecundariaTemariosData,
+  options?: { cc?: string }
 ): Promise<{ ok: boolean; error?: string }> {
   const from = process.env.MAIL_USER ?? 'avisos_no-replay@winston93.edu.mx'
   const footerName = 'Instituto Winston Churchill'
@@ -240,6 +243,7 @@ export async function sendSecundariaTemarios(
     await transporter.sendMail({
       from: `"${footerName}" <${from}>`,
       to,
+      ...(options?.cc ? { cc: options.cc } : {}),
       subject: `Temarios de Admisión - Examen de admisión ${dateFormatted}`,
       html,
       attachments,

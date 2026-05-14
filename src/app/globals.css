@@ -4106,7 +4106,9 @@ body {
 .admin-layout[data-theme="dark"] .admin-card-bloquear,
 .admin-layout[data-theme="dark"] .admin-card-buscar,
 .admin-layout[data-theme="dark"] .admin-card-recorridos,
-.admin-layout[data-theme="dark"] .admin-card-migracion {
+.admin-layout[data-theme="dark"] .admin-card-migracion,
+.admin-layout[data-theme="dark"] .admin-card-sync,
+.admin-layout[data-theme="dark"] .admin-card-reenviar {
   --card-color: #1565c0;
 }
 
@@ -4599,6 +4601,8 @@ body {
 .admin-card-buscar     { --card-color: #6d28d9; }  /* violeta            */
 .admin-card-recorridos { --card-color: #0277bd; }  /* azul cielo         */
 .admin-card-migracion  { --card-color: #b7510a; }  /* ámbar tierra       */
+.admin-card-sync       { --card-color: #00838f; }  /* cyan               */
+.admin-card-reenviar   { --card-color: #5b21b6; }  /* violeta intenso   */
 
 /* ── Componente AdminMigracion ─────────────────────────────────────── */
 .migracion-container {

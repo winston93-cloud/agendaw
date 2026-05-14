@@ -1,10 +1,18 @@
 'use server'
 
+import { cookies } from 'next/headers'
 import { createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { AdmissionLevel } from '@/types/database'
 import { createAlumnoInMySQL, checkAlumnoExists as checkAlumnoExistsInMySQL, type AlumnoData } from '@/lib/mysql'
-import { sendRecorridoConfirmationToParent, sendRecorridoNotificationToDirector, sendRecorridoReagendacionToParent, sendRecorridoReagendacionToDirector } from '@/lib/email'
+import {
+  sendRecorridoConfirmationToParent,
+  sendRecorridoNotificationToDirector,
+  sendRecorridoReagendacionToParent,
+  sendRecorridoReagendacionToDirector,
+  sendAdmissionConfirmation,
+  sendSecundariaTemarios,
+} from '@/lib/email'
 import nodemailer from 'nodemailer'
 import {
   createCalendarEvent,
@@ -16,6 +24,33 @@ import {
 } from '@/lib/googleCalendar'
 
 const INTERNAL_APPROVAL_EMAIL = 'sistemas.desarrollo@winston93.edu.mx'
+
+/** Mismos niveles que `src/app/admin/page.tsx` (admission_appointments.level). */
+const ADMIN_ROLE_LEVELS: Record<string, string[]> = {
+  psi_mk:  ['maternal', 'kinder'],
+  psi_pri: ['primaria'],
+  psi_sec: ['secundaria'],
+  vin_mk:  ['maternal', 'kinder'],
+  vin_pri: ['primaria', 'secundaria'],
+}
+
+async function getAdminAllowedLevelsFromSession(): Promise<string[]> {
+  const cookieStore = await cookies()
+  const role = cookieStore.get('admin_session')?.value ?? ''
+  return ADMIN_ROLE_LEVELS[role] ?? []
+}
+
+function getCampusNameByLevelForEmail(level: string): string {
+  if (level === 'maternal' || level === 'kinder') return 'Instituto Educativo Winston'
+  return 'Winston Churchill'
+}
+
+const LEVEL_LABELS_EMAIL: Record<string, string> = {
+  maternal: 'Maternal',
+  kinder: 'Kinder',
+  primaria: 'Primaria',
+  secundaria: 'Secundaria',
+}
 
 function makeInternalTransporter() {
   return nodemailer.createTransport({
@@ -554,6 +589,107 @@ export async function createManualExpedienteForAppointment(appointmentId: string
     return { ok: true }
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : 'Error creando expediente manual' }
+  }
+}
+
+/**
+ * Reenvía al tutor el mismo correo de confirmación de cita (enlace a requisitos / expediente y documentación),
+ * con copia interna a sistemas. En Secundaria también reenvía el correo de temarios adjuntos, como al agendar.
+ */
+export async function resendAdmissionParentEmails(appointmentId: string): Promise<{
+  ok: boolean
+  error?: string
+  confirmationOk?: boolean
+  temariosOk?: boolean
+  temariosSkipped?: boolean
+}> {
+  try {
+    const allowedLevels = await getAdminAllowedLevelsFromSession()
+    const supabase = createAdminClient()
+    const { data: appt, error: apptErr } = await supabase
+      .from('admission_appointments')
+      .select('*')
+      .eq('id', appointmentId)
+      .single()
+
+    if (apptErr || !appt) {
+      return { ok: false, error: apptErr?.message ?? 'No se encontró la cita' }
+    }
+
+    if (allowedLevels.length > 0 && !allowedLevels.includes(appt.level)) {
+      return { ok: false, error: 'No tienes permiso para reenviar información de esta cita.' }
+    }
+
+    const parentEmail = (appt.parent_email || '').trim()
+    if (!parentEmail) {
+      return { ok: false, error: 'La cita no tiene correo del tutor registrado.' }
+    }
+
+    const studentName = [appt.student_name, appt.student_last_name_p, appt.student_last_name_m]
+      .filter(Boolean)
+      .join(' ')
+      .trim()
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://agendaw.vercel.app'
+    const expedienteUrl = `${baseUrl.replace(/\/$/, '')}/expediente_inicial?cita=${appointmentId}`
+
+    const confirmation = await sendAdmissionConfirmation(
+      parentEmail,
+      {
+        parentName: appt.parent_name?.trim() || 'Padre o madre de familia',
+        studentName: studentName || appt.student_name || 'Aspirante',
+        appointmentDate: appt.appointment_date,
+        appointmentTime: appt.appointment_time || 'Por confirmar',
+        campusName: getCampusNameByLevelForEmail(appt.level),
+        levelLabel: LEVEL_LABELS_EMAIL[appt.level] || appt.level,
+        level: appt.level,
+        expedienteUrl,
+      },
+      { cc: INTERNAL_APPROVAL_EMAIL }
+    )
+
+    let temariosOk: boolean | undefined
+    let temariosSkipped = true
+    if (appt.level === 'secundaria' && appt.grade_level) {
+      temariosSkipped = false
+      const tr = await sendSecundariaTemarios(
+        parentEmail,
+        {
+          parentName: appt.parent_name?.trim() || 'Padre o madre de familia',
+          studentName: studentName || appt.student_name || 'Aspirante',
+          appointmentDate: appt.appointment_date,
+          gradeLevel: appt.grade_level,
+        },
+        { cc: INTERNAL_APPROVAL_EMAIL }
+      )
+      temariosOk = tr.ok
+    }
+
+    const ok =
+      confirmation.ok &&
+      (temariosSkipped || temariosOk === true)
+
+    let combinedError: string | undefined
+    if (!ok) {
+      const parts: string[] = []
+      if (!confirmation.ok) parts.push(confirmation.error ? `Confirmación: ${confirmation.error}` : 'Confirmación: error')
+      if (!temariosSkipped && temariosOk === false) parts.push('Temarios: no se pudo enviar')
+      combinedError = parts.join(' · ')
+    }
+
+    revalidatePath('/admin')
+    return {
+      ok,
+      error: combinedError,
+      confirmationOk: confirmation.ok,
+      temariosOk,
+      temariosSkipped,
+    }
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : 'Error al reenviar correos',
+    }
   }
 }
 
