@@ -155,44 +155,17 @@ export default function AdminReenviarInfo({
           aria-expanded={openList && suggestions.length > 0}
         />
         {openList && suggestions.length > 0 && (
-          <ul
-            role="listbox"
-            style={{
-              position: 'absolute',
-              zIndex: 30,
-              left: 0,
-              right: 0,
-              marginTop: 6,
-              maxHeight: 260,
-              overflowY: 'auto',
-              padding: 0,
-              margin: 0,
-              listStyle: 'none',
-              borderRadius: 10,
-              border: '1px solid var(--adm-border, #e2e8f0)',
-              background: 'var(--adm-surface-elevated, #fff)',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-            }}
-          >
+          <ul className="admin-reenviar-suggest-list" role="listbox">
             {suggestions.map((a) => (
               <li key={a.id} role="option">
                 <button
                   type="button"
+                  className="admin-reenviar-suggest-item-btn"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => pick(a)}
-                  style={{
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '10px 12px',
-                    border: 'none',
-                    background: 'transparent',
-                    cursor: 'pointer',
-                    color: 'inherit',
-                    font: 'inherit',
-                  }}
                 >
-                  <div style={{ fontWeight: 700 }}>{fullStudentName(a) || a.student_name}</div>
-                  <div style={{ fontSize: '0.82rem', opacity: 0.85, marginTop: 2 }}>
+                  <div className="admin-reenviar-suggest-name">{fullStudentName(a) || a.student_name}</div>
+                  <div className="admin-reenviar-suggest-sub">
                     {LEVEL_LABELS[a.level] || a.level} · {GRADE_LABELS[a.grade_level] || a.grade_level} ·{' '}
                     {formatExamDate(a.appointment_date)} {a.appointment_time}
                   </div>
