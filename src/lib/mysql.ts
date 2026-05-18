@@ -87,13 +87,21 @@ async function getAlumnoRequiredColumnDefaults(): Promise<Record<string, unknown
   return defaults
 }
 
+/** 0 = sin grupo asignado; en SA suelen usarse 1, 2 o 3. */
+function parseAlumnoGrupo(value?: string): number {
+  if (value == null || String(value).trim() === '') return 0
+  const n = parseInt(String(value).trim(), 10)
+  if (n >= 1 && n <= 3) return n
+  return 0
+}
+
 export type AlumnoData = {
   alumno_app: string // Apellido paterno
   alumno_apm: string // Apellido materno
   alumno_nombre: string // Nombre completo
   alumno_nivel: string // 1= Maternal, 2= Kinder, 3= Primaria, 4= Secundaria
   alumno_grado: string // Grado dentro del nivel
-  alumno_grupo?: string // Grupo (vacío por defecto)
+  alumno_grupo?: string // 0 = sin grupo; 1, 2 o 3 cuando ya está asignado en SA
   alumno_status: string // 0= Baja General, 1= Activo, 2= Inactivo, 3= Baja Temporal Administrativa, 4= Bloqueado por Psicología
   alumno_nuevo_ingreso: string // 0= Reingreso, 1= Nuevo Ingreso de Agenda
   alumno_ciclo_escolar: string // Ej: "2015 - 2016"
@@ -130,7 +138,7 @@ export async function createAlumnoInMySQL(data: AlumnoData): Promise<number> {
     alumno_nombre: normalizeAlumnoText(data.alumno_nombre || ''),
     alumno_nivel: data.alumno_nivel || '',
     alumno_grado: data.alumno_grado || '',
-    alumno_grupo: data.alumno_grupo || '',
+    alumno_grupo: parseAlumnoGrupo(data.alumno_grupo),
     alumno_status: data.alumno_status || '2',
     alumno_nuevo_ingreso: data.alumno_nuevo_ingreso || '1',
     alumno_ciclo_escolar: data.alumno_ciclo_escolar || '',
