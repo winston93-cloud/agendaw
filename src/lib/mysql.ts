@@ -87,6 +87,7 @@ export async function createAlumnoInMySQL(data: AlumnoData): Promise<number> {
     alumno_nivel: data.alumno_nivel || '',
     alumno_grado: data.alumno_grado || '',
     alumno_grupo: data.alumno_grupo || '',
+    alumno_boleta: '', // Obligatorio en MariaDB del servidor nuevo (sin DEFAULT); se asigna después en SA
     alumno_status: data.alumno_status || '1', // Activo por defecto
     alumno_nuevo_ingreso: data.alumno_nuevo_ingreso || '1', // Nuevo ingreso por defecto
     alumno_ciclo_escolar: data.alumno_ciclo_escolar || '',
