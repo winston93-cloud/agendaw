@@ -7,6 +7,7 @@
 import mysql from 'mysql2/promise'
 
 let pool: mysql.Pool | null = null
+let alumnoRequiredDefaultsCache: Record<string, unknown> | null = null
 
 function normalizeAlumnoText(input: string): string {
   // Requisito legacy (PHPMyAdmin / tabla alumno): MAYÚSCULAS y sin acentos/diacríticos.
@@ -45,6 +46,47 @@ export function getMySQLPool() {
   return pool
 }
 
+function defaultForMysqlDataType(dataType: string): unknown {
+  const t = dataType.toLowerCase()
+  if (['int', 'tinyint', 'smallint', 'mediumint', 'bigint', 'decimal', 'float', 'double', 'bit'].includes(t)) {
+    return 0
+  }
+  if (['date', 'datetime', 'timestamp'].includes(t)) {
+    return new Date()
+  }
+  return ''
+}
+
+/**
+ * Columnas NOT NULL sin DEFAULT en `alumno` (servidor MariaDB estricto tras migración).
+ * Evita errores tipo "Field 'mes' doesn't have a default value".
+ */
+async function getAlumnoRequiredColumnDefaults(): Promise<Record<string, unknown>> {
+  if (alumnoRequiredDefaultsCache) return alumnoRequiredDefaultsCache
+
+  const pool = getMySQLPool()
+  const db = process.env.MYSQL_DATABASE || 'winston_general'
+  const [rows] = await pool.query<mysql.RowDataPacket[]>(
+    `SELECT COLUMN_NAME, DATA_TYPE, EXTRA
+     FROM information_schema.COLUMNS
+     WHERE TABLE_SCHEMA = ?
+       AND TABLE_NAME = 'alumno'
+       AND IS_NULLABLE = 'NO'
+       AND COLUMN_DEFAULT IS NULL
+       AND EXTRA NOT LIKE '%auto_increment%'`,
+    [db]
+  )
+
+  const defaults: Record<string, unknown> = {}
+  for (const row of rows) {
+    const name = row.COLUMN_NAME as string
+    defaults[name] = defaultForMysqlDataType(String(row.DATA_TYPE))
+  }
+
+  alumnoRequiredDefaultsCache = defaults
+  return defaults
+}
+
 export type AlumnoData = {
   alumno_app: string // Apellido paterno
   alumno_apm: string // Apellido materno
@@ -78,8 +120,10 @@ export async function getNextAlumnoRef(): Promise<number> {
 export async function createAlumnoInMySQL(data: AlumnoData): Promise<number> {
   const pool = getMySQLPool()
   const alumno_ref = await getNextAlumnoRef()
+  const requiredDefaults = await getAlumnoRequiredColumnDefaults()
 
   const insertData = {
+    ...requiredDefaults,
     alumno_ref,
     alumno_app: normalizeAlumnoText(data.alumno_app || ''),
     alumno_apm: normalizeAlumnoText(data.alumno_apm || ''),
@@ -87,9 +131,8 @@ export async function createAlumnoInMySQL(data: AlumnoData): Promise<number> {
     alumno_nivel: data.alumno_nivel || '',
     alumno_grado: data.alumno_grado || '',
     alumno_grupo: data.alumno_grupo || '',
-    alumno_boleta: '', // Obligatorio en MariaDB del servidor nuevo (sin DEFAULT); se asigna después en SA
-    alumno_status: data.alumno_status || '1', // Activo por defecto
-    alumno_nuevo_ingreso: data.alumno_nuevo_ingreso || '1', // Nuevo ingreso por defecto
+    alumno_status: data.alumno_status || '2',
+    alumno_nuevo_ingreso: data.alumno_nuevo_ingreso || '1',
     alumno_ciclo_escolar: data.alumno_ciclo_escolar || '',
     alumno_registro: new Date(),
     alumno_alta: data.alumno_alta || new Date(),
