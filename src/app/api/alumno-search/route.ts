@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 
+/** Columnas reales en Supabase `alumno` (sin alumno_nombre_completo). */
 const SELECT_ALUMNO =
-  'alumno_id, alumno_ref, alumno_nombre, alumno_app, alumno_apm, alumno_nombre_completo, alumno_nivel, alumno_grado, alumno_ciclo_escolar, alumno_status'
+  'alumno_id, alumno_ref, alumno_nombre, alumno_app, alumno_apm, alumno_nivel, alumno_grado, alumno_ciclo_escolar, alumno_status'
 
 type AlumnoRow = {
   alumno_id: number
@@ -10,15 +11,22 @@ type AlumnoRow = {
   alumno_nombre: string | null
   alumno_app: string | null
   alumno_apm: string | null
-  alumno_nombre_completo: string | null
   alumno_nivel: number | null
   alumno_grado: number | null
   alumno_ciclo_escolar: number | null
   alumno_status: number | null
 }
 
+export type AlumnoSearchResult = AlumnoRow & {
+  alumno_nombre_completo: string
+}
+
 function escaparIlike(termino: string): string {
   return termino.replace(/[%_\\]/g, '\\$&')
+}
+
+function nombreCompleto(row: Pick<AlumnoRow, 'alumno_nombre' | 'alumno_app' | 'alumno_apm'>): string {
+  return [row.alumno_nombre, row.alumno_app, row.alumno_apm].filter(Boolean).join(' ').trim()
 }
 
 /** Extrae número de control si el usuario escribe "20761" o "20761 — Nombre". */
@@ -36,18 +44,31 @@ function fusionarResultados(filas: AlumnoRow[]): AlumnoRow[] {
   return [...mapa.values()].slice(0, 8)
 }
 
+function aRespuesta(filas: AlumnoRow[]): AlumnoSearchResult[] {
+  return filas.map(({ alumno_status: _s, ...rest }) => ({
+    ...rest,
+    alumno_nombre_completo: nombreCompleto(rest),
+  }))
+}
+
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get('q')?.trim() ?? ''
   if (q.length < 2) return NextResponse.json([])
 
-  const supabase = createAdminClient()
+  let supabase
+  try {
+    supabase = createAdminClient()
+  } catch (e) {
+    console.error('[alumno-search] Supabase no configurado:', e)
+    return NextResponse.json({ error: 'Servicio no disponible' }, { status: 503 })
+  }
+
   const esc = escaparIlike(q)
   const patron = `%${esc}%`
   const refNum = extraerRefNumerico(q)
-
   const acumulado: AlumnoRow[] = []
 
-  // alumno_ref es int8: .ilike no aplica; búsqueda exacta por número de control
+  // alumno_ref es int8: ilike no aplica; búsqueda exacta por número de control
   if (refNum != null) {
     const { data, error } = await supabase
       .from('alumno')
@@ -57,10 +78,10 @@ export async function GET(req: NextRequest) {
       .limit(8)
 
     if (error) {
-      console.error('[alumno-search] ref', error)
-    } else if (data?.length) {
-      acumulado.push(...(data as AlumnoRow[]))
+      console.error('[alumno-search] ref', error.message)
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
+    if (data?.length) acumulado.push(...(data as AlumnoRow[]))
   }
 
   if (acumulado.length < 8) {
@@ -72,7 +93,6 @@ export async function GET(req: NextRequest) {
           `alumno_nombre.ilike.${patron}`,
           `alumno_app.ilike.${patron}`,
           `alumno_apm.ilike.${patron}`,
-          `alumno_nombre_completo.ilike.${patron}`,
         ].join(',')
       )
       .not('alumno_status', 'eq', 0)
@@ -80,15 +100,11 @@ export async function GET(req: NextRequest) {
       .limit(8)
 
     if (error) {
-      console.error('[alumno-search] texto', error)
-    } else if (data?.length) {
-      acumulado.push(...(data as AlumnoRow[]))
+      console.error('[alumno-search] texto', error.message)
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
+    if (data?.length) acumulado.push(...(data as AlumnoRow[]))
   }
 
-  const resultados = fusionarResultados(acumulado).map(
-    ({ alumno_status: _s, ...rest }) => rest
-  )
-
-  return NextResponse.json(resultados)
+  return NextResponse.json(aRespuesta(fusionarResultados(acumulado)))
 }
