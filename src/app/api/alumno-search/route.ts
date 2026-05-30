@@ -17,7 +17,7 @@ type AlumnoRow = {
   alumno_status: number | null
 }
 
-export type AlumnoSearchResult = AlumnoRow & {
+export type AlumnoSearchResult = Omit<AlumnoRow, 'alumno_status'> & {
   alumno_nombre_completo: string
 }
 
