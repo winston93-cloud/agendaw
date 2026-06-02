@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { AdmissionLevel } from '@/types/database'
+import { alumnoGradoParaMySQL } from '@/lib/alumnoGradoMysql'
 import { createAlumnoInMySQL, checkAlumnoExists as checkAlumnoExistsInMySQL, type AlumnoData } from '@/lib/mysql'
 import {
   sendRecorridoConfirmationToParent,
@@ -371,14 +372,10 @@ export async function completeAdmissionAndCreateAlumno(appointmentId: string): P
       return rawCiclo
     })()
 
-    // Extraer grado numérico de grade_level (ej. 'kinder_2' → '2', 'maternal_a' → '1')
-    // Priorizar grade_level de la cita (puede haber sido actualizado por reagendación)
-    const gradeRaw = appointment.grade_level || expediente.grado || ''
-    const gradeMatch = gradeRaw.match(/(\d+)$/)
-    const gradeLetter = gradeRaw.match(/_([ab])$/i)
-    const alumno_grado_parsed = gradeMatch 
-      ? gradeMatch[1] 
-      : (gradeLetter ? (gradeLetter[1].toUpperCase() === 'A' ? '1' : '2') : '1')
+  const alumno_grado_parsed = alumnoGradoParaMySQL(
+      appointment.level,
+      appointment.grade_level || expediente.grado || ''
+    )
 
     // Crear alumno en MySQL
     const alumnoData: AlumnoData = {
@@ -458,11 +455,7 @@ export async function completeAdmissionLegacy(appointmentId: string): Promise<{
       maternal: '1', kinder: '2', primaria: '3', secundaria: '4',
     }
 
-    // Extraer grado numérico de grade_level (ej. 'primaria_3' → '3', 'maternal_a' → '1')
-    const gradeRaw = appointment.grade_level ?? ''
-    const gradeMatch = gradeRaw.match(/(\d+)$/)
-    const gradeLetter = gradeRaw.match(/_([ab])$/i)
-    const alumno_grado = gradeMatch ? gradeMatch[1] : (gradeLetter ? (gradeLetter[1].toUpperCase() === 'A' ? '1' : '2') : '1')
+    const alumno_grado = alumnoGradoParaMySQL(appointment.level, appointment.grade_level)
 
     // Convertir ciclo "2025-2026" → "22"
     const rawCiclo = appointment.school_cycle || ''
