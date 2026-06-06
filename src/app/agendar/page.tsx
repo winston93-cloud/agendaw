@@ -1021,7 +1021,7 @@ export default function AgendarPage() {
 
               <div className="summary-section highlight">
                 <h3>{t('confirm.sectionCita')}</h3>
-                <p><strong>{t('confirm.fecha')}</strong> {new Date(formData.appointmentDate).toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                <p><strong>{t('confirm.fecha')}</strong> {new Date(formData.appointmentDate + 'T12:00:00').toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
                 <p><strong>{t('confirm.hora')}</strong> {formData.appointmentTime || t('confirm.hourPending')}</p>
                 <p><strong>{t('confirm.contacto')}</strong> {getContactEmail()}</p>
               </div>
