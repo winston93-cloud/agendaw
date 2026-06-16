@@ -1,15 +1,8 @@
 import { NextResponse } from 'next/server'
+import { bookingConflictLevels } from '@/lib/admissionBooking'
 import { createAdminClient } from '@/lib/supabase/server'
 
 const VALID_LEVELS = ['maternal', 'kinder', 'primaria', 'secundaria']
-
-// Mapeo de nivel individual a nivel agrupado (por psicóloga)
-function mapToGroupLevel(level: string): string[] {
-  if (level === 'maternal' || level === 'kinder') return ['maternal', 'kinder']
-  if (level === 'primaria') return ['primaria']
-  if (level === 'secundaria') return ['secundaria']
-  return [level]
-}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -31,7 +24,7 @@ export async function GET(request: Request) {
   try {
     const supabase = createAdminClient()
     // Maternal y Kinder comparten psicóloga → bloquear horarios de ambos niveles
-    const groupLevels = mapToGroupLevel(level)
+    const groupLevels = bookingConflictLevels(level)
     
     let query = supabase
       .from('admission_appointments')

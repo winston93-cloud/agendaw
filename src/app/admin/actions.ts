@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { AdmissionLevel } from '@/types/database'
 import { alumnoGradoParaMySQL } from '@/lib/alumnoGradoMysql'
+import { bookingConflictLevels } from '@/lib/admissionBooking'
 import { createAlumnoInMySQL, checkAlumnoExists as checkAlumnoExistsInMySQL, type AlumnoData } from '@/lib/mysql'
 import {
   sendRecorridoConfirmationToParent,
@@ -130,7 +131,7 @@ export async function getFullyBookedDates(level: AdmissionLevel, excludeAppointm
     let query = supabase
       .from('admission_appointments')
       .select('appointment_date')
-      .eq('level', level)
+      .in('level', bookingConflictLevels(level))
       .neq('status', 'cancelled')
       .gte('appointment_date', today)
     
@@ -262,12 +263,12 @@ export async function updateAppointment(
         .select('id')
         .eq('appointment_date', updates.appointment_date)
         .eq('appointment_time', updates.appointment_time)
-        .eq('level', current.level)
+        .in('level', bookingConflictLevels(current.level))
         .neq('id', id)
         .neq('status', 'cancelled')
         .limit(1)
       if (existing?.length) {
-        throw new Error('Ese horario ya está ocupado por otra cita del mismo nivel. Elige otra fecha u horario.')
+        throw new Error('Ese horario ya está ocupado por otra cita de preescolar. Elige otra fecha u horario.')
       }
     }
   }

@@ -3,6 +3,7 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { sendAdmissionConfirmation, sendSecundariaTemarios, sendAdmissionNotificationToPsicologa } from '@/lib/email'
 import { sendAdmissionSms } from '@/lib/sms'
+import { bookingConflictLevels } from '@/lib/admissionBooking'
 import {
   createCalendarEvent,
   getPsicologaCalendarId,
@@ -46,13 +47,14 @@ export async function createAdmissionAppointment(data: {
 }) {
   const supabase = createAdminClient()
 
-  // Evitar doble reserva: mismo día, hora y nivel
+  // Evitar doble reserva: maternal y kinder comparten psicóloga
+  const conflictLevels = bookingConflictLevels(data.level)
   const { data: existing } = await supabase
     .from('admission_appointments')
     .select('id')
     .eq('appointment_date', data.appointment_date)
     .eq('appointment_time', data.appointment_time || 'Por confirmar')
-    .eq('level', data.level)
+    .in('level', conflictLevels)
     .neq('status', 'cancelled')
     .limit(1)
   if (existing && existing.length > 0) {

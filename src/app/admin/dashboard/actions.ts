@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import nodemailer from 'nodemailer'
 import type { AdmissionLevel, PermissionRequest } from '@/types/database'
+import { bookingConflictLevels } from '@/lib/admissionBooking'
 import {
   getAllCalendarIdsForLevel,
   updateCalendarEvent,
@@ -318,8 +319,23 @@ export async function respondPermissionRequest(
       
       // Si hay cambio de fecha/hora
       if (req.proposed_date) {
+        const proposedTime = req.proposed_time ?? 'Por confirmar'
+        if (proposedTime !== 'Por confirmar' && currentAppt?.level) {
+          const { data: existing } = await supabase
+            .from('admission_appointments')
+            .select('id')
+            .eq('appointment_date', req.proposed_date)
+            .eq('appointment_time', proposedTime)
+            .in('level', bookingConflictLevels(currentAppt.level))
+            .neq('id', req.appointment_id)
+            .neq('status', 'cancelled')
+            .limit(1)
+          if (existing?.length) {
+            throw new Error('Ese horario ya está ocupado por otra cita de preescolar. Elige otra fecha u horario.')
+          }
+        }
         updateData.appointment_date = req.proposed_date
-        updateData.appointment_time = req.proposed_time ?? 'Por confirmar'
+        updateData.appointment_time = proposedTime
         updateData.status = 'confirmed'
       }
       
