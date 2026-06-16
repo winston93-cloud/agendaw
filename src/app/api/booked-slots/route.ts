@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { bookingConflictLevels } from '@/lib/admissionBooking'
+import { bookingConflictLevels, normalizeAppointmentTime } from '@/lib/admissionBooking'
+import { fetchPendingRescheduleTimes } from '@/lib/pendingRescheduleSlots'
 import { createAdminClient } from '@/lib/supabase/server'
 
 const VALID_LEVELS = ['maternal', 'kinder', 'primaria', 'secundaria']
@@ -40,7 +41,14 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    const times = [...new Set((data || []).map((r) => r.appointment_time).filter(Boolean))]
+    const bookedTimes = (data || [])
+      .map((r) => r.appointment_time)
+      .filter(Boolean)
+      .map((t) => normalizeAppointmentTime(t as string))
+
+    const pendingTimes = await fetchPendingRescheduleTimes(supabase, date, level, excludeId)
+
+    const times = [...new Set([...bookedTimes, ...pendingTimes])]
     return NextResponse.json({ times })
   } catch {
     return NextResponse.json({ times: [] })

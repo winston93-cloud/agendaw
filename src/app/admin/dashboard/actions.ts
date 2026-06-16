@@ -5,7 +5,8 @@ import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import nodemailer from 'nodemailer'
 import type { AdmissionLevel, PermissionRequest } from '@/types/database'
-import { bookingConflictLevels } from '@/lib/admissionBooking'
+import { bookingConflictLevels, normalizeAppointmentTime } from '@/lib/admissionBooking'
+import { fetchPendingRescheduleTimes } from '@/lib/pendingRescheduleSlots'
 import {
   getAllCalendarIdsForLevel,
   updateCalendarEvent,
@@ -98,6 +99,40 @@ export async function createPermissionRequest(data: {
       } catch (error) {
         console.error('[createPermissionRequest] Error getting user role:', error)
         requestedBy = 'Sistema'
+      }
+    }
+
+    if (
+      data.type === 'reagendar' &&
+      data.proposed_date &&
+      data.proposed_time &&
+      data.proposed_time !== 'Por confirmar'
+    ) {
+      const conflictLevels = bookingConflictLevels(data.level)
+      const proposedTime = normalizeAppointmentTime(data.proposed_time)
+
+      let apptQuery = supabase
+        .from('admission_appointments')
+        .select('id')
+        .eq('appointment_date', data.proposed_date)
+        .eq('appointment_time', data.proposed_time)
+        .in('level', conflictLevels)
+        .neq('status', 'cancelled')
+        .limit(1)
+      if (data.appointment_id) apptQuery = apptQuery.neq('id', data.appointment_id)
+      const { data: existingAppt } = await apptQuery
+      if (existingAppt?.length) {
+        return { ok: false as const, error: 'Ese horario ya está ocupado por otra cita. Elige otra fecha u horario.' }
+      }
+
+      const pending = await fetchPendingRescheduleTimes(
+        supabase,
+        data.proposed_date,
+        data.level,
+        data.appointment_id
+      )
+      if (pending.includes(proposedTime)) {
+        return { ok: false as const, error: 'Ese horario ya tiene una reagendación pendiente de autorización.' }
       }
     }
 
@@ -332,6 +367,16 @@ export async function respondPermissionRequest(
             .limit(1)
           if (existing?.length) {
             throw new Error('Ese horario ya está ocupado por otra cita de preescolar. Elige otra fecha u horario.')
+          }
+
+          const pending = await fetchPendingRescheduleTimes(
+            supabase,
+            req.proposed_date,
+            currentAppt.level,
+            req.appointment_id
+          )
+          if (pending.includes(normalizeAppointmentTime(proposedTime))) {
+            throw new Error('Ese horario tiene otra reagendación pendiente de autorización. No se puede aprobar.')
           }
         }
         updateData.appointment_date = req.proposed_date
