@@ -1,12 +1,12 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@insforge/sdk'
 
-const supabaseUrl =
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.NEXT_PUBLIC_INSFORGE_URL!
-const supabaseAnonKey =
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY!
+const baseUrl =
+  process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.NEXT_PUBLIC_INSFORGE_URL
+const anonKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY
 
-if (!supabaseUrl || !supabaseAnonKey) {
+if (!baseUrl || !anonKey) {
   throw new Error('Faltan variables de InsForge AgendaW (URL y anon key).')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient({ baseUrl, anonKey }).database

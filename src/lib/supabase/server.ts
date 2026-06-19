@@ -1,27 +1,33 @@
-import { createClient } from '@supabase/supabase-js'
+import type { InsForgeClient } from '@insforge/sdk'
+import { createAdminClient as createInsforgeAdmin, createClient } from '@insforge/sdk'
 
-/** Cliente público (anon) a InsForge AgendaW. */
-export function createPublicClient() {
-  const supabaseUrl =
+export type DbClient = InsForgeClient['database']
+
+function agendawBaseUrl(): string {
+  const baseUrl =
     process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.NEXT_PUBLIC_INSFORGE_URL
-  const anonKey =
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY
-  if (!supabaseUrl || !anonKey) {
-    throw new Error('Faltan credenciales públicas de InsForge AgendaW.')
+  if (!baseUrl) {
+    throw new Error('Falta NEXT_PUBLIC_SUPABASE_URL (URL de InsForge AgendaW).')
   }
-  return createClient(supabaseUrl, anonKey)
+  return baseUrl
 }
 
-/** Cliente admin a InsForge AgendaW (API PostgREST; compatible con supabase-js). */
-export function createAdminClient() {
-  const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.NEXT_PUBLIC_INSFORGE_URL
-  const serviceRoleKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.INSFORGE_API_KEY
-  if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error(
-      'Faltan credenciales de InsForge AgendaW (NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY, o NEXT_PUBLIC_INSFORGE_URL + INSFORGE_API_KEY).'
-    )
+/** Cliente público (anon) a InsForge AgendaW. */
+export function createPublicClient(): DbClient {
+  const anonKey =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY
+  if (!anonKey) {
+    throw new Error('Falta NEXT_PUBLIC_SUPABASE_ANON_KEY (InsForge AgendaW).')
   }
-  return createClient(supabaseUrl, serviceRoleKey)
+  return createClient({ baseUrl: agendawBaseUrl(), anonKey }).database
+}
+
+/** Cliente admin a InsForge AgendaW. */
+export function createAdminClient(): DbClient {
+  const apiKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.INSFORGE_API_KEY
+  if (!apiKey) {
+    throw new Error('Falta SUPABASE_SERVICE_ROLE_KEY (API key de InsForge AgendaW).')
+  }
+  return createInsforgeAdmin({ baseUrl: agendawBaseUrl(), apiKey }).database
 }

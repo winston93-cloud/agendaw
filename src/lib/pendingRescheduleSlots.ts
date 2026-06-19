@@ -1,11 +1,11 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
+import type { DbClient } from '@/lib/supabase/server'
 import { normalizeAppointmentTime, permissionRequestLevel } from '@/lib/admissionBooking'
 
 const PERMISSION_TABLE = 'admission_permission_requests'
 
 /** Horarios reservados por reagendaciones pendientes de autorización de dirección */
 export async function fetchPendingRescheduleTimes(
-  supabase: SupabaseClient,
+  supabase: DbClient,
   date: string,
   level: string,
   excludeAppointmentId?: string
