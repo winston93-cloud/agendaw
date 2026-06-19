@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createWinstonServiciosClient } from '@/lib/winstonServicios'
 
-/** Columnas reales en Supabase `alumno` (sin alumno_nombre_completo). */
+/** Columnas en InsForge Winston Servicios → `alumno` (sin alumno_nombre_completo). */
 const SELECT_ALUMNO =
   'alumno_id, alumno_ref, alumno_nombre, alumno_app, alumno_apm, alumno_nivel, alumno_grado, alumno_ciclo_escolar, alumno_status'
 
@@ -57,9 +57,9 @@ export async function GET(req: NextRequest) {
 
   let supabase
   try {
-    supabase = createAdminClient()
+    supabase = createWinstonServiciosClient()
   } catch (e) {
-    console.error('[alumno-search] Supabase no configurado:', e)
+    console.error('[alumno-search] Winston Servicios no configurado:', e)
     return NextResponse.json({ error: 'Servicio no disponible' }, { status: 503 })
   }
 

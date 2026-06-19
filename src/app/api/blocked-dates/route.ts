@@ -1,8 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+import { createPublicClient } from '@/lib/supabase/server'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -10,7 +7,7 @@ export async function GET(request: Request) {
   if (!level || !['maternal_kinder', 'primaria', 'secundaria'].includes(level)) {
     return NextResponse.json({ error: 'level required: maternal_kinder | primaria | secundaria' }, { status: 400 })
   }
-  const supabase = createClient(url, anonKey)
+  const supabase = createPublicClient()
   // Solo devolver días con bloqueo completo (block_time IS NULL)
   // Los días con bloqueo parcial por horario siguen disponibles para agendar
   const { data, error } = await supabase

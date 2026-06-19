@@ -1,15 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-function getAdminClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
-  if (!url || !key) throw new Error('Supabase env vars not set')
-  // auth.persistSession: false para server-side, autoRefreshToken: false
-  return createClient(url, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
-}
+import { createAdminClient } from '@/lib/supabase/server'
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,7 +7,7 @@ export async function POST(req: NextRequest) {
     const ctrl = parseInt(body.ctrl) || 0
     const qr = Math.floor(100000 + Math.random() * 900000)
 
-    const supabase = getAdminClient()
+    const supabase = createAdminClient()
 
     const insertData = {
       ctrl,
