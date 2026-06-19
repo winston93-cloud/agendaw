@@ -2,7 +2,7 @@
 
 Sistema de agendamiento de citas para proceso de admisión escolar del **Instituto Winston Churchill** e **Instituto Educativo Winston** (Guadalajara, México). Más de 30 años formando líderes.
 
-**Stack**: Next.js 16 (App Router) · Supabase (PostgreSQL) · CSS puro con variables · Plus Jakarta Sans · Vercel
+**Stack**: Next.js 16 (App Router) · InsForge (PostgreSQL) · CSS puro con variables · Plus Jakarta Sans · Vercel
 
 **Módulos principales**:
 - `/` — Landing pública para padres de familia

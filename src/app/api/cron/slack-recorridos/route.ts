@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/insforge/server'
 import { sendSlackRecorridoReminder } from '@/lib/slack'
 
 // Cron job llamado cada 5 minutos por cron-job.org

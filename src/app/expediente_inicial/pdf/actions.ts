@@ -1,6 +1,6 @@
 'use server'
 
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/insforge/server'
 
 export async function getExpedienteForPdf(appointmentId: string) {
   const supabase = createAdminClient()

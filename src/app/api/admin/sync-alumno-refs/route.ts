@@ -1,10 +1,10 @@
 /**
- * Endpoint para sincronizar alumno_ref de MySQL a Supabase
+ * Endpoint para sincronizar alumno_ref de MySQL a InsForge AgendaW
  * Para citas completadas que no tienen alumno_ref
  */
 
 import { NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/insforge/server'
 import { checkAlumnoExists } from '@/lib/mysql'
 
 export async function POST(req: Request) {
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
       const alumno_ref = await checkAlumnoExists(nombre, apellido)
 
       if (alumno_ref) {
-        // Actualizar en Supabase
+        // Actualizar en InsForge
         const { error: updateErr } = await supabase
           .from('admission_appointments')
           .update({ alumno_ref })

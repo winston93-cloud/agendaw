@@ -1,6 +1,6 @@
 'use server'
 
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/insforge/server'
 
 export async function getExpedienteCompleto(appointmentId: string) {
   console.log('[expediente-ver] Buscando expediente para cita:', appointmentId)

@@ -22,9 +22,9 @@ const ROLE_LEVELS: Record<string, string[]> = {
   vin_pri: ['primaria', 'secundaria'],
 }
 
-function hasSupabaseEnv() {
-  const u = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const k = process.env.SUPABASE_SERVICE_ROLE_KEY
+function hasInsforgeEnv() {
+  const u = process.env.NEXT_PUBLIC_INSFORGE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
+  const k = process.env.INSFORGE_API_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY
   return Boolean(u && typeof u === 'string' && u.trim() && k && typeof k === 'string' && k.trim())
 }
 
@@ -38,7 +38,7 @@ export default async function AdminPage() {
   let blockedDates: Awaited<ReturnType<typeof getBlockedDates>> = []
   let schedules: Awaited<ReturnType<typeof getSchedules>> = []
   let recorridos: Awaited<ReturnType<typeof getRecorridos>> = []
-  if (hasSupabaseEnv()) {
+  if (hasInsforgeEnv()) {
     try {
       ;[appointments, blockedDates, schedules, recorridos] = await Promise.all([
         getAdmissionAppointments(allowedLevels.length > 0 ? { levels: allowedLevels } : undefined),

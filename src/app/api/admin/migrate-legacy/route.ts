@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/insforge/server'
 import { getMySQLPool } from '@/lib/mysql'
 import type { RowDataPacket } from 'mysql2'
 

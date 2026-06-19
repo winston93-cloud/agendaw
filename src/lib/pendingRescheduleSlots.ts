@@ -1,4 +1,4 @@
-import type { DbClient } from '@/lib/supabase/server'
+import type { DbClient } from '@/lib/insforge/server'
 import { normalizeAppointmentTime, permissionRequestLevel } from '@/lib/admissionBooking'
 
 const PERMISSION_TABLE = 'admission_permission_requests'

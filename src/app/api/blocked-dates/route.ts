@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createPublicClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/insforge/server'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)

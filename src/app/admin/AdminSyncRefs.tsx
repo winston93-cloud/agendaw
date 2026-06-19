@@ -17,7 +17,7 @@ export default function AdminSyncRefs() {
   const [error, setError] = useState<string | null>(null)
 
   const handleSync = async () => {
-    if (!confirm('¿Estás seguro? Esta operación buscará en MySQL los números de control de todas las citas completadas sin alumno_ref y los actualizará en Supabase.')) {
+    if (!confirm('¿Estás seguro? Esta operación buscará en MySQL los números de control de todas las citas completadas sin alumno_ref y los actualizará en InsForge.')) {
       return
     }
 
@@ -49,7 +49,7 @@ export default function AdminSyncRefs() {
       <div className="admin-section-header">
         <h2>🔄 Sincronizar números de control</h2>
         <p className="admin-section-subtitle">
-          Vincula los números de control (alumno_ref) de MySQL con las citas completadas en Supabase
+          Vincula los números de control (alumno_ref) de MySQL con las citas completadas en InsForge
         </p>
       </div>
 
@@ -63,7 +63,7 @@ export default function AdminSyncRefs() {
           
           <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: '1.6' }}>
             Esta herramienta busca en la base de datos MySQL los números de control de alumnos
-            que ya fueron aprobados pero no tienen el <code>alumno_ref</code> registrado en Supabase.
+            que ya fueron aprobados pero no tienen el <code>alumno_ref</code> registrado en InsForge.
           </p>
 
           <div style={{ 
@@ -80,7 +80,7 @@ export default function AdminSyncRefs() {
             <ul style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.8', paddingLeft: '1.5rem' }}>
               <li>Busca citas con <code>status = 'completed'</code> y <code>alumno_ref = NULL</code></li>
               <li>Para cada cita, busca en MySQL por nombre y apellido paterno del alumno</li>
-              <li>Si encuentra coincidencia, actualiza el <code>alumno_ref</code> en Supabase</li>
+              <li>Si encuentra coincidencia, actualiza el <code>alumno_ref</code> en InsForge</li>
               <li>Te muestra un reporte de cuántos se sincronizaron y cuántos no se encontraron</li>
             </ul>
           </div>

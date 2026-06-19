@@ -1,6 +1,6 @@
 'use server'
 
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/insforge/server'
 import nodemailer from 'nodemailer'
 
 const PSICOLOGIA_EMAILS: Record<string, string> = {

@@ -1,5 +1,5 @@
 import { createAdminClient as createInsforgeAdmin } from '@insforge/sdk'
-import type { DbClient } from '@/lib/supabase/server'
+import type { DbClient } from '@/lib/insforge/server'
 
 /** Cliente admin a InsForge «Winston Servicios» (tabla `alumno` para Familia Winston). */
 export function createWinstonServiciosClient(): DbClient {

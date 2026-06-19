@@ -1,6 +1,6 @@
 'use server'
 
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/insforge/server'
 import { sendAdmissionConfirmation, sendSecundariaTemarios, sendAdmissionNotificationToPsicologa } from '@/lib/email'
 import { sendAdmissionSms } from '@/lib/sms'
 import { bookingConflictLevels, normalizeAppointmentTime } from '@/lib/admissionBooking'

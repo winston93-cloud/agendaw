@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { bookingConflictLevels, normalizeAppointmentTime } from '@/lib/admissionBooking'
 import { fetchPendingRescheduleTimes } from '@/lib/pendingRescheduleSlots'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/insforge/server'
 
 const VALID_LEVELS = ['maternal', 'kinder', 'primaria', 'secundaria']
 

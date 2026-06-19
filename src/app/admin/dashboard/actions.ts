@@ -1,6 +1,6 @@
 'use server'
 
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/insforge/server'
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import nodemailer from 'nodemailer'

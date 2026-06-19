@@ -1,7 +1,7 @@
 'use server'
 
 import { cookies } from 'next/headers'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/insforge/server'
 import { revalidatePath } from 'next/cache'
 import type { AdmissionLevel } from '@/types/database'
 import { alumnoGradoParaMySQL } from '@/lib/alumnoGradoMysql'
@@ -404,7 +404,7 @@ export async function completeAdmissionAndCreateAlumno(appointmentId: string): P
 
     const alumno_ref = await createAlumnoInMySQL(alumnoData)
 
-    // Actualizar status en Supabase
+    // Actualizar status en InsForge
     await supabase
       .from('admission_appointments')
       .update({ 

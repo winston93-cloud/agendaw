@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/insforge/server'
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (error) {
-      console.error('[wsp POST] Supabase error:', JSON.stringify(error))
+      console.error('[wsp POST] InsForge error:', JSON.stringify(error))
       return NextResponse.json(
         { ok: false, error: error.message, details: error.details, hint: error.hint },
         { status: 500 }
