@@ -22,11 +22,7 @@ const ROLE_LEVELS: Record<string, string[]> = {
   vin_pri: ['primaria', 'secundaria'],
 }
 
-function hasInsforgeEnv() {
-  const u = process.env.NEXT_PUBLIC_INSFORGE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
-  const k = process.env.INSFORGE_API_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY
-  return Boolean(u && typeof u === 'string' && u.trim() && k && typeof k === 'string' && k.trim())
-}
+import { hasAgendawDbEnv } from '@/lib/insforge/env'
 
 export default async function AdminPage() {
   const cookieStore = await cookies()
@@ -38,7 +34,7 @@ export default async function AdminPage() {
   let blockedDates: Awaited<ReturnType<typeof getBlockedDates>> = []
   let schedules: Awaited<ReturnType<typeof getSchedules>> = []
   let recorridos: Awaited<ReturnType<typeof getRecorridos>> = []
-  if (hasInsforgeEnv()) {
+  if (hasAgendawDbEnv()) {
     try {
       ;[appointments, blockedDates, schedules, recorridos] = await Promise.all([
         getAdmissionAppointments(allowedLevels.length > 0 ? { levels: allowedLevels } : undefined),

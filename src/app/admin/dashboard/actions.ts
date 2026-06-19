@@ -271,9 +271,14 @@ export async function createPermissionRequest(data: {
 
 // ─── OBTENER SOLICITUDES (para el panel psicólogas) ──────────────────────
 export async function getAllRecentRequests() {
-  const supabase = createAdminClient()
+  let db
+  try {
+    db = createAdminClient()
+  } catch {
+    return []
+  }
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
-  const { data } = await supabase
+  const { data } = await db
     .from(PERMISSION_TABLE)
     .select('*')
     .gte('created_at', since)
