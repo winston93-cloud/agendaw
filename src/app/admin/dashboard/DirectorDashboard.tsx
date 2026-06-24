@@ -1,5 +1,7 @@
 'use client'
 
+import { urlServiciosAdminDashboard } from '@/lib/serviciosAdminConfig'
+
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { respondPermissionRequest } from './actions'
@@ -236,6 +238,7 @@ export default function DirectorDashboard({
             </div>
           </div>
           <div className="director-header-actions">
+            <a href={urlServiciosAdminDashboard()} className="director-header-link">← Servicios Administrativos</a>
             <a href="/admin" className="director-header-link">← Panel Psicólogas</a>
             <button type="button" onClick={handleLogout} className="director-header-link">
               Cerrar sesión

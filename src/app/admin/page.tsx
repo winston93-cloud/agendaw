@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers'
 import { getAdmissionAppointments, getBlockedDates, getSchedules, getRecorridos } from './actions'
+import { urlServiciosAdminDashboard } from '@/lib/serviciosAdminConfig'
 import AdminDashboard from './AdminDashboard'
 import AdminThemeToggle from './AdminThemeToggle'
 
@@ -60,7 +61,7 @@ export default async function AdminPage() {
           </div>
           <div className="admin-header-actions">
             <AdminThemeToggle />
-            <a href="/admin" className="admin-link">← Dashboard</a>
+            <a href={urlServiciosAdminDashboard()} className="admin-link">← Servicios Administrativos</a>
             <a href="/api/admin/logout" className="admin-link">Cerrar sesión</a>
           </div>
         </div>
