@@ -9,6 +9,7 @@ import ExamDateCalendar from '@/components/ExamDateCalendar'
 import PublicThemeToggle from '@/components/PublicThemeToggle'
 import ClientLangSelector from '@/components/ClientLangSelector'
 import { createAdmissionAppointment } from './actions'
+import type { SlotAvailabilityMap } from '@/lib/admissionSlotAvailability'
 
 interface AlumnoResult {
   alumno_id: number
@@ -72,6 +73,7 @@ export default function AgendarPage() {
   const [blockedDates, setBlockedDates] = useState<string[]>([])
   const [scheduleTimes, setScheduleTimes] = useState<string[]>([])
   const [bookedSlots,   setBookedSlots]   = useState<string[]>([])
+  const [slotAvailability, setSlotAvailability] = useState<SlotAvailabilityMap>({})
   const [blockedSlots,  setBlockedSlots]  = useState<string[]>([])
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [lastAppointmentId, setLastAppointmentId] = useState<string | null>(null)
@@ -374,25 +376,36 @@ export default function AgendarPage() {
       setScheduleTimes([])
       return
     }
+    const schedulesUrl = formData.appointmentDate
+      ? `/api/schedules?level=${level}&date=${formData.appointmentDate}&student_level=${encodeURIComponent(formData.level)}`
+      : `/api/schedules?level=${level}`
+
     Promise.all([
       fetch(`/api/blocked-dates?level=${level}`).then((res) => res.json()).then((data) => data.dates || []).catch(() => []),
-      fetch(`/api/schedules?level=${level}`).then((res) => res.json()).then((data) => data.times || []).catch(() => []),
+      fetch(schedulesUrl).then((res) => res.json()).then((data) => data.times || []).catch(() => []),
     ]).then(([dates, times]) => {
       setBlockedDates(dates)
       setScheduleTimes(times)
     })
-  }, [formData.level])
+  }, [formData.level, formData.appointmentDate])
 
   // Horarios ya reservados para esta fecha y nivel (evitar doble reserva)
   useEffect(() => {
     if (!formData.appointmentDate || !formData.level) {
       setBookedSlots([])
+      setSlotAvailability({})
       return
     }
     fetch(`/api/booked-slots?level=${formData.level}&date=${formData.appointmentDate}`)
       .then((res) => res.json())
-      .then((data) => setBookedSlots(data.times || []))
-      .catch(() => setBookedSlots([]))
+      .then((data) => {
+        setBookedSlots(data.times || [])
+        setSlotAvailability(data.availability || {})
+      })
+      .catch(() => {
+        setBookedSlots([])
+        setSlotAvailability({})
+      })
   }, [formData.appointmentDate, formData.level])
 
   // Horarios bloqueados administrativamente para esta fecha y nivel
@@ -783,6 +796,10 @@ export default function AgendarPage() {
                             const isBooked  = bookedSlots.includes(time)
                             const isBlocked = blockedSlots.includes(time)
                             const unavailable = isBooked || isBlocked
+                            const slotInfo = slotAvailability[time]
+                            const remaining = slotInfo
+                              ? Math.max(0, slotInfo.capacity - slotInfo.booked)
+                              : null
                             return (
                               <button
                                 key={time}
@@ -790,9 +807,20 @@ export default function AgendarPage() {
                                 className={`time-slot ${formData.appointmentTime === time ? 'selected' : ''} ${unavailable ? 'time-slot-booked' : ''}`}
                                 onClick={() => !unavailable && updateFormData('appointmentTime', time)}
                                 disabled={unavailable}
-                                title={isBlocked ? 'Horario no disponible' : isBooked ? t('aspirante.slotOccupiedTitle') : undefined}
+                                title={
+                                  isBlocked
+                                    ? 'Horario no disponible'
+                                    : isBooked
+                                      ? t('aspirante.slotOccupiedTitle')
+                                      : remaining != null
+                                        ? `${remaining} lugar(es) disponible(s)`
+                                        : undefined
+                                }
                               >
                                 {time}
+                                {!unavailable && remaining != null && remaining < 2 && (
+                                  <span className="time-slot-label"> · {remaining} lugar</span>
+                                )}
                                 {unavailable && <span className="time-slot-label"> {t('aspirante.slotOccupied')}</span>}
                               </button>
                             )

@@ -5,8 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
 import nodemailer from 'nodemailer'
 import type { AdmissionLevel, PermissionRequest } from '@/types/database'
-import { bookingConflictLevels, normalizeAppointmentTime } from '@/lib/admissionBooking'
-import { fetchPendingRescheduleTimes } from '@/lib/pendingRescheduleSlots'
+import { assertAdmissionSlotAvailable } from '@/lib/admissionSlotAvailability'
 import {
   getAllCalendarIdsForLevel,
   updateCalendarEvent,
@@ -108,32 +107,24 @@ export async function createPermissionRequest(data: {
       data.proposed_time &&
       data.proposed_time !== 'Por confirmar'
     ) {
-      const conflictLevels = bookingConflictLevels(data.level)
-      const proposedTime = normalizeAppointmentTime(data.proposed_time)
-
-      let apptQuery = supabase
-        .from('admission_appointments')
-        .select('id')
-        .eq('appointment_date', data.proposed_date)
-        .eq('appointment_time', data.proposed_time)
-        .in('level', conflictLevels)
-        .neq('status', 'cancelled')
-        .limit(1)
-      if (data.appointment_id) apptQuery = apptQuery.neq('id', data.appointment_id)
-      const { data: existingAppt } = await apptQuery
-      if (existingAppt?.length) {
-        return { ok: false as const, error: 'Ese horario ya está ocupado por otra cita. Elige otra fecha u horario.' }
+      let studentLevel: string = data.level
+      if (data.appointment_id) {
+        const { data: appt } = await supabase
+          .from('admission_appointments')
+          .select('level')
+          .eq('id', data.appointment_id)
+          .maybeSingle()
+        if (appt?.level) studentLevel = appt.level
+      } else if (data.level === 'maternal_kinder') {
+        studentLevel = 'maternal'
       }
 
-      const pending = await fetchPendingRescheduleTimes(
-        supabase,
-        data.proposed_date,
-        data.level,
-        data.appointment_id
-      )
-      if (pending.includes(proposedTime)) {
-        return { ok: false as const, error: 'Ese horario ya tiene una reagendación pendiente de autorización.' }
-      }
+      await assertAdmissionSlotAvailable(supabase, {
+        date: data.proposed_date,
+        time: data.proposed_time,
+        level: studentLevel,
+        excludeAppointmentId: data.appointment_id,
+      })
     }
 
     const { data: inserted, error } = await supabase
@@ -361,28 +352,12 @@ export async function respondPermissionRequest(
       if (req.proposed_date) {
         const proposedTime = req.proposed_time ?? 'Por confirmar'
         if (proposedTime !== 'Por confirmar' && currentAppt?.level) {
-          const { data: existing } = await supabase
-            .from('admission_appointments')
-            .select('id')
-            .eq('appointment_date', req.proposed_date)
-            .eq('appointment_time', proposedTime)
-            .in('level', bookingConflictLevels(currentAppt.level))
-            .neq('id', req.appointment_id)
-            .neq('status', 'cancelled')
-            .limit(1)
-          if (existing?.length) {
-            throw new Error('Ese horario ya está ocupado por otra cita de preescolar. Elige otra fecha u horario.')
-          }
-
-          const pending = await fetchPendingRescheduleTimes(
-            supabase,
-            req.proposed_date,
-            currentAppt.level,
-            req.appointment_id
-          )
-          if (pending.includes(normalizeAppointmentTime(proposedTime))) {
-            throw new Error('Ese horario tiene otra reagendación pendiente de autorización. No se puede aprobar.')
-          }
+          await assertAdmissionSlotAvailable(supabase, {
+            date: req.proposed_date,
+            time: proposedTime,
+            level: currentAppt.level,
+            excludeAppointmentId: req.appointment_id,
+          })
         }
         updateData.appointment_date = req.proposed_date
         updateData.appointment_time = proposedTime

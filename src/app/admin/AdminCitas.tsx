@@ -151,14 +151,28 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
     // Cargar todo al abrir el modal (sin esperar a que se seleccione fecha)
     Promise.all([
       fetch(`/api/blocked-dates?level=${level}`).then(r => r.json()).then(d => d.dates || []).catch(() => []),
-      fetch(`/api/schedules?level=${level}`).then(r => r.json()).then(d => d.times || []).catch(() => []),
       getFullyBookedDates(level as 'maternal_kinder' | 'primaria' | 'secundaria', apt.id),
-    ]).then(([blocked, times, fullyBooked]) => {
+    ]).then(([blocked, fullyBooked]) => {
       setCalBlockedDates(blocked)
-      setCalScheduleTimes(times)   // <-- disponibles desde el primer momento
       setCalFullyBooked(fullyBooked)
     }).catch(() => {})
   }, [modal])
+
+  useEffect(() => {
+    if (modal?.type !== 'solicitar-reagendar') return
+    const apt = modal.appointment
+    const level = toAdminLevel(apt.level)
+    if (!solicitudDate) {
+      setCalScheduleTimes([])
+      return
+    }
+    fetch(
+      `/api/schedules?level=${level}&date=${solicitudDate}&student_level=${encodeURIComponent(apt.level)}`
+    )
+      .then((r) => r.json())
+      .then((d) => setCalScheduleTimes(d.times || []))
+      .catch(() => setCalScheduleTimes([]))
+  }, [modal, solicitudDate])
 
   // Cargar slots OCUPADOS al cambiar la fecha (marca cuáles están tomados ese día)
   useEffect(() => {

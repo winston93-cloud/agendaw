@@ -1,10 +1,9 @@
 'use server'
 
 import { createAdminClient } from '@/lib/insforge/server'
+import { assertAdmissionSlotAvailable } from '@/lib/admissionSlotAvailability'
 import { sendAdmissionConfirmation, sendSecundariaTemarios, sendAdmissionNotificationToPsicologa } from '@/lib/email'
 import { sendAdmissionSms } from '@/lib/sms'
-import { bookingConflictLevels, normalizeAppointmentTime } from '@/lib/admissionBooking'
-import { fetchPendingRescheduleTimes } from '@/lib/pendingRescheduleSlots'
 import {
   createCalendarEvent,
   getPsicologaCalendarId,
@@ -48,27 +47,11 @@ export async function createAdmissionAppointment(data: {
 }) {
   const supabase = createAdminClient()
 
-  // Evitar doble reserva: maternal y kinder comparten psicóloga
-  const conflictLevels = bookingConflictLevels(data.level)
-  const { data: existing } = await supabase
-    .from('admission_appointments')
-    .select('id')
-    .eq('appointment_date', data.appointment_date)
-    .eq('appointment_time', data.appointment_time || 'Por confirmar')
-    .in('level', conflictLevels)
-    .neq('status', 'cancelled')
-    .limit(1)
-  if (existing && existing.length > 0) {
-    throw new Error('Ese horario ya no está disponible. Elige otra fecha u otro horario.')
-  }
-
-  const appointmentTime = data.appointment_time || 'Por confirmar'
-  if (appointmentTime !== 'Por confirmar') {
-    const pending = await fetchPendingRescheduleTimes(supabase, data.appointment_date, data.level)
-    if (pending.includes(normalizeAppointmentTime(appointmentTime))) {
-      throw new Error('Ese horario tiene una reagendación pendiente de autorización. Elige otra fecha u otro horario.')
-    }
-  }
+  await assertAdmissionSlotAvailable(supabase, {
+    date: data.appointment_date,
+    time: data.appointment_time || 'Por confirmar',
+    level: data.level,
+  })
 
   const { data: inserted, error } = await supabase
     .from('admission_appointments')

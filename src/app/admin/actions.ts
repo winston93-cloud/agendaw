@@ -5,8 +5,8 @@ import { createAdminClient } from '@/lib/insforge/server'
 import { revalidatePath } from 'next/cache'
 import type { AdmissionLevel } from '@/types/database'
 import { alumnoGradoParaMySQL } from '@/lib/alumnoGradoMysql'
+import { assertAdmissionSlotAvailable } from '@/lib/admissionSlotAvailability'
 import { bookingConflictLevels, normalizeAppointmentTime } from '@/lib/admissionBooking'
-import { fetchPendingRescheduleTimes } from '@/lib/pendingRescheduleSlots'
 import { createAlumnoInMySQL, checkAlumnoExists as checkAlumnoExistsInMySQL, type AlumnoData } from '@/lib/mysql'
 import {
   sendRecorridoConfirmationToParent,
@@ -259,28 +259,12 @@ export async function updateAppointment(
   if (updates.appointment_date != null && updates.appointment_time != null) {
     const { data: current } = await supabase.from('admission_appointments').select('level').eq('id', id).single()
     if (current?.level) {
-      const { data: existing } = await supabase
-        .from('admission_appointments')
-        .select('id')
-        .eq('appointment_date', updates.appointment_date)
-        .eq('appointment_time', updates.appointment_time)
-        .in('level', bookingConflictLevels(current.level))
-        .neq('id', id)
-        .neq('status', 'cancelled')
-        .limit(1)
-      if (existing?.length) {
-        throw new Error('Ese horario ya está ocupado por otra cita de preescolar. Elige otra fecha u horario.')
-      }
-
-      const pending = await fetchPendingRescheduleTimes(
-        supabase,
-        updates.appointment_date,
-        current.level,
-        id
-      )
-      if (pending.includes(normalizeAppointmentTime(updates.appointment_time))) {
-        throw new Error('Ese horario tiene una reagendación pendiente de autorización. Elige otra fecha u horario.')
-      }
+      await assertAdmissionSlotAvailable(supabase, {
+        date: updates.appointment_date,
+        time: updates.appointment_time,
+        level: current.level,
+        excludeAppointmentId: id,
+      })
     }
   }
 

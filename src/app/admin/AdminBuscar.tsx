@@ -191,14 +191,23 @@ export default function AdminBuscar({ allowedLevels }: { allowedLevels: string[]
   useEffect(() => {
     if (!reagendarId || !editLevel) return
     const level = apiLevel(editLevel)
-    Promise.all([
-      fetch(`/api/blocked-dates?level=${level}`).then(r => r.json()).then(d => d.dates || []).catch(() => []),
-      fetch(`/api/schedules?level=${level}`).then(r => r.json()).then(d => d.times || []).catch(() => []),
-    ]).then(([dates, times]) => {
-      setEditBlockedDates(dates)
-      setEditScheduleTimes(times)
-    })
+    fetch(`/api/blocked-dates?level=${level}`).then(r => r.json()).then(d => d.dates || []).catch(() => [])
+      .then((dates) => setEditBlockedDates(dates))
   }, [reagendarId, editLevel])
+
+  useEffect(() => {
+    if (!reagendarId || !editLevel || !editDate) {
+      setEditScheduleTimes([])
+      return
+    }
+    const level = apiLevel(editLevel)
+    fetch(
+      `/api/schedules?level=${level}&date=${editDate}&student_level=${encodeURIComponent(editLevel)}`
+    )
+      .then((r) => r.json())
+      .then((d) => setEditScheduleTimes(d.times || []))
+      .catch(() => setEditScheduleTimes([]))
+  }, [reagendarId, editLevel, editDate])
 
   useEffect(() => {
     if (!reagendarId || !editDate || !editLevel) { setEditBookedSlots([]); return }

@@ -1,14 +1,16 @@
 import { NextResponse } from 'next/server'
+import { getVacationSlotAvailability } from '@/lib/admissionSlotAvailability'
 import { bookingConflictLevels, normalizeAppointmentTime } from '@/lib/admissionBooking'
 import { fetchPendingRescheduleTimes } from '@/lib/pendingRescheduleSlots'
 import { createAdminClient } from '@/lib/insforge/server'
+import { isActiveVacationBookingDate } from '@/lib/vacationAdmission'
 
 const VALID_LEVELS = ['maternal', 'kinder', 'primaria', 'secundaria']
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const level = searchParams.get('level')
-  const date  = searchParams.get('date')
+  const date = searchParams.get('date')
 
   if (!level || !VALID_LEVELS.includes(level)) {
     return NextResponse.json(
@@ -24,16 +26,29 @@ export async function GET(request: Request) {
 
   try {
     const supabase = createAdminClient()
-    // Maternal y Kinder comparten psicóloga → bloquear horarios de ambos niveles
+
+    if (isActiveVacationBookingDate(date)) {
+      const availability = await getVacationSlotAvailability(
+        supabase,
+        date,
+        level,
+        excludeId
+      )
+      const times = Object.entries(availability)
+        .filter(([, entry]) => entry.full)
+        .map(([time]) => time)
+      return NextResponse.json({ times, availability, vacation: true })
+    }
+
     const groupLevels = bookingConflictLevels(level)
-    
+
     let query = supabase
       .from('admission_appointments')
       .select('appointment_time')
       .eq('appointment_date', date)
       .in('level', groupLevels)
       .neq('status', 'cancelled')
-    
+
     if (excludeId) query = query.neq('id', excludeId)
     const { data, error } = await query
 
@@ -49,7 +64,7 @@ export async function GET(request: Request) {
     const pendingTimes = await fetchPendingRescheduleTimes(supabase, date, level, excludeId)
 
     const times = [...new Set([...bookedTimes, ...pendingTimes])]
-    return NextResponse.json({ times })
+    return NextResponse.json({ times, vacation: false })
   } catch {
     return NextResponse.json({ times: [] })
   }
