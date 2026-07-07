@@ -26,7 +26,6 @@ interface AlumnoResult {
 type Step = 1 | 2
 
 const SCHOOL_CYCLES = [
-  { value: '2025-2026', label: '2025-2026' },
   { value: '2026-2027', label: '2026-2027' },
 ] as const
 

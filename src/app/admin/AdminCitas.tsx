@@ -658,7 +658,9 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
                         style={{ width: '96px', minWidth: '96px', fontSize: '0.78rem', position: 'relative', zIndex: 3, pointerEvents: 'auto' }}
                         aria-label="Cambiar ciclo escolar"
                       >
-                        <option value="2025-2026">2025-2026</option>
+                        {a.school_cycle === '2025-2026' && (
+                          <option value="2025-2026">2025-2026</option>
+                        )}
                         <option value="2026-2027">2026-2027</option>
                       </select>
                     </td>
