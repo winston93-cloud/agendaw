@@ -8,6 +8,7 @@ import { alumnoGradoParaMySQL } from '@/lib/alumnoGradoMysql'
 import { assertAdmissionSlotAvailable } from '@/lib/admissionSlotAvailability'
 import { bookingConflictLevels, normalizeAppointmentTime } from '@/lib/admissionBooking'
 import { createAlumnoInMySQL, checkAlumnoExists as checkAlumnoExistsInMySQL, type AlumnoData } from '@/lib/mysql'
+import { createAlumnoInWinstonServicios } from '@/lib/winstonServicios'
 import {
   sendRecorridoConfirmationToParent,
   sendRecorridoNotificationToDirector,
@@ -388,7 +389,17 @@ export async function completeAdmissionAndCreateAlumno(appointmentId: string): P
 
     const alumno_ref = await createAlumnoInMySQL(alumnoData)
 
-    // Actualizar status en InsForge
+    const insforge = await createAlumnoInWinstonServicios(alumnoData, alumno_ref)
+    if (!insforge.ok) {
+      console.error('[completeAdmission] MySQL OK pero InsForge falló:', insforge.message)
+      return {
+        success: false,
+        alumno_ref,
+        message: `Alumno creado en MySQL (ref ${alumno_ref}) pero falló el alta en InsForge Winston Servicios: ${insforge.message}. Reintenta o sincroniza manualmente.`,
+      }
+    }
+
+    // Actualizar status en InsForge AgendaW
     await supabase
       .from('admission_appointments')
       .update({ 
@@ -415,7 +426,7 @@ export async function completeAdmissionAndCreateAlumno(appointmentId: string): P
     return {
       success: true,
       alumno_ref,
-      message: `✓ Alta exitosa. Alumno creado con referencia: ${alumno_ref}`,
+      message: `✓ Alta exitosa. Alumno creado con referencia: ${alumno_ref} (MySQL + InsForge)`,
     }
   } catch (error) {
     console.error('[completeAdmission]', error)
@@ -486,6 +497,16 @@ export async function completeAdmissionLegacy(appointmentId: string): Promise<{
 
     const alumno_ref = await createAlumnoInMySQL(alumnoData)
 
+    const insforge = await createAlumnoInWinstonServicios(alumnoData, alumno_ref)
+    if (!insforge.ok) {
+      console.error('[completeAdmissionLegacy] MySQL OK pero InsForge falló:', insforge.message)
+      return {
+        success: false,
+        alumno_ref,
+        message: `Alumno creado en MySQL (ref ${alumno_ref}) pero falló el alta en InsForge Winston Servicios: ${insforge.message}. Reintenta o sincroniza manualmente.`,
+      }
+    }
+
     await supabase
       .from('admission_appointments')
       .update({ status: 'completed', alumno_ref, updated_at: new Date().toISOString() })
@@ -505,7 +526,11 @@ export async function completeAdmissionLegacy(appointmentId: string): Promise<{
       appointmentTime: appointment.appointment_time ?? null,
     })
 
-    return { success: true, alumno_ref, message: `✓ Alta exitosa. Alumno creado con referencia: ${alumno_ref}` }
+    return {
+      success: true,
+      alumno_ref,
+      message: `✓ Alta exitosa. Alumno creado con referencia: ${alumno_ref} (MySQL + InsForge)`,
+    }
   } catch (error) {
     console.error('[completeAdmissionLegacy]', error)
     return { success: false, message: error instanceof Error ? error.message : 'Error al crear alumno en MySQL' }
