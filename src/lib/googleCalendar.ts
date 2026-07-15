@@ -9,6 +9,29 @@ const LEVEL_LABELS: Record<string, string> = {
   secundaria: 'Secundaria',
 }
 
+export type PsicologaCalendarKey = 'educativo' | 'primaria' | 'secundaria'
+
+export const PSICOLOGA_EVENT_COLUMNS: Record<
+  PsicologaCalendarKey,
+  'google_event_id_psic_educativo' | 'google_event_id_psic_primaria' | 'google_event_id_psic_secundaria'
+> = {
+  educativo: 'google_event_id_psic_educativo',
+  primaria: 'google_event_id_psic_primaria',
+  secundaria: 'google_event_id_psic_secundaria',
+}
+
+/** Calendarios de las 3 psicólogas (vacaciones: toda cita se replica en todas). */
+export function listPsicologaCalendars(): { key: PsicologaCalendarKey; calendarId: string }[] {
+  const all: { key: PsicologaCalendarKey; env: string | undefined }[] = [
+    { key: 'educativo', env: process.env.GOOGLE_CALENDAR_PSICOLOGA_EDUCATIVO },
+    { key: 'primaria', env: process.env.GOOGLE_CALENDAR_PSICOLOGA_PRIMARIA },
+    { key: 'secundaria', env: process.env.GOOGLE_CALENDAR_PSICOLOGA_SECUNDARIA },
+  ]
+  return all
+    .filter((c): c is { key: PsicologaCalendarKey; env: string } => Boolean(c.env))
+    .map((c) => ({ key: c.key, calendarId: c.env }))
+}
+
 /** Retorna el Calendar ID (correo) de la psicóloga según el nivel educativo */
 export function getPsicologaCalendarId(level: string): string | null {
   if (level === 'maternal' || level === 'kinder') {
@@ -23,22 +46,162 @@ export function getPsicologaCalendarId(level: string): string | null {
   return null
 }
 
-/** Retorna TODOS los Calendar IDs para un nivel (primaria tiene 3, otros solo 1) */
-export function getAllCalendarIdsForLevel(level: string): { psicologa: string; controlEscolar?: string; ingles?: string } | null {
-  const psicologaId = getPsicologaCalendarId(level)
-  if (!psicologaId) return null
+export function psicologaKeyForLevel(level: string): PsicologaCalendarKey | null {
+  if (level === 'maternal' || level === 'kinder') return 'educativo'
+  if (level === 'primaria') return 'primaria'
+  if (level === 'secundaria') return 'secundaria'
+  return null
+}
 
-  // Primaria: agregar calendars de control escolar e inglés
+export type LevelCalendars = {
+  /** Las 3 psicólogas (si hay env configuradas). */
+  psicologas: { key: PsicologaCalendarKey; calendarId: string }[]
+  /** Psicóloga del nivel del alumno (compat / google_event_id). */
+  psicologa: string
+  controlEscolar?: string
+  ingles?: string
+}
+
+/**
+ * Calendarios destino al agendar una cita de admisión.
+ * Vacaciones / rotación: SIEMPRE las 3 psicólogas, sin importar el nivel.
+ * Primaria además escribe en control escolar e inglés.
+ */
+export function getAllCalendarIdsForLevel(level: string): LevelCalendars | null {
+  const psicologas = listPsicologaCalendars()
+  const psicologaId = getPsicologaCalendarId(level) ?? psicologas[0]?.calendarId
+  if (!psicologaId && psicologas.length === 0) return null
+
+  const base: LevelCalendars = {
+    psicologas,
+    psicologa: psicologaId ?? psicologas[0].calendarId,
+  }
+
   if (level === 'primaria') {
-    return {
-      psicologa: psicologaId,
-      controlEscolar: process.env.GOOGLE_CALENDAR_CONTROL_ESCOLAR_PRIMARIA ?? undefined,
-      ingles: process.env.GOOGLE_CALENDAR_INGLES_PRIMARIA ?? undefined,
+    base.controlEscolar = process.env.GOOGLE_CALENDAR_CONTROL_ESCOLAR_PRIMARIA ?? undefined
+    base.ingles = process.env.GOOGLE_CALENDAR_INGLES_PRIMARIA ?? undefined
+  }
+
+  return base
+}
+
+export type AppointmentCalendarIds = {
+  google_event_id?: string | null
+  google_event_id_psic_educativo?: string | null
+  google_event_id_psic_primaria?: string | null
+  google_event_id_psic_secundaria?: string | null
+  google_event_id_control_escolar?: string | null
+  google_event_id_ingles?: string | null
+}
+
+/** Crea el evento en las 3 psicólogas (+ control/inglés si aplica). */
+export async function createAdmissionCalendarEvents(
+  level: string,
+  eventData: CalendarEventData
+): Promise<Record<string, string>> {
+  const calendars = getAllCalendarIdsForLevel(level)
+  if (!calendars) return {}
+
+  const updates: Record<string, string> = {}
+  const levelKey = psicologaKeyForLevel(level)
+
+  for (const psic of calendars.psicologas) {
+    const result = await createCalendarEvent(psic.calendarId, eventData)
+    if (!result.ok || !result.eventId) continue
+    updates[PSICOLOGA_EVENT_COLUMNS[psic.key]] = result.eventId
+    if (levelKey === psic.key || (!levelKey && psic.calendarId === calendars.psicologa)) {
+      updates.google_event_id = result.eventId
     }
   }
 
-  // Otros niveles: solo psicóloga
-  return { psicologa: psicologaId }
+  // Compat: si no se llenó google_event_id (env del nivel ausente), usar el primero
+  if (!updates.google_event_id) {
+    const firstCol = Object.values(PSICOLOGA_EVENT_COLUMNS).find((c) => updates[c])
+    if (firstCol) updates.google_event_id = updates[firstCol]
+  }
+
+  if (level === 'primaria') {
+    if (calendars.controlEscolar) {
+      const controlResult = await createCalendarEvent(calendars.controlEscolar, eventData)
+      if (controlResult.ok && controlResult.eventId) {
+        updates.google_event_id_control_escolar = controlResult.eventId
+      }
+    }
+    if (calendars.ingles) {
+      const inglesResult = await createCalendarEvent(calendars.ingles, eventData)
+      if (inglesResult.ok && inglesResult.eventId) {
+        updates.google_event_id_ingles = inglesResult.eventId
+      }
+    }
+  }
+
+  return updates
+}
+
+/** Actualiza eventos existentes en todas las psicólogas (+ control/inglés). */
+export async function updateAdmissionCalendarEvents(
+  level: string,
+  stored: AppointmentCalendarIds,
+  eventData: CalendarEventData
+): Promise<void> {
+  const calendars = getAllCalendarIdsForLevel(level)
+  if (!calendars) return
+
+  for (const psic of calendars.psicologas) {
+    const eventId = stored[PSICOLOGA_EVENT_COLUMNS[psic.key]]
+    if (eventId) {
+      await updateCalendarEvent(psic.calendarId, eventId, eventData)
+    }
+  }
+
+  // Legacy: solo google_event_id (antes de columnas por psicóloga)
+  const hasPerPsic = calendars.psicologas.some((p) => stored[PSICOLOGA_EVENT_COLUMNS[p.key]])
+  if (!hasPerPsic && stored.google_event_id && calendars.psicologa) {
+    await updateCalendarEvent(calendars.psicologa, stored.google_event_id, eventData)
+  }
+
+  if (level === 'primaria') {
+    if (calendars.controlEscolar && stored.google_event_id_control_escolar) {
+      await updateCalendarEvent(
+        calendars.controlEscolar,
+        stored.google_event_id_control_escolar,
+        eventData
+      )
+    }
+    if (calendars.ingles && stored.google_event_id_ingles) {
+      await updateCalendarEvent(calendars.ingles, stored.google_event_id_ingles, eventData)
+    }
+  }
+}
+
+/** Elimina eventos de las 3 psicólogas (+ control/inglés). */
+export async function deleteAdmissionCalendarEvents(
+  level: string,
+  stored: AppointmentCalendarIds
+): Promise<void> {
+  const calendars = getAllCalendarIdsForLevel(level)
+  if (!calendars) return
+
+  for (const psic of calendars.psicologas) {
+    const eventId = stored[PSICOLOGA_EVENT_COLUMNS[psic.key]]
+    if (eventId) {
+      await deleteCalendarEvent(psic.calendarId, eventId)
+    }
+  }
+
+  const hasPerPsic = calendars.psicologas.some((p) => stored[PSICOLOGA_EVENT_COLUMNS[p.key]])
+  if (!hasPerPsic && stored.google_event_id && calendars.psicologa) {
+    await deleteCalendarEvent(calendars.psicologa, stored.google_event_id)
+  }
+
+  if (level === 'primaria') {
+    if (calendars.controlEscolar && stored.google_event_id_control_escolar) {
+      await deleteCalendarEvent(calendars.controlEscolar, stored.google_event_id_control_escolar)
+    }
+    if (calendars.ingles && stored.google_event_id_ingles) {
+      await deleteCalendarEvent(calendars.ingles, stored.google_event_id_ingles)
+    }
+  }
 }
 
 /** Retorna el Calendar ID (correo) de vinculación según el nivel educativo */

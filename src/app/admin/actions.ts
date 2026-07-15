@@ -23,7 +23,7 @@ import {
   updateCalendarEvent,
   deleteCalendarEvent,
   getVinculacionCalendarId,
-  getAllCalendarIdsForLevel,
+  deleteAdmissionCalendarEvents,
   buildRecorridoEventDescription,
 } from '@/lib/googleCalendar'
 
@@ -246,12 +246,22 @@ export async function updateAppointment(
 
   // Si se está cancelando, obtener event IDs para eliminar de calendars
   const isBeingCancelled = updates.status === 'cancelled'
-  let currentAppointment: { level?: string; google_event_id?: string; google_event_id_control_escolar?: string; google_event_id_ingles?: string } | null = null
-  
+  let currentAppointment: {
+    level?: string
+    google_event_id?: string
+    google_event_id_psic_educativo?: string
+    google_event_id_psic_primaria?: string
+    google_event_id_psic_secundaria?: string
+    google_event_id_control_escolar?: string
+    google_event_id_ingles?: string
+  } | null = null
+
   if (isBeingCancelled) {
     const { data } = await supabase
       .from('admission_appointments')
-      .select('level, google_event_id, google_event_id_control_escolar, google_event_id_ingles')
+      .select(
+        'level, google_event_id, google_event_id_psic_educativo, google_event_id_psic_primaria, google_event_id_psic_secundaria, google_event_id_control_escolar, google_event_id_ingles'
+      )
       .eq('id', id)
       .single()
     currentAppointment = data
@@ -275,27 +285,12 @@ export async function updateAppointment(
     .eq('id', id)
   if (error) throw new Error(error.message)
 
-  // Si se canceló la cita, eliminar eventos de Google Calendar
+  // Si se canceló la cita, eliminar eventos de Google Calendar (3 psicólogas + extras)
   if (isBeingCancelled && currentAppointment) {
-    const calendars = getAllCalendarIdsForLevel(currentAppointment.level || '')
-    if (calendars) {
-      try {
-        // Eliminar evento de psicóloga
-        if (currentAppointment.google_event_id) {
-          await deleteCalendarEvent(calendars.psicologa, currentAppointment.google_event_id)
-        }
-        // Si es primaria, eliminar también de control escolar e inglés
-        if (currentAppointment.level === 'primaria') {
-          if (calendars.controlEscolar && currentAppointment.google_event_id_control_escolar) {
-            await deleteCalendarEvent(calendars.controlEscolar, currentAppointment.google_event_id_control_escolar)
-          }
-          if (calendars.ingles && currentAppointment.google_event_id_ingles) {
-            await deleteCalendarEvent(calendars.ingles, currentAppointment.google_event_id_ingles)
-          }
-        }
-      } catch (e) {
-        console.warn('[updateAppointment] Error eliminando eventos de calendar:', e)
-      }
+    try {
+      await deleteAdmissionCalendarEvents(currentAppointment.level || '', currentAppointment)
+    } catch (e) {
+      console.warn('[updateAppointment] Error eliminando eventos de calendar:', e)
     }
   }
 

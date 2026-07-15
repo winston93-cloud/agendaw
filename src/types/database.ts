@@ -90,6 +90,9 @@ export interface AdmissionAppointment {
   origin?: string
   legacy_id?: number
   google_event_id?: string
+  google_event_id_psic_educativo?: string
+  google_event_id_psic_primaria?: string
+  google_event_id_psic_secundaria?: string
   google_event_id_control_escolar?: string
   google_event_id_ingles?: string
   alumno_ref?: number
