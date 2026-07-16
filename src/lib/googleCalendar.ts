@@ -138,40 +138,94 @@ export async function createAdmissionCalendarEvents(
   return updates
 }
 
-/** Actualiza eventos existentes en todas las psicólogas (+ control/inglés). */
+/**
+ * Sincroniza calendarios: actualiza IDs existentes, adopta google_event_id legacy
+ * en la psicóloga del nivel, y CREA las copias faltantes en las demás.
+ * Devuelve columnas a persistir en admission_appointments.
+ */
+export async function syncAdmissionCalendarEvents(
+  level: string,
+  stored: AppointmentCalendarIds,
+  eventData: CalendarEventData
+): Promise<Record<string, string>> {
+  const calendars = getAllCalendarIdsForLevel(level)
+  if (!calendars) return {}
+
+  const updates: Record<string, string> = {}
+  const working: AppointmentCalendarIds = { ...stored }
+  const levelKey = psicologaKeyForLevel(level)
+
+  // Citas anteriores al cambio: solo tenían google_event_id en la psicóloga del nivel.
+  if (stored.google_event_id && levelKey) {
+    const col = PSICOLOGA_EVENT_COLUMNS[levelKey]
+    if (!working[col]) {
+      working[col] = stored.google_event_id
+      updates[col] = stored.google_event_id
+    }
+  }
+
+  for (const psic of calendars.psicologas) {
+    const col = PSICOLOGA_EVENT_COLUMNS[psic.key]
+    const eventId = working[col]
+    if (eventId) {
+      await updateCalendarEvent(psic.calendarId, eventId, eventData)
+      continue
+    }
+
+    const created = await createCalendarEvent(psic.calendarId, eventData)
+    if (!created.ok || !created.eventId) continue
+    updates[col] = created.eventId
+    working[col] = created.eventId
+    if (levelKey === psic.key) {
+      updates.google_event_id = created.eventId
+    }
+  }
+
+  if (!stored.google_event_id && !updates.google_event_id) {
+    const firstCol = Object.values(PSICOLOGA_EVENT_COLUMNS).find((c) => updates[c] || working[c])
+    if (firstCol) {
+      const id = updates[firstCol] || working[firstCol]
+      if (id) updates.google_event_id = id
+    }
+  }
+
+  if (level === 'primaria') {
+    if (calendars.controlEscolar) {
+      if (working.google_event_id_control_escolar) {
+        await updateCalendarEvent(
+          calendars.controlEscolar,
+          working.google_event_id_control_escolar,
+          eventData
+        )
+      } else {
+        const controlResult = await createCalendarEvent(calendars.controlEscolar, eventData)
+        if (controlResult.ok && controlResult.eventId) {
+          updates.google_event_id_control_escolar = controlResult.eventId
+        }
+      }
+    }
+    if (calendars.ingles) {
+      if (working.google_event_id_ingles) {
+        await updateCalendarEvent(calendars.ingles, working.google_event_id_ingles, eventData)
+      } else {
+        const inglesResult = await createCalendarEvent(calendars.ingles, eventData)
+        if (inglesResult.ok && inglesResult.eventId) {
+          updates.google_event_id_ingles = inglesResult.eventId
+        }
+      }
+    }
+  }
+
+  return updates
+}
+
+/** @deprecated Prefer syncAdmissionCalendarEvents (crea faltantes). */
 export async function updateAdmissionCalendarEvents(
   level: string,
   stored: AppointmentCalendarIds,
   eventData: CalendarEventData
-): Promise<void> {
-  const calendars = getAllCalendarIdsForLevel(level)
-  if (!calendars) return
-
-  for (const psic of calendars.psicologas) {
-    const eventId = stored[PSICOLOGA_EVENT_COLUMNS[psic.key]]
-    if (eventId) {
-      await updateCalendarEvent(psic.calendarId, eventId, eventData)
-    }
-  }
-
-  // Legacy: solo google_event_id (antes de columnas por psicóloga)
-  const hasPerPsic = calendars.psicologas.some((p) => stored[PSICOLOGA_EVENT_COLUMNS[p.key]])
-  if (!hasPerPsic && stored.google_event_id && calendars.psicologa) {
-    await updateCalendarEvent(calendars.psicologa, stored.google_event_id, eventData)
-  }
-
-  if (level === 'primaria') {
-    if (calendars.controlEscolar && stored.google_event_id_control_escolar) {
-      await updateCalendarEvent(
-        calendars.controlEscolar,
-        stored.google_event_id_control_escolar,
-        eventData
-      )
-    }
-    if (calendars.ingles && stored.google_event_id_ingles) {
-      await updateCalendarEvent(calendars.ingles, stored.google_event_id_ingles, eventData)
-    }
-  }
+): Promise<Record<string, string>> {
+  return syncAdmissionCalendarEvents(level, stored, eventData)
 }
 
 /** Elimina eventos de las 3 psicólogas (+ control/inglés). */

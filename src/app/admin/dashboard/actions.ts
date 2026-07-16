@@ -379,7 +379,7 @@ export async function respondPermissionRequest(
           const studentName = [currentAppt.student_name, currentAppt.student_last_name_p, currentAppt.student_last_name_m]
             .filter(Boolean).join(' ')
 
-          await updateAdmissionCalendarEvents(currentAppt.level, currentAppt, {
+          const calendarUpdates = await updateAdmissionCalendarEvents(currentAppt.level, currentAppt, {
             summary: `Examen admisión: ${studentName} (${currentAppt.level})`,
             description: buildAdmisionEventDescription({
               studentName,
@@ -393,6 +393,12 @@ export async function respondPermissionRequest(
             date: req.proposed_date,
             time: req.proposed_time,
           })
+          if (Object.keys(calendarUpdates).length > 0) {
+            await supabase
+              .from('admission_appointments')
+              .update(calendarUpdates)
+              .eq('id', req.appointment_id)
+          }
         } catch (e) {
           console.warn('[respondPermissionRequest] Error actualizando eventos de calendar:', e)
         }
