@@ -1,7 +1,7 @@
 // Componente para administrar citas - V4
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateAppointment, completeAdmissionAndCreateAlumno, completeAdmissionLegacy, checkExpedientesBatch, getFullyBookedDates, createManualExpedienteForAppointment } from './actions'
 import { createPermissionRequest, getAllRecentRequests } from './dashboard/actions'
@@ -94,6 +94,27 @@ function toAdminLevel(level: string) {
   return level
 }
 
+function nombreCompletoAspirante(a: AdmissionAppointment): string {
+  return `${a.student_name || ''} ${a.student_last_name_p || ''} ${a.student_last_name_m || ''}`
+    .trim()
+    .replace(/\s+/g, ' ')
+}
+
+function normalizarBusqueda(s: string): string {
+  return s
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+}
+
+function coincideNombre(full: string, query: string): boolean {
+  const nFull = normalizarBusqueda(full)
+  const tokens = normalizarBusqueda(query).split(/\s+/).filter(Boolean)
+  if (!tokens.length) return true
+  return tokens.every((t) => nFull.includes(t))
+}
+
 export default function AdminCitas({ appointments, allowedLevels }: { appointments: AdmissionAppointment[]; allowedLevels: string[] }) {
   const router = useRouter()
 
@@ -108,6 +129,11 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
   const [filterStatus,   setFilterStatus]   = useState('')
   const [filterStart,    setFilterStart]    = useState('')
   const [filterEnd,      setFilterEnd]      = useState('')
+  const [filterNameQuery, setFilterNameQuery] = useState('')
+  const [filterAspiranteId, setFilterAspiranteId] = useState<string | null>(null)
+  const [nameSuggestOpen, setNameSuggestOpen] = useState(false)
+  const [nameHighlight, setNameHighlight] = useState(0)
+  const aspiranteFilterRef = useRef<HTMLDivElement>(null)
   const [expedientesMap, setExpedientesMap] = useState<Record<string, boolean>>({})
   const [statusMap,      setStatusMap]      = useState<Record<string, ReqStatus>>({})
 
@@ -126,8 +152,59 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
     if (filterStatus && a.status !== filterStatus) return false
     if (filterStart  && a.appointment_date < filterStart) return false
     if (filterEnd    && a.appointment_date > filterEnd)   return false
+    if (filterAspiranteId) {
+      if (a.id !== filterAspiranteId) return false
+    } else if (filterNameQuery.trim()) {
+      if (!coincideNombre(nombreCompletoAspirante(a), filterNameQuery)) return false
+    }
     return true
   })
+
+  const aspiranteSuggestions = useMemo(() => {
+    const q = filterNameQuery.trim()
+    if (q.length < 1) return []
+    const seen = new Set<string>()
+    const out: { id: string; nombre: string; nivel: string; fecha: string }[] = []
+    for (const a of appointments) {
+      const nombre = nombreCompletoAspirante(a)
+      if (!coincideNombre(nombre, q)) continue
+      const key = normalizarBusqueda(nombre)
+      if (seen.has(key)) continue
+      seen.add(key)
+      out.push({
+        id: a.id,
+        nombre,
+        nivel: LEVEL_LABELS[a.level] || a.level,
+        fecha: a.appointment_date,
+      })
+      if (out.length >= 8) break
+    }
+    return out
+  }, [appointments, filterNameQuery])
+
+  const seleccionarAspirante = useCallback((id: string, nombre: string) => {
+    setFilterAspiranteId(id)
+    setFilterNameQuery(nombre)
+    setNameSuggestOpen(false)
+    setNameHighlight(0)
+  }, [])
+
+  const limpiarFiltroAspirante = useCallback(() => {
+    setFilterAspiranteId(null)
+    setFilterNameQuery('')
+    setNameSuggestOpen(false)
+    setNameHighlight(0)
+  }, [])
+
+  useEffect(() => {
+    const onDoc = (e: MouseEvent) => {
+      if (!aspiranteFilterRef.current?.contains(e.target as Node)) {
+        setNameSuggestOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onDoc)
+    return () => document.removeEventListener('mousedown', onDoc)
+  }, [])
 
   useEffect(() => {
     if (appointments.length === 0) return
@@ -580,6 +657,94 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
             </select>
           </div>
         </div>
+        <div
+          className={`admin-filters-group admin-filters-group--aspirante${filterAspiranteId ? ' admin-filters-group--aspirante-selected' : ''}`}
+          ref={aspiranteFilterRef}
+        >
+          <label className="admin-filter-label" htmlFor="filtro-aspirante">
+            <span className="filter-icon" aria-hidden="true">👤</span> Aspirante
+          </label>
+          <div className="admin-aspirante-search">
+            <span className="admin-aspirante-search-icon" aria-hidden="true">⌕</span>
+            <input
+              id="filtro-aspirante"
+              type="search"
+              className="admin-aspirante-input"
+              placeholder="Buscar por nombre completo…"
+              value={filterNameQuery}
+              autoComplete="off"
+              aria-autocomplete="list"
+              aria-expanded={nameSuggestOpen && aspiranteSuggestions.length > 0}
+              aria-controls="aspirante-suggest-list"
+              onChange={(e) => {
+                setFilterNameQuery(e.target.value)
+                setFilterAspiranteId(null)
+                setNameSuggestOpen(true)
+                setNameHighlight(0)
+              }}
+              onFocus={() => setNameSuggestOpen(true)}
+              onKeyDown={(e) => {
+                if (!nameSuggestOpen || aspiranteSuggestions.length === 0) {
+                  if (e.key === 'Escape') limpiarFiltroAspirante()
+                  return
+                }
+                if (e.key === 'ArrowDown') {
+                  e.preventDefault()
+                  setNameHighlight((i) => Math.min(i + 1, aspiranteSuggestions.length - 1))
+                } else if (e.key === 'ArrowUp') {
+                  e.preventDefault()
+                  setNameHighlight((i) => Math.max(i - 1, 0))
+                } else if (e.key === 'Enter') {
+                  e.preventDefault()
+                  const pick = aspiranteSuggestions[nameHighlight]
+                  if (pick) seleccionarAspirante(pick.id, pick.nombre)
+                } else if (e.key === 'Escape') {
+                  setNameSuggestOpen(false)
+                }
+              }}
+            />
+            {(filterNameQuery || filterAspiranteId) && (
+              <button
+                type="button"
+                className="admin-aspirante-clear"
+                onClick={limpiarFiltroAspirante}
+                title="Quitar filtro de aspirante"
+                aria-label="Quitar filtro de aspirante"
+              >
+                ✕
+              </button>
+            )}
+            {nameSuggestOpen && filterNameQuery.trim() && (
+              <ul id="aspirante-suggest-list" className="admin-aspirante-suggest" role="listbox">
+                {aspiranteSuggestions.length === 0 ? (
+                  <li className="admin-aspirante-suggest-empty">Sin coincidencias</li>
+                ) : (
+                  aspiranteSuggestions.map((s, idx) => (
+                    <li key={s.id} role="option" aria-selected={idx === nameHighlight}>
+                      <button
+                        type="button"
+                        className={`admin-aspirante-suggest-item${idx === nameHighlight ? ' is-active' : ''}`}
+                        onMouseEnter={() => setNameHighlight(idx)}
+                        onClick={() => seleccionarAspirante(s.id, s.nombre)}
+                      >
+                        <span className="admin-aspirante-suggest-name">{s.nombre}</span>
+                        <span className="admin-aspirante-suggest-meta">
+                          {s.nivel}
+                          {' · '}
+                          {new Date(s.fecha + 'T12:00:00').toLocaleDateString('es-MX', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                          })}
+                        </span>
+                      </button>
+                    </li>
+                  ))
+                )}
+              </ul>
+            )}
+          </div>
+        </div>
         <div className="admin-filters-divider"></div>
         <div className="admin-filters-group-dates">
           <div className="admin-filters-date-label"><span className="filter-icon" aria-hidden="true">📅</span> Fecha de examen</div>
@@ -595,9 +760,19 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
             </div>
           </div>
         </div>
-        {(filterStart || filterEnd || filterLevel || filterStatus) && (
-          <button onClick={() => { setFilterStart(''); setFilterEnd(''); setFilterLevel(''); setFilterStatus('') }}
-            className="admin-filter-clear" title="Limpiar filtros" aria-label="Limpiar filtros">
+        {(filterStart || filterEnd || filterLevel || filterStatus || filterNameQuery || filterAspiranteId) && (
+          <button
+            onClick={() => {
+              setFilterStart('')
+              setFilterEnd('')
+              setFilterLevel('')
+              setFilterStatus('')
+              limpiarFiltroAspirante()
+            }}
+            className="admin-filter-clear"
+            title="Limpiar filtros"
+            aria-label="Limpiar filtros"
+          >
             <span aria-hidden="true">✕</span>
           </button>
         )}
