@@ -509,7 +509,7 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
               <h3>Confirmar aprobación de ingreso</h3>
             </div>
             <div className="modal-body">
-              <p className="modal-body-subtitle">Estás a punto de dar de alta al siguiente aspirante en Servicios Administrativos (MySQL + InsForge):</p>
+              <p className="modal-body-subtitle">Estás a punto de dar de alta al siguiente aspirante en Servicios Administrativos (InsForge Winston Servicios):</p>
               <div className="modal-info-grid">
                 <div className="modal-info-item">
                   <span className="modal-info-label">Alumno</span>
@@ -526,7 +526,7 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
                   <span className="modal-info-value">{GRADE_LABELS[modal.appointment.grade_level] || modal.appointment.grade_level}</span>
                 </div>
               </div>
-              <p className="modal-body-warning">Esta acción crea el registro en phpMyAdmin y en InsForge Winston Servicios (tabla alumno).</p>
+              <p className="modal-body-warning">Esta acción crea el registro en InsForge Winston Servicios (tabla alumno).</p>
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" onClick={() => setModal(null)} disabled={approving}>Cancelar</button>

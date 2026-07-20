@@ -7,8 +7,11 @@ import type { AdmissionLevel } from '@/types/database'
 import { alumnoGradoParaMySQL } from '@/lib/alumnoGradoMysql'
 import { assertAdmissionSlotAvailable } from '@/lib/admissionSlotAvailability'
 import { bookingConflictLevels, normalizeAppointmentTime } from '@/lib/admissionBooking'
-import { createAlumnoInMySQL, checkAlumnoExists as checkAlumnoExistsInMySQL, type AlumnoData } from '@/lib/mysql'
-import { createAlumnoInWinstonServicios } from '@/lib/winstonServicios'
+import {
+  checkAlumnoExistsInWinstonServicios,
+  createAlumnoInWinstonServicios,
+  type AlumnoData,
+} from '@/lib/winstonServicios'
 import {
   sendRecorridoConfirmationToParent,
   sendRecorridoNotificationToDirector,
@@ -298,8 +301,8 @@ export async function updateAppointment(
 }
 
 /**
- * Marca una cita como completada y crea el alumno en MySQL
- * Retorna el alumno_ref asignado en MySQL
+ * Marca una cita como completada y crea el alumno en InsForge Winston Servicios.
+ * Retorna el alumno_ref asignado en InsForge (ya no escribe en MySQL/phpMyAdmin).
  */
 export async function completeAdmissionAndCreateAlumno(appointmentId: string): Promise<{
   success: boolean
@@ -330,7 +333,6 @@ export async function completeAdmissionAndCreateAlumno(appointmentId: string): P
       return { success: false, message: 'El alumno no ha llenado el expediente inicial' }
     }
 
-    // Mapear nivel a número para MySQL
     const nivelMap: Record<string, string> = {
       maternal: '1',
       kinder: '2',
@@ -338,8 +340,7 @@ export async function completeAdmissionAndCreateAlumno(appointmentId: string): P
       secundaria: '4',
     }
 
-    // Verificar si ya existe el alumno
-    const existingRef = await checkAlumnoExistsInMySQL(
+    const existingRef = await checkAlumnoExistsInWinstonServicios(
       expediente.nombre_alumno || appointment.student_name,
       expediente.apellido_paterno_alumno || appointment.student_last_name_p || ''
     )
@@ -369,7 +370,6 @@ export async function completeAdmissionAndCreateAlumno(appointmentId: string): P
       appointment.grade_level || expediente.grado || ''
     )
 
-    // Crear alumno en MySQL
     const alumnoData: AlumnoData = {
       alumno_app: expediente.apellido_paterno_alumno || appointment.student_last_name_p || '',
       alumno_apm: expediente.apellido_materno_alumno || appointment.student_last_name_m || '',
@@ -382,17 +382,16 @@ export async function completeAdmissionAndCreateAlumno(appointmentId: string): P
       alumno_ciclo_escolar: parsedCiclo,
     }
 
-    const alumno_ref = await createAlumnoInMySQL(alumnoData)
-
-    const insforge = await createAlumnoInWinstonServicios(alumnoData, alumno_ref)
+    const insforge = await createAlumnoInWinstonServicios(alumnoData)
     if (!insforge.ok) {
-      console.error('[completeAdmission] MySQL OK pero InsForge falló:', insforge.message)
+      console.error('[completeAdmission] InsForge falló:', insforge.message)
       return {
         success: false,
-        alumno_ref,
-        message: `Alumno creado en MySQL (ref ${alumno_ref}) pero falló el alta en InsForge Winston Servicios: ${insforge.message}. Reintenta o sincroniza manualmente.`,
+        message: `Falló el alta en InsForge Winston Servicios: ${insforge.message}`,
       }
     }
+
+    const alumno_ref = insforge.alumno_ref
 
     // Actualizar status en InsForge AgendaW
     await supabase
@@ -421,13 +420,13 @@ export async function completeAdmissionAndCreateAlumno(appointmentId: string): P
     return {
       success: true,
       alumno_ref,
-      message: `✓ Alta exitosa. Alumno creado con referencia: ${alumno_ref} (MySQL + InsForge)`,
+      message: `✓ Alta exitosa. Alumno creado con referencia: ${alumno_ref}`,
     }
   } catch (error) {
     console.error('[completeAdmission]', error)
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Error al crear alumno en MySQL',
+      message: error instanceof Error ? error.message : 'Error al crear alumno en InsForge',
     }
   }
 }
@@ -470,7 +469,7 @@ export async function completeAdmissionLegacy(appointmentId: string): Promise<{
       return rawCiclo
     })()
 
-    const existingRef = await checkAlumnoExistsInMySQL(
+    const existingRef = await checkAlumnoExistsInWinstonServicios(
       appointment.student_name,
       appointment.student_last_name_p || ''
     )
@@ -490,17 +489,16 @@ export async function completeAdmissionLegacy(appointmentId: string): Promise<{
       alumno_ciclo_escolar: parsedCiclo,
     }
 
-    const alumno_ref = await createAlumnoInMySQL(alumnoData)
-
-    const insforge = await createAlumnoInWinstonServicios(alumnoData, alumno_ref)
+    const insforge = await createAlumnoInWinstonServicios(alumnoData)
     if (!insforge.ok) {
-      console.error('[completeAdmissionLegacy] MySQL OK pero InsForge falló:', insforge.message)
+      console.error('[completeAdmissionLegacy] InsForge falló:', insforge.message)
       return {
         success: false,
-        alumno_ref,
-        message: `Alumno creado en MySQL (ref ${alumno_ref}) pero falló el alta en InsForge Winston Servicios: ${insforge.message}. Reintenta o sincroniza manualmente.`,
+        message: `Falló el alta en InsForge Winston Servicios: ${insforge.message}`,
       }
     }
+
+    const alumno_ref = insforge.alumno_ref
 
     await supabase
       .from('admission_appointments')
@@ -524,11 +522,11 @@ export async function completeAdmissionLegacy(appointmentId: string): Promise<{
     return {
       success: true,
       alumno_ref,
-      message: `✓ Alta exitosa. Alumno creado con referencia: ${alumno_ref} (MySQL + InsForge)`,
+      message: `✓ Alta exitosa. Alumno creado con referencia: ${alumno_ref}`,
     }
   } catch (error) {
     console.error('[completeAdmissionLegacy]', error)
-    return { success: false, message: error instanceof Error ? error.message : 'Error al crear alumno en MySQL' }
+    return { success: false, message: error instanceof Error ? error.message : 'Error al crear alumno en InsForge' }
   }
 }
 
