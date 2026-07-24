@@ -14,6 +14,14 @@ export type AlumnoData = {
   alumno_ciclo_escolar: string
   alumno_registro?: string
   alumno_alta?: string
+  /** 0 = sin boleta aún (default nuevos ingresos AgendaW). */
+  alumno_boleta?: string | number
+  secret_key?: string
+  motivo?: string
+  responsable?: string
+  estatus_key?: string | number
+  digito?: string | number
+  hijo?: string | number
 }
 
 /** Cliente admin a InsForge «Winston Servicios» (tabla `alumno`). */
@@ -146,6 +154,7 @@ export async function createAlumnoInWinstonServicios(
 
     const alumno_id = await siguienteAlumnoId(db)
     const hoy = fechaIsoHoy()
+    // 2026-07-24 - alumno_boleta es NOT NULL en Winston Servicios; nuevos ingresos usan 0
     const fila = {
       alumno_id,
       alumno_ref: ref,
@@ -160,7 +169,14 @@ export async function createAlumnoInWinstonServicios(
       alumno_ciclo_escolar: toInt(data.alumno_ciclo_escolar, 0),
       alumno_registro: hoy,
       alumno_alta: data.alumno_alta ? String(data.alumno_alta).slice(0, 10) : hoy,
+      alumno_boleta: toInt(data.alumno_boleta, 0),
       mes: 1,
+      secret_key: data.secret_key?.trim() || '',
+      motivo: data.motivo?.trim() || '',
+      responsable: data.responsable?.trim() || 'agendaw',
+      estatus_key: toInt(data.estatus_key, 0),
+      digito: toInt(data.digito, 0),
+      hijo: toInt(data.hijo, 0),
     }
 
     const { error } = await db.from('alumno').insert(fila)
