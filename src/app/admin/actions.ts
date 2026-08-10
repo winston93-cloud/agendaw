@@ -323,11 +323,14 @@ export async function completeAdmissionAndCreateAlumno(appointmentId: string): P
       return { success: false, message: 'No se encontró la cita' }
     }
 
-    const { data: expediente } = await supabase
+    // Puede haber varios envíos/marcas; tomamos el más reciente.
+    const { data: expedientes } = await supabase
       .from('expediente_inicial')
       .select('*')
       .eq('appointment_id', appointmentId)
-      .single()
+      .order('created_at', { ascending: false })
+      .limit(1)
+    const expediente = expedientes?.[0] ?? null
 
     if (!expediente) {
       return { success: false, message: 'El alumno no ha llenado el expediente inicial' }
@@ -553,21 +556,21 @@ export async function checkExpedienteExists(appointmentId: string): Promise<bool
     .from('expediente_inicial')
     .select('id')
     .eq('appointment_id', appointmentId)
-    .single()
-  return !!data
+    .limit(1)
+  return !!(data && data.length > 0)
 }
 
 export async function createManualExpedienteForAppointment(appointmentId: string): Promise<{ ok: boolean; error?: string }> {
   try {
     const supabase = createAdminClient()
 
-    // Si ya existe, no hacer nada (idempotente)
+    // Si ya existe, no hacer nada (idempotente). No usar maybeSingle: fallaba con duplicados.
     const { data: existing } = await supabase
       .from('expediente_inicial')
       .select('id')
       .eq('appointment_id', appointmentId)
-      .maybeSingle()
-    if (existing?.id) return { ok: true }
+      .limit(1)
+    if (existing && existing.length > 0) return { ok: true }
 
     const { data: appt, error: apptErr } = await supabase
       .from('admission_appointments')
