@@ -383,6 +383,10 @@ export async function completeAdmissionAndCreateAlumno(appointmentId: string): P
       alumno_status: '2',
       alumno_nuevo_ingreso: '1', // Nuevo ingreso de agenda
       alumno_ciclo_escolar: parsedCiclo,
+      // Fecha que agendaron (cita de examen) — usada en reporte NI por mes.
+      alumno_alta: appointment.appointment_date
+        ? String(appointment.appointment_date).slice(0, 10)
+        : undefined,
     }
 
     const insforge = await createAlumnoInWinstonServicios(alumnoData)
@@ -490,6 +494,10 @@ export async function completeAdmissionLegacy(appointmentId: string): Promise<{
       alumno_status: '2',
       alumno_nuevo_ingreso: '1',
       alumno_ciclo_escolar: parsedCiclo,
+      // Fecha que agendaron (cita de examen) — usada en reporte NI por mes.
+      alumno_alta: appointment.appointment_date
+        ? String(appointment.appointment_date).slice(0, 10)
+        : undefined,
     }
 
     const insforge = await createAlumnoInWinstonServicios(alumnoData)
