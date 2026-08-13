@@ -2,6 +2,7 @@
 
 import { createAdminClient } from '@/lib/insforge/server'
 import { assertAdmissionSlotAvailable } from '@/lib/admissionSlotAvailability'
+import { assertCupoDisponibleAgenda, consultarCupoInscripcionAgenda } from '@/lib/cupoInscripcionPrimaria'
 import { sendAdmissionConfirmation, sendSecundariaTemarios, sendAdmissionNotificationToPsicologa } from '@/lib/email'
 import { sendAdmissionSms } from '@/lib/sms'
 import {
@@ -44,6 +45,12 @@ export async function createAdmissionAppointment(data: {
   appointment_time: string
 }) {
   const supabase = createAdminClient()
+
+  // Tope 60 inscritos (reporte dif2) en 3° y 5° de Primaria.
+  await assertCupoDisponibleAgenda({
+    level: data.level,
+    grade_level: data.grade_level,
+  })
 
   await assertAdmissionSlotAvailable(supabase, {
     date: data.appointment_date,
@@ -186,4 +193,25 @@ export async function createAdmissionAppointment(data: {
   }
 
   return { id: appointmentId, emailSent, smsSent }
+}
+
+/** Consulta cupo 3°/5° Primaria (tope 60) para la UI de agendar. */
+export async function checkCupoInscripcionGrade(level: string, grade_level: string) {
+  try {
+    const consulta = await consultarCupoInscripcionAgenda({ level, grade_level })
+    if (!consulta) {
+      return { aplica: false, lleno: false, mensaje: null as string | null }
+    }
+    return {
+      aplica: consulta.aplica,
+      lleno: consulta.lleno,
+      mensaje: consulta.mensaje,
+      totalInscritos: consulta.totalInscritos,
+      max: consulta.max,
+      etiqueta: consulta.etiqueta,
+    }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'No se pudo verificar el cupo'
+    return { aplica: true, lleno: false, mensaje: null as string | null, error: msg }
+  }
 }

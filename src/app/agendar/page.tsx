@@ -8,7 +8,7 @@ import { useTranslations, useLocale } from 'next-intl'
 import ExamDateCalendar from '@/components/ExamDateCalendar'
 import PublicThemeToggle from '@/components/PublicThemeToggle'
 import ClientLangSelector from '@/components/ClientLangSelector'
-import { createAdmissionAppointment } from './actions'
+import { createAdmissionAppointment, checkCupoInscripcionGrade } from './actions'
 import type { SlotAvailabilityMap } from '@/lib/admissionSlotAvailability'
 
 interface AlumnoResult {
@@ -82,6 +82,9 @@ export default function AgendarPage() {
   const [pendingLeaveAction, setPendingLeaveAction] = useState<'prevStep' | 'goHome' | null>(null)
   const [submitError,   setSubmitError]   = useState<string | null>(null)
   const [isSubmitting,  setIsSubmitting]  = useState(false)
+  const [cupoLleno, setCupoLleno] = useState(false)
+  const [cupoMensaje, setCupoMensaje] = useState<string | null>(null)
+  const [cupoChecking, setCupoChecking] = useState(false)
   const allowLeaveWithoutSendRef = useRef(false)
 
   // --- Programa Familia Winston ---
@@ -438,12 +441,50 @@ export default function AgendarPage() {
     }
   }, [formData.campus, formData.level, currentStep])
 
-  // Al seleccionar grado, bajar el scroll al calendario
+  // Al seleccionar grado, verificar cupo 3°/5° Primaria; si hay cupo, bajar al calendario
   useEffect(() => {
-    if (formData.gradeLevel && currentStep === 1) {
-      calendarRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    let cancelled = false
+    async function run() {
+      if (!formData.level || !formData.gradeLevel || currentStep !== 1) {
+        setCupoLleno(false)
+        setCupoMensaje(null)
+        setCupoChecking(false)
+        return
+      }
+      setCupoChecking(true)
+      setCupoLleno(false)
+      setCupoMensaje(null)
+      try {
+        const r = await checkCupoInscripcionGrade(formData.level, formData.gradeLevel)
+        if (cancelled) return
+        if (r.lleno) {
+          setCupoLleno(true)
+          setCupoMensaje(r.mensaje || t('aspirante.cupoFullMessage'))
+          setFormData((prev) => ({
+            ...prev,
+            appointmentDate: '',
+            appointmentTime: '',
+          }))
+        } else {
+          setCupoLleno(false)
+          setCupoMensaje(r.error ? r.error : null)
+          // Solo hacer scroll al calendario si hay cupo
+          calendarRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      } catch {
+        if (!cancelled) {
+          setCupoLleno(false)
+          setCupoMensaje(null)
+        }
+      } finally {
+        if (!cancelled) setCupoChecking(false)
+      }
     }
-  }, [formData.gradeLevel, currentStep])
+    void run()
+    return () => {
+      cancelled = true
+    }
+  }, [formData.level, formData.gradeLevel, currentStep, t])
 
   // Scroll a datos del alumno al elegir horario (o al tener fecha si no hay horarios configurados)
   useEffect(() => {
@@ -482,6 +523,7 @@ export default function AgendarPage() {
   }, [currentStep, showSuccessModal])
 
   const nextStep = () => {
+    if (cupoLleno || cupoChecking) return
     if (currentStep < 2) setCurrentStep(2)
   }
 
@@ -772,7 +814,32 @@ export default function AgendarPage() {
                     </select>
                   </div>
 
-                  {formData.gradeLevel && (
+                  {cupoChecking && formData.gradeLevel && (
+                    <div className="form-group full-width" role="status">
+                      <p className="form-hint">{t('aspirante.cupoChecking')}</p>
+                    </div>
+                  )}
+
+                  {cupoLleno && cupoMensaje && (
+                    <div
+                      className="form-group full-width"
+                      role="alert"
+                      style={{
+                        padding: '1rem 1.1rem',
+                        borderRadius: 12,
+                        border: '1px solid #f0d9a8',
+                        background: 'rgba(255, 246, 223, 0.65)',
+                        color: '#5c4a1f',
+                      }}
+                    >
+                      <strong style={{ display: 'block', marginBottom: 6 }}>
+                        {t('aspirante.cupoFullTitle')}
+                      </strong>
+                      <p style={{ margin: 0, lineHeight: 1.5 }}>{cupoMensaje}</p>
+                    </div>
+                  )}
+
+                  {formData.gradeLevel && !cupoLleno && !cupoChecking && (
                     <div ref={calendarRef} className="form-group full-width">
                       <label className="form-label">{t('aspirante.examDateLabel')}</label>
                       <ExamDateCalendar
@@ -784,7 +851,7 @@ export default function AgendarPage() {
                     </div>
                   )}
 
-                  {formData.gradeLevel && formData.appointmentDate && (
+                  {formData.gradeLevel && !cupoLleno && !cupoChecking && formData.appointmentDate && (
                     <div className="form-group full-width">
                       <label className="form-label">{t('aspirante.scheduleLabel')}</label>
                       {scheduleTimes.length === 0 ? (
@@ -829,7 +896,11 @@ export default function AgendarPage() {
                     </div>
                   )}
 
-                  {(formData.appointmentTime || scheduleTimes.length === 0) && formData.gradeLevel && formData.appointmentDate && (
+                  {(formData.appointmentTime || scheduleTimes.length === 0) &&
+                    formData.gradeLevel &&
+                    formData.appointmentDate &&
+                    !cupoLleno &&
+                    !cupoChecking && (
                     <div className="student-data-section" ref={afterHorarioRef}>
                       <h3 className="section-subtitle">{t('aspirante.heading')}</h3>
                       <div className="form-grid">
@@ -990,6 +1061,8 @@ export default function AgendarPage() {
                 className="btn btn-primary btn-submit-step"
                 onClick={nextStep}
                 disabled={Boolean(
+                  cupoLleno ||
+                  cupoChecking ||
                   !formData.campus || !formData.level || !formData.gradeLevel || !formData.appointmentDate ||
                   (scheduleTimes.length > 0 && !formData.appointmentTime) ||
                   ((formData.appointmentTime || scheduleTimes.length === 0) && (
