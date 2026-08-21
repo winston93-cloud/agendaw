@@ -22,6 +22,14 @@ export function gradeLevelConCupoLimitado(level: string, gradeLevel: string): bo
 }
 
 /**
+ * 2026-08-21 - 5° Primaria forzado a cupo lleno (como si ya hubiera 60).
+ * 3° sigue consultando servicios_admin (métrica real).
+ */
+export function gradeLevelForzarCupoLleno(level: string, gradeLevel: string): boolean {
+  return level === 'primaria' && gradeLevel === 'primaria_5'
+}
+
+/**
  * Consulta cupo vía servicios_admin (misma métrica del reporte 2.º diferido).
  */
 export async function consultarCupoInscripcionAgenda(opts: {
@@ -30,6 +38,21 @@ export async function consultarCupoInscripcionAgenda(opts: {
 }): Promise<ConsultaCupoInscripcion | null> {
   if (!gradeLevelConCupoLimitado(opts.level, opts.grade_level)) {
     return null
+  }
+
+  // Bloqueo inmediato de 5° aunque la API aún no haya redeployado.
+  if (gradeLevelForzarCupoLleno(opts.level, opts.grade_level)) {
+    return {
+      aplica: true,
+      nivel: 3,
+      grado: 5,
+      etiqueta: '5° de Primaria',
+      totalInscritos: 60,
+      max: 60,
+      lleno: true,
+      cicloInscripcion: 0,
+      mensaje: MENSAJE_CUPO_FALLBACK,
+    }
   }
 
   const url = urlCupoInscripcionApi({
