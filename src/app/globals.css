@@ -8356,6 +8356,16 @@ body {
   font-family: 'Courier New', monospace;
 }
 
+/* 2026-10-05 — Código numérico bajo el QR del comprobante Familia Winston. */
+.familia-doc-qr-code {
+  font-family: 'Courier New', monospace;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  color: #111;
+  margin: 0.35rem 0 0;
+}
+
 .familia-doc-qr-label {
   font-size: 0.78rem;
   font-weight: 700;
@@ -8542,6 +8552,16 @@ body {
   font-weight: 800;
   letter-spacing: 0.1em;
   font-family: 'Courier New', monospace;
+}
+
+/* 2026-10-05 — Código numérico bajo el QR del comprobante imprimible. */
+.wsp-qr-code {
+  font-family: 'Courier New', monospace;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  color: #111;
+  margin: 0.4rem 0 0;
 }
 
 .wsp-qr-label {

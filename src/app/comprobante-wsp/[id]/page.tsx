@@ -98,6 +98,8 @@ function ComprobanteContent({ id }: { id: string }) {
                   <span>{qr}</span>
                 </div>
               )}
+              {/* 2026-10-05 — Código numérico visible bajo el QR por si no se puede escanear. */}
+              {qrDataUrl ? <p className="wsp-qr-code">{qr}</p> : null}
               <p className="wsp-qr-label">Código de Verificación</p>
             </div>
 

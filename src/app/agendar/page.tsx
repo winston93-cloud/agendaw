@@ -1296,6 +1296,10 @@ export default function AgendarPage() {
                       ) : (
                         <div className="familia-doc-qr-placeholder">{familiaComprobante.qr}</div>
                       )}
+                      {/* 2026-10-05 — Código numérico visible bajo el QR por si no se puede escanear. */}
+                      {familiaQrDataUrl ? (
+                        <p className="familia-doc-qr-code">{familiaComprobante.qr}</p>
+                      ) : null}
                       <p className="familia-doc-qr-label">{t('familiaWinston.voucherQrLabel')}</p>
                     </div>
 
