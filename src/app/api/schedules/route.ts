@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createPublicClient } from '@/lib/insforge/server'
+import { createAdminClient } from '@/lib/insforge/server'
 import {
   getVacationSlotsForApiLevel,
   getVacationSlotsForStudentLevel,
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ times, vacation: true })
   }
 
-  const supabase = createPublicClient()
+  const supabase = createAdminClient()
   const { data, error } = await supabase
     .from('admission_schedules')
     .select('time_slot')

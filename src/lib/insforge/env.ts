@@ -1,36 +1,27 @@
-/** URL del backend InsForge AgendaW (acepta nombres nuevos y legacy). */
-export function getAgendawBaseUrl(): string {
-  const url =
-    process.env.NEXT_PUBLIC_INSFORGE_URL ??
-    process.env.INSFORGE_URL ??
-    process.env.NEXT_PUBLIC_SUPABASE_URL
-  if (!url?.trim()) {
-    throw new Error(
-      'Falta la URL de InsForge AgendaW. En Vercel define NEXT_PUBLIC_INSFORGE_URL=https://sr6a9iza.us-east.insforge.app'
-    )
-  }
-  return url.trim()
-}
+/**
+ * Las tablas de la agenda viven en InsForge «Winston Servicios» (desde 2026-10-05).
+ * El proyecto AgendaW (sr6a9iza) queda retirado: si la URL apunta ahí, se rechaza
+ * para no escribir citas en dos bases distintas.
+ */
+const HOST_AGENDAW_RETIRADO = 'sr6a9iza'
 
-export function getAgendawAnonKey(): string {
-  const key =
-    process.env.NEXT_PUBLIC_INSFORGE_ANON_KEY ??
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!key?.trim()) {
-    throw new Error(
-      'Falta NEXT_PUBLIC_INSFORGE_ANON_KEY (anon key del proyecto AgendaW en InsForge).'
-    )
+export function getAgendawBaseUrl(): string {
+  const url = process.env.WINSTON_SERVICIOS_URL?.trim()
+  if (!url) {
+    throw new Error('Falta WINSTON_SERVICIOS_URL (proyecto Winston Servicios en InsForge).')
   }
-  return key.trim()
+  if (url.includes(HOST_AGENDAW_RETIRADO)) {
+    throw new Error('WINSTON_SERVICIOS_URL apunta al proyecto AgendaW retirado; debe ser Winston Servicios.')
+  }
+  return url
 }
 
 export function getAgendawApiKey(): string {
-  const key =
-    process.env.INSFORGE_API_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!key?.trim()) {
-    throw new Error('Falta INSFORGE_API_KEY (API key admin del proyecto AgendaW en InsForge).')
+  const key = process.env.WINSTON_SERVICIOS_API_KEY?.trim()
+  if (!key) {
+    throw new Error('Falta WINSTON_SERVICIOS_API_KEY (proyecto Winston Servicios en InsForge).')
   }
-  return key.trim()
+  return key
 }
 
 export function hasAgendawDbEnv(): boolean {

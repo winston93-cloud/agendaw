@@ -1,15 +1,10 @@
 import type { InsForgeClient } from '@insforge/sdk'
-import { createAdminClient as createInsforgeAdmin, createClient } from '@insforge/sdk'
-import { getAgendawAnonKey, getAgendawApiKey, getAgendawBaseUrl } from '@/lib/insforge/env'
+import { createAdminClient as createInsforgeAdmin } from '@insforge/sdk'
+import { getAgendawApiKey, getAgendawBaseUrl } from '@/lib/insforge/env'
 
 export type DbClient = InsForgeClient['database']
 
-/** Cliente público (anon) a InsForge AgendaW. */
-export function createPublicClient(): DbClient {
-  return createClient({ baseUrl: getAgendawBaseUrl(), anonKey: getAgendawAnonKey() }).database
-}
-
-/** Cliente admin a InsForge AgendaW. */
+/** Cliente admin (solo servidor) a las tablas de la agenda en Winston Servicios. */
 export function createAdminClient(): DbClient {
   return createInsforgeAdmin({ baseUrl: getAgendawBaseUrl(), apiKey: getAgendawApiKey() }).database
 }

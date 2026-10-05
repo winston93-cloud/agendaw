@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createPublicClient } from '@/lib/insforge/server'
+import { createAdminClient } from '@/lib/insforge/server'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'date requerido en formato YYYY-MM-DD' }, { status: 400 })
   }
 
-  const supabase = createPublicClient()
+  const supabase = createAdminClient()
   const { data, error } = await supabase
     .from('blocked_dates')
     .select('block_time')

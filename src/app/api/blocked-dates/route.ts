@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createPublicClient } from '@/lib/insforge/server'
+import { createAdminClient } from '@/lib/insforge/server'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   if (!level || !['maternal_kinder', 'primaria', 'secundaria'].includes(level)) {
     return NextResponse.json({ error: 'level required: maternal_kinder | primaria | secundaria' }, { status: 400 })
   }
-  const supabase = createPublicClient()
+  const supabase = createAdminClient()
   // Solo devolver días con bloqueo completo (block_time IS NULL)
   // Los días con bloqueo parcial por horario siguen disponibles para agendar
   const { data, error } = await supabase
