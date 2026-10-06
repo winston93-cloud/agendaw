@@ -19,12 +19,18 @@ export async function POST(req: NextRequest) {
 
     const db = createWinstonServiciosClient()
 
+    // 2026-10-06: se guarda también el interesado (alumno nuevo) para que el validador de
+    // servicios_admin llene solo «¿A quién recomendó?» al leer el QR.
+    const texto = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, 200) : null)
     const insertData = {
       ctrl,
       qr,
       fecha: new Date().toISOString().slice(0, 10),
       estatus: 'INICIAL',
       status: 'pendiente',
+      interesado_nombre: texto(body.interesado_nombre),
+      interesado_nivel_grado: texto(body.interesado_nivel_grado),
+      interesado_ciclo: texto(body.interesado_ciclo),
     }
 
     const { data, error } = await db

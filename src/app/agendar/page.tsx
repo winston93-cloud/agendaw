@@ -96,6 +96,8 @@ export default function AgendarPage() {
   const [familiaShowDropdown, setFamiliaShowDropdown] = useState(false)
   const [familiaGenerating, setFamiliaGenerating] = useState(false)
   const [familiaCtrlConfirmed, setFamiliaCtrlConfirmed] = useState<string | null>(null)
+  /** 2026-10-06 — Comprobante generado; al agendar se liga a la cita (wsp.appointment_id). */
+  const [familiaWspId, setFamiliaWspId] = useState<number | null>(null)
   const [familiaComprobante, setFamiliaComprobante] = useState<{
     id: number; qr: number; ctrl: string; nombreRef: string;
     estudiante: string; nivelGrado: string; ciclo: string;
@@ -310,10 +312,25 @@ export default function AgendarPage() {
     if (!familiaSelected) return
     setFamiliaGenerating(true)
     try {
+      // 2026-10-06: datos del interesado calculados antes para guardarlos también en wsp.
+      const estudianteNombre = [formData.studentName, formData.studentLastNameP, formData.studentLastNameM]
+        .map(s => (s ?? '').trim()).filter(Boolean).join(' ').toUpperCase() || 'N/D'
+      const gradoLabel = getGradeLevels().find(g => g.value === formData.gradeLevel)?.label ?? ''
+      const levelLabel: Record<string, string> = {
+        maternal: 'Maternal', kinder: 'Kinder', primaria: 'Primaria', secundaria: 'Secundaria',
+      }
+      const nivelGrado = [levelLabel[formData.level] ?? formData.level, gradoLabel].filter(Boolean).join(' ')
+      const ciclo = (formData.schoolCycle || '').replace('-', ' - ')
+
       const res = await fetch('/api/wsp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ctrl: parseInt(familiaSelected.alumno_ref) || 0 }),
+        body: JSON.stringify({
+          ctrl: parseInt(familiaSelected.alumno_ref) || 0,
+          interesado_nombre: estudianteNombre === 'N/D' ? null : estudianteNombre,
+          interesado_nivel_grado: nivelGrado || null,
+          interesado_ciclo: formData.schoolCycle || null,
+        }),
       })
 
       let data: Record<string, unknown>
@@ -329,18 +346,11 @@ export default function AgendarPage() {
       }
 
       // Construir datos para mostrar el comprobante dentro del modal
-      const estudianteNombre = [formData.studentName, formData.studentLastNameP, formData.studentLastNameM]
-        .filter(Boolean).join(' ').toUpperCase() || 'N/D'
-      const gradoLabel = getGradeLevels().find(g => g.value === formData.gradeLevel)?.label ?? ''
-      const levelLabel: Record<string, string> = {
-        maternal: 'Maternal', kinder: 'Kinder', primaria: 'Primaria', secundaria: 'Secundaria',
-      }
-      const nivelGrado = [levelLabel[formData.level] ?? formData.level, gradoLabel].filter(Boolean).join(' ')
-      const ciclo = (formData.schoolCycle || '').replace('-', ' - ')
       const nombreRef = [familiaSelected.alumno_nombre, familiaSelected.alumno_app, familiaSelected.alumno_apm]
         .filter(Boolean).join(' ')
 
       setFamiliaCtrlConfirmed(familiaSelected.alumno_ref)
+      setFamiliaWspId(Number(data.id) || null)
       setFamiliaComprobante({
         id: data.id as number,
         qr: data.qr as number,
@@ -583,6 +593,8 @@ export default function AgendarPage() {
           : formData.relationship,
         appointment_date: formData.appointmentDate,
         appointment_time: formData.appointmentTime,
+        // 2026-10-06: liga el comprobante Familia Winston con esta cita
+        wsp_id: formData.howDidYouHear === 'programa_familia_winston' ? familiaWspId ?? undefined : undefined,
       })
       setLastAppointmentId(result?.id ?? null)
       setEmailSent(result?.emailSent ?? false)

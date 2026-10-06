@@ -5,6 +5,7 @@ import { assertAdmissionSlotAvailable } from '@/lib/admissionSlotAvailability'
 import { assertCupoDisponibleAgenda, consultarCupoInscripcionAgenda } from '@/lib/cupoInscripcionPrimaria'
 import { sendAdmissionConfirmation, sendSecundariaTemarios, sendAdmissionNotificationToPsicologa } from '@/lib/email'
 import { sendAdmissionSms } from '@/lib/sms'
+import { createWinstonServiciosClient } from '@/lib/winstonServicios'
 import {
   createAdmissionCalendarEvents,
   buildAdmisionEventDescription,
@@ -43,6 +44,8 @@ export async function createAdmissionAppointment(data: {
   relationship: string
   appointment_date: string
   appointment_time: string
+  /** 2026-10-06 — Comprobante Familia Winston generado en esta cita. */
+  wsp_id?: number
 }) {
   const supabase = createAdminClient()
 
@@ -87,6 +90,22 @@ export async function createAdmissionAppointment(data: {
   }
   const appointmentId = (inserted as { id: string })?.id
   console.log('[agendar] Cita creada con ID:', appointmentId)
+
+  // 2026-10-06: liga el comprobante con la cita; cuando el niño se inscribe la cita recibe
+  // alumno_ref y el validador Familia Winston llena solo «¿A quién recomendó?».
+  const wspId = Number(data.wsp_id)
+  if (appointmentId && Number.isInteger(wspId) && wspId > 0) {
+    try {
+      const { error: wspError } = await createWinstonServiciosClient()
+        .from('wsp')
+        .update({ appointment_id: appointmentId })
+        .eq('id', wspId)
+        .is('appointment_id', null)
+      if (wspError) console.warn('[agendar] No se ligó el comprobante WSP:', wspError.message)
+    } catch (e) {
+      console.warn('[agendar] No se ligó el comprobante WSP:', e)
+    }
+  }
 
   const studentName = [data.student_name, data.student_last_name_p, data.student_last_name_m].filter(Boolean).join(' ')
   const campusName = getCampusNameByLevel(data.level)
