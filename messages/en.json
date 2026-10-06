@@ -80,6 +80,8 @@
       "emailPlaceholder": "email@example.com",
       "cycleLabel": "School year applying for *",
       "cyclePlaceholder": "Select an option",
+      "cycleCurrentOption": "{cycle} · current school year (started August {inicio})",
+      "cycleNextOption": "{cycle} · next school year (starts August {inicio})",
       "howLabel": "How did you hear about us? *",
       "howPlaceholder": "Select an option",
       "howOptions": {
@@ -145,6 +147,22 @@
       "btnExpediente": "📋 Initial File",
       "btnDocs": "📤 Upload Documents",
       "btnClose": "Back to home"
+    },
+    "cycleModal": {
+      "kicker": "Before you continue",
+      "title": "Confirm the school year",
+      "range": "August {inicio} – July {fin}",
+      "tagCurrent": "Current school year",
+      "tagNext": "Next school year",
+      "textCurrent": "This school year is already under way: it started in August {inicio} and ends in July {fin}. Choose it only if {alumno} would join {grado} during this school year.",
+      "textNext": "This is the next school year: it starts in August {inicio} and ends in July {fin}. Choose it if {alumno} would join {grado} starting August {inicio}.",
+      "hintOtherNext": "If your child would join starting August {inicio}, choose the {other} school year.",
+      "hintOtherCurrent": "If your child would join during the school year already under way, choose {other}.",
+      "confirmBtn": "Yes, it is for {cycle}",
+      "cancelBtn": "No, choose another school year",
+      "confirmedNote": "School year confirmed: {cycle} (starts August {inicio})",
+      "defaultStudent": "your child",
+      "defaultGrade": "the selected grade"
     },
     "exitModal": {
       "title": "Do you want to submit your request?",

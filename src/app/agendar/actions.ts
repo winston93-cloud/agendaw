@@ -6,6 +6,7 @@ import { assertCupoDisponibleAgenda, consultarCupoInscripcionAgenda } from '@/li
 import { sendAdmissionConfirmation, sendSecundariaTemarios, sendAdmissionNotificationToPsicologa } from '@/lib/email'
 import { sendAdmissionSms } from '@/lib/sms'
 import { createWinstonServiciosClient } from '@/lib/winstonServicios'
+import { ciclosAdmision, type CicloAdmision } from '@/lib/ciclosAdmision'
 import {
   createAdmissionCalendarEvents,
   buildAdmisionEventDescription,
@@ -48,6 +49,13 @@ export async function createAdmissionAppointment(data: {
   wsp_id?: number
 }) {
   const supabase = createAdminClient()
+
+  if (data.school_cycle) {
+    const permitidos = (await ciclosAdmision()).map((c) => c.value)
+    if (!permitidos.includes(data.school_cycle)) {
+      throw new Error('El ciclo escolar seleccionado ya no está disponible. Recargue la página y elija de nuevo.')
+    }
+  }
 
   // Tope 60 inscritos (reporte dif2) en 3° y 5° de Primaria.
   await assertCupoDisponibleAgenda({
@@ -212,6 +220,11 @@ export async function createAdmissionAppointment(data: {
   }
 
   return { id: appointmentId, emailSent, smsSent }
+}
+
+/** Ciclos reservables (actual y siguiente) para el selector de agendar. */
+export async function obtenerCiclosAdmision(): Promise<CicloAdmision[]> {
+  return ciclosAdmision()
 }
 
 /** Consulta cupo 3°/5° Primaria (tope 60) para la UI de agendar. */

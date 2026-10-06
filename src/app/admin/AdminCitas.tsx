@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateAppointment, completeAdmissionAndCreateAlumno, completeAdmissionLegacy, checkExpedientesBatch, getFullyBookedDates, createManualExpedienteForAppointment } from './actions'
 import { createPermissionRequest, getAllRecentRequests } from './dashboard/actions'
+import { obtenerCiclosAdmision } from '@/app/agendar/actions'
 import ExamDateCalendar from '@/components/ExamDateCalendar'
 import type { AdmissionAppointment, PermissionRequest } from '@/types/database'
 
@@ -194,6 +195,13 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
     setFilterNameQuery('')
     setNameSuggestOpen(false)
     setNameHighlight(0)
+  }, [])
+
+  const [ciclosReservables, setCiclosReservables] = useState<string[]>([])
+  useEffect(() => {
+    obtenerCiclosAdmision()
+      .then((lista) => setCiclosReservables(lista.map((c) => c.value)))
+      .catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -833,10 +841,12 @@ export default function AdminCitas({ appointments, allowedLevels }: { appointmen
                         style={{ width: '96px', minWidth: '96px', fontSize: '0.78rem', position: 'relative', zIndex: 3, pointerEvents: 'auto' }}
                         aria-label="Cambiar ciclo escolar"
                       >
-                        {a.school_cycle === '2025-2026' && (
-                          <option value="2025-2026">2025-2026</option>
-                        )}
-                        <option value="2026-2027">2026-2027</option>
+                        {!a.school_cycle && <option value="">—</option>}
+                        {[...new Set([...(a.school_cycle ? [a.school_cycle] : []), ...ciclosReservables])]
+                          .sort()
+                          .map((c) => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
                       </select>
                     </td>
                     <td>

@@ -8,8 +8,9 @@ import { useTranslations, useLocale } from 'next-intl'
 import ExamDateCalendar from '@/components/ExamDateCalendar'
 import PublicThemeToggle from '@/components/PublicThemeToggle'
 import ClientLangSelector from '@/components/ClientLangSelector'
-import { createAdmissionAppointment, checkCupoInscripcionGrade } from './actions'
+import { createAdmissionAppointment, checkCupoInscripcionGrade, obtenerCiclosAdmision } from './actions'
 import type { SlotAvailabilityMap } from '@/lib/admissionSlotAvailability'
+import type { CicloAdmision } from '@/lib/ciclosAdmision'
 
 interface AlumnoResult {
   alumno_id: number
@@ -25,9 +26,18 @@ interface AlumnoResult {
 
 type Step = 1 | 2
 
-const SCHOOL_CYCLES = [
-  { value: '2026-2027', label: '2026-2027' },
-] as const
+/** Mientras responde el servidor: ciclo en curso por fecha (inicia en agosto) y el siguiente. */
+function ciclosPorFecha(): CicloAdmision[] {
+  const hoy = new Date()
+  const inicio = hoy.getMonth() >= 7 ? hoy.getFullYear() : hoy.getFullYear() - 1
+  return [0, 1].map((i) => ({
+    value: `${inicio + i}-${inicio + i + 1}`,
+    numero: inicio + i + 1 - 2004,
+    inicio: inicio + i,
+    fin: inicio + i + 1,
+    actual: i === 0,
+  }))
+}
 
 
 interface FormData {
@@ -86,6 +96,9 @@ export default function AgendarPage() {
   const [cupoMensaje, setCupoMensaje] = useState<string | null>(null)
   const [cupoChecking, setCupoChecking] = useState(false)
   const allowLeaveWithoutSendRef = useRef(false)
+  const [ciclos, setCiclos] = useState<CicloAdmision[]>(ciclosPorFecha)
+  /** Ciclo elegido en el select que aún no confirma el papá en el modal. */
+  const [cicloPendiente, setCicloPendiente] = useState<CicloAdmision | null>(null)
 
   // --- Programa Familia Winston ---
   const [showFamiliaModal, setShowFamiliaModal] = useState(false)
@@ -521,6 +534,43 @@ export default function AgendarPage() {
     return () => clearTimeout(t)
   }, []) // solo al montar
 
+  useEffect(() => {
+    let vivo = true
+    obtenerCiclosAdmision()
+      .then((lista) => {
+        if (vivo && lista.length) setCiclos(lista)
+      })
+      .catch(() => {})
+    return () => {
+      vivo = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!cicloPendiente) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setCicloPendiente(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [cicloPendiente])
+
+  const elegirCiclo = (value: string) => {
+    if (!value) {
+      updateFormData('schoolCycle', '')
+      return
+    }
+    const c = ciclos.find((x) => x.value === value)
+    if (c) setCicloPendiente(c)
+  }
+
+  const confirmarCiclo = () => {
+    if (cicloPendiente) updateFormData('schoolCycle', cicloPendiente.value)
+    setCicloPendiente(null)
+  }
+
+  const cicloSeleccionado = ciclos.find((c) => c.value === formData.schoolCycle) ?? null
+
   // Al cerrar la pestaña o recargar en paso confirmación: aviso nativo del navegador (no se puede mostrar nuestro modal ahí).
   useEffect(() => {
     const onBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -661,6 +711,53 @@ export default function AgendarPage() {
           </div>
         </div>
       )}
+
+      {cicloPendiente && (() => {
+        const otro = ciclos.find((c) => c.value !== cicloPendiente.value)
+        const alumno = formData.studentName.trim() || t('cycleModal.defaultStudent')
+        const grado = getGradeLevels().find((g) => g.value === formData.gradeLevel)?.label || t('cycleModal.defaultGrade')
+        const vars = { cycle: cicloPendiente.value, inicio: cicloPendiente.inicio, fin: cicloPendiente.fin, alumno, grado }
+        return (
+          <div className="ciclo-modal-overlay" onClick={() => setCicloPendiente(null)}>
+            <div
+              className="ciclo-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="ciclo-modal-title"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <p className="ciclo-modal-kicker">{t('cycleModal.kicker')}</p>
+              <h3 id="ciclo-modal-title" className="ciclo-modal-title">{t('cycleModal.title')}</h3>
+              <div className={`ciclo-modal-badge${cicloPendiente.actual ? ' ciclo-modal-badge--actual' : ''}`}>
+                <span className="ciclo-modal-badge-cycle">{cicloPendiente.value}</span>
+                <span className="ciclo-modal-badge-range">{t('cycleModal.range', vars)}</span>
+                <span className="ciclo-modal-badge-tag">
+                  {t(cicloPendiente.actual ? 'cycleModal.tagCurrent' : 'cycleModal.tagNext')}
+                </span>
+              </div>
+              <p className="ciclo-modal-text">
+                {t(cicloPendiente.actual ? 'cycleModal.textCurrent' : 'cycleModal.textNext', vars)}
+              </p>
+              {otro && (
+                <p className="ciclo-modal-hint">
+                  {t(cicloPendiente.actual ? 'cycleModal.hintOtherNext' : 'cycleModal.hintOtherCurrent', {
+                    other: otro.value,
+                    inicio: otro.inicio,
+                  })}
+                </p>
+              )}
+              <div className="ciclo-modal-actions">
+                <button type="button" className="ciclo-modal-btn ciclo-modal-btn--primary" onClick={confirmarCiclo} autoFocus>
+                  {t('cycleModal.confirmBtn', vars)}
+                </button>
+                <button type="button" className="ciclo-modal-btn ciclo-modal-btn--secondary" onClick={() => setCicloPendiente(null)}>
+                  {t('cycleModal.cancelBtn')}
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Modal: ¿Desea enviar antes de salir? */}
       {showLeaveConfirmModal && (
@@ -991,14 +1088,25 @@ export default function AgendarPage() {
                           <select
                             className="form-select"
                             value={formData.schoolCycle}
-                            onChange={(e) => updateFormData('schoolCycle', e.target.value)}
+                            onChange={(e) => elegirCiclo(e.target.value)}
                             required
                           >
                             <option value="">{t('aspirante.cyclePlaceholder')}</option>
-                            {SCHOOL_CYCLES.map((c) => (
-                              <option key={c.value} value={c.value}>{c.label}</option>
+                            {ciclos.map((c) => (
+                              <option key={c.value} value={c.value}>
+                                {t(c.actual ? 'aspirante.cycleCurrentOption' : 'aspirante.cycleNextOption', {
+                                  cycle: c.value,
+                                  inicio: c.inicio,
+                                  fin: c.fin,
+                                })}
+                              </option>
                             ))}
                           </select>
+                          {cicloSeleccionado && (
+                            <p className="ciclo-confirmado">
+                              ✓ {t('cycleModal.confirmedNote', { cycle: cicloSeleccionado.value, inicio: cicloSeleccionado.inicio })}
+                            </p>
+                          )}
                         </div>
                         <div className="form-group full-width">
                           <label className="form-label">{t('aspirante.howLabel')}</label>
@@ -1113,7 +1221,14 @@ export default function AgendarPage() {
                 <p><strong>{t('confirm.nombre')}</strong> {formData.studentName}{formData.studentLastNameP || formData.studentLastNameM ? ` ${formData.studentLastNameP || ''} ${formData.studentLastNameM || ''}`.trim() : ''}</p>
                 <p><strong>{t('confirm.dob')}</strong> {formData.studentBirthDate ? new Date(formData.studentBirthDate + 'T12:00:00').toLocaleDateString('es-MX') : '—'}</p>
                 <p><strong>{t('confirm.grado')}</strong> {getGradeLevels().find(g => g.value === formData.gradeLevel)?.label}</p>
-                {formData.schoolCycle && <p><strong>{t('confirm.ciclo')}</strong> {formData.schoolCycle}</p>}
+                {formData.schoolCycle && (
+                  <p className="ciclo-resumen">
+                    <strong>{t('confirm.ciclo')}</strong> {formData.schoolCycle}
+                    {cicloSeleccionado && (
+                      <span> — {t('cycleModal.range', { inicio: cicloSeleccionado.inicio, fin: cicloSeleccionado.fin })}</span>
+                    )}
+                  </p>
+                )}
                 {formData.howDidYouHear && (
                 <p><strong>{t('confirm.howKnew')}</strong> {formData.howDidYouHear === 'otra' && formData.howDidYouHearOther?.trim()
                   ? `Otra: ${formData.howDidYouHearOther.trim()}`

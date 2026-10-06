@@ -80,6 +80,8 @@
       "emailPlaceholder": "correo@ejemplo.com",
       "cycleLabel": "Ciclo escolar al que desea ingresar *",
       "cyclePlaceholder": "Seleccione una opción",
+      "cycleCurrentOption": "{cycle} · ciclo en curso (inició en agosto {inicio})",
+      "cycleNextOption": "{cycle} · próximo ciclo (inicia en agosto {inicio})",
       "howLabel": "¿Cómo se enteró de nuestra institución? *",
       "howPlaceholder": "Seleccione una opción",
       "howOptions": {
@@ -145,6 +147,22 @@
       "btnExpediente": "📋 Expediente Inicial",
       "btnDocs": "📤 Subir Documentación",
       "btnClose": "Volver al inicio"
+    },
+    "cycleModal": {
+      "kicker": "Antes de continuar",
+      "title": "Confirme el ciclo escolar",
+      "range": "agosto {inicio} – julio {fin}",
+      "tagCurrent": "Ciclo en curso",
+      "tagNext": "Próximo ciclo",
+      "textCurrent": "Este ciclo ya está en curso: inició en agosto de {inicio} y termina en julio de {fin}. Elíjalo solo si {alumno} entraría a {grado} durante este ciclo escolar.",
+      "textNext": "Este es el próximo ciclo: inicia en agosto de {inicio} y termina en julio de {fin}. Elíjalo si {alumno} entraría a {grado} a partir de agosto de {inicio}.",
+      "hintOtherNext": "Si su hijo(a) entraría hasta agosto de {inicio}, elija el ciclo {other}.",
+      "hintOtherCurrent": "Si su hijo(a) entraría en el ciclo que ya está en curso, elija el ciclo {other}.",
+      "confirmBtn": "Sí, es para el ciclo {cycle}",
+      "cancelBtn": "No, elegir otro ciclo",
+      "confirmedNote": "Ciclo confirmado: {cycle} (inicia en agosto {inicio})",
+      "defaultStudent": "su hijo(a)",
+      "defaultGrade": "el grado seleccionado"
     },
     "exitModal": {
       "title": "¿Desea enviar su solicitud?",

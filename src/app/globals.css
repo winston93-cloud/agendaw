@@ -1991,6 +1991,234 @@ body {
   background: #e2e8f0;
 }
 
+/* Modal: confirmar ciclo escolar */
+.ciclo-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1.25rem;
+  overflow-y: auto;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.ciclo-modal {
+  background: #fff;
+  border-radius: 20px;
+  padding: 1.75rem 1.5rem;
+  max-width: 460px;
+  width: 100%;
+  margin: auto;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.22);
+  animation: successModalIn 0.3s ease-out;
+}
+
+.ciclo-modal-kicker {
+  margin: 0 0 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b45309;
+}
+
+.ciclo-modal-title {
+  margin: 0 0 1rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.02em;
+}
+
+.ciclo-modal-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 16px;
+  background: #eff6ff;
+  border: 2px solid #3b82f6;
+  text-align: center;
+}
+
+.ciclo-modal-badge--actual {
+  background: #fffbeb;
+  border-color: #f59e0b;
+}
+
+.ciclo-modal-badge-cycle {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #1e3a8a;
+  letter-spacing: -0.02em;
+}
+
+.ciclo-modal-badge--actual .ciclo-modal-badge-cycle {
+  color: #92400e;
+}
+
+.ciclo-modal-badge-range {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.ciclo-modal-badge-tag {
+  margin-top: 0.25rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: #3b82f6;
+  color: #fff;
+}
+
+.ciclo-modal-badge--actual .ciclo-modal-badge-tag {
+  background: #d97706;
+}
+
+.ciclo-modal-text {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #334155;
+}
+
+.ciclo-modal-hint {
+  margin: 0 0 1.25rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 10px;
+  background: #f1f5f9;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #475569;
+}
+
+.ciclo-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.ciclo-modal-btn {
+  min-height: 48px;
+  padding: 0.8rem 1.1rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.ciclo-modal-btn--primary {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #2563eb 100%);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+}
+
+.ciclo-modal-btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.45);
+}
+
+.ciclo-modal-btn--secondary {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.ciclo-modal-btn--secondary:hover {
+  background: #e2e8f0;
+}
+
+.ciclo-confirmado {
+  margin: 0.4rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #047857;
+}
+
+.ciclo-resumen span {
+  color: #64748b;
+}
+
+.public-layout[data-theme="dark"] .ciclo-modal {
+  background: #0f172a;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.public-layout[data-theme="dark"] .ciclo-modal-kicker {
+  color: #fbbf24;
+}
+
+.public-layout[data-theme="dark"] .ciclo-modal-title {
+  color: #f1f5f9;
+}
+
+.public-layout[data-theme="dark"] .ciclo-modal-badge {
+  background: rgba(59, 130, 246, 0.14);
+  border-color: #60a5fa;
+}
+
+.public-layout[data-theme="dark"] .ciclo-modal-badge--actual {
+  background: rgba(245, 158, 11, 0.14);
+  border-color: #fbbf24;
+}
+
+.public-layout[data-theme="dark"] .ciclo-modal-badge-cycle {
+  color: #bfdbfe;
+}
+
+.public-layout[data-theme="dark"] .ciclo-modal-badge--actual .ciclo-modal-badge-cycle {
+  color: #fde68a;
+}
+
+.public-layout[data-theme="dark"] .ciclo-modal-badge-range,
+.public-layout[data-theme="dark"] .ciclo-modal-text {
+  color: #cbd5e1;
+}
+
+.public-layout[data-theme="dark"] .ciclo-modal-hint,
+.public-layout[data-theme="dark"] .ciclo-modal-btn--secondary {
+  background: #1e293b;
+  color: #cbd5e1;
+}
+
+.public-layout[data-theme="dark"] .ciclo-modal-btn--secondary:hover {
+  background: #334155;
+}
+
+.public-layout[data-theme="dark"] .ciclo-confirmado {
+  color: #34d399;
+}
+
+.public-layout[data-theme="dark"] .ciclo-resumen span {
+  color: #94a3b8;
+}
+
+@media (max-width: 480px) {
+  .ciclo-modal-overlay {
+    align-items: flex-end;
+    padding: 0.75rem;
+  }
+
+  .ciclo-modal {
+    padding: 1.4rem 1.1rem;
+    border-radius: 18px;
+  }
+
+  .ciclo-modal-badge-cycle {
+    font-size: 1.7rem;
+  }
+}
+
 .agendar-error-banner {
   position: fixed;
   top: 0;
